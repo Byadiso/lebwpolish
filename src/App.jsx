@@ -10,6 +10,8 @@ import LearningSpace from './pages/LearningSpace';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
+import PracticeLab from './pages/PracticeLab';
+import GrammarGauntlet from './pages/GrammarGauntlet';
 
 // A helper to protect pages from non-logged-in users
 const ProtectedRoute = ({ children }) => {
@@ -34,6 +36,16 @@ function App() {
             } />
             <Route path="/profile" element={
               <ProtectedRoute><Profile /></ProtectedRoute>
+            } />
+
+
+            
+            <Route path="/practice" element={
+              <ProtectedRoute><PracticeLab /></ProtectedRoute>
+            } />
+
+            <Route path="/grammar" element={
+              <ProtectedRoute><GrammarGauntlet /></ProtectedRoute>
             } />
 
             {/* Admin Only Route */}
