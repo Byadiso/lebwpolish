@@ -12,6 +12,7 @@ import AdminDashboard from './pages/AdminDashboard';
 import Navbar from './components/Navbar';
 import PracticeLab from './pages/PracticeLab';
 import GrammarGauntlet from './pages/GrammarGauntlet';
+import VocabularyVault from './pages/VocabularyVault';
 
 // A helper to protect pages from non-logged-in users
 const ProtectedRoute = ({ children }) => {
@@ -46,6 +47,10 @@ function App() {
 
             <Route path="/grammar" element={
               <ProtectedRoute><GrammarGauntlet /></ProtectedRoute>
+            } />
+
+            <Route path="/vocabularyvault" element={
+              <ProtectedRoute><VocabularyVault /></ProtectedRoute>
             } />
 
             {/* Admin Only Route */}
