@@ -5,10 +5,11 @@ import {
   collection, query, orderBy, onSnapshot, doc, updateDoc, increment 
 } from "firebase/firestore";
 import Confetti from "react-confetti";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function PracticeLab() {
   const { user, profile } = useAuth();
-  const [drills, setDrills] = useState([]); // Now dynamic from DB
+  const [drills, setDrills] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState("idle"); 
@@ -18,10 +19,8 @@ export default function PracticeLab() {
   const [showHint, setShowHint] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Constants for level calculation
   const XP_PER_LEVEL = 100;
   
-  // 1. Live Fetch Drills from Firebase
   useEffect(() => {
     const q = query(collection(db, "drills"), orderBy("createdAt", "asc"));
     const unsub = onSnapshot(q, (snap) => {
@@ -31,19 +30,16 @@ export default function PracticeLab() {
     return unsub;
   }, []);
 
-  // Sync progress bar with current index and dynamic drill count
   useEffect(() => {
     if (drills.length > 0) {
       setProgress((currentIndex / drills.length) * 100);
     }
   }, [currentIndex, drills]);
 
-  // Use values directly from Profile (Live Firebase Doc)
   const xp = profile?.xp || 0;
   const streak = profile?.streak || 0;
   const userLevel = Math.floor(xp / XP_PER_LEVEL) + 1;
   const xpInCurrentLevel = xp % XP_PER_LEVEL;
-  
   const currentDrill = drills[currentIndex];
 
   const getRank = () => {
@@ -84,33 +80,24 @@ export default function PracticeLab() {
       .join(" ");
   };
 
-  // 2. Update Firebase with real progress
   const handleVerify = async () => {
     setStatus("checking");
     const normalize = (str) => str.toLowerCase().replace(/[.,?!]/g, "").trim();
-    
-    // Reference to the current user's document in Firebase
     const userRef = doc(db, "pending_users", user.uid); 
 
     setTimeout(async () => {
       if (normalize(userInput) === normalize(currentDrill.polish)) {
         setStatus("success");
-        
-        // SAVE PROGRESS TO CLOUD
         await updateDoc(userRef, {
           xp: increment(showHint ? 5 : 20),
           streak: increment(1)
         });
-
         setShowConfetti(true);
         speak("Świetnie!", 1.1);
         setTimeout(() => setShowConfetti(false), 3000);
       } else {
         setStatus("error");
-        
-        // RESET STREAK IN CLOUD
         await updateDoc(userRef, { streak: 0 });
-        
         speak("Spróbuj jeszcze raz", 1);
       }
     }, 600);
@@ -134,7 +121,6 @@ export default function PracticeLab() {
     setStatus("idle");
     setIsFinished(false);
     setProgress(0);
-    // Note: We don't reset XP/Streak here because they are permanent in the cloud
   };
 
   if (drills.length === 0) return (
@@ -144,52 +130,53 @@ export default function PracticeLab() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-white font-sans selection:bg-red-500/30">
+    <div className="min-h-screen bg-[#0F172A] text-white font-sans selection:bg-red-500/30 overflow-x-hidden">
       {showConfetti && <Confetti numberOfPieces={150} recycle={false} colors={['#EF4444', '#FFFFFF', '#10B981']} />}
       
-      <div className="max-w-xl mx-auto px-6 py-12">
-        {/* LEVEL & RANK SYSTEM (Pulling from profile) */}
-        <div className="mb-10 p-4 bg-slate-900/80 rounded-3xl border border-slate-800 shadow-xl">
+      <div className="max-w-xl mx-auto px-4 py-6 md:py-12">
+        {/* TOP HUD - COMPACT ON MOBILE */}
+        <div className="mb-6 p-4 bg-slate-900/80 rounded-2xl md:rounded-3xl border border-slate-800 shadow-xl">
             <div className="flex justify-between items-center mb-3">
-                <div>
-                    <span className="text-[10px] font-black text-red-500 uppercase tracking-widest">Your Rank</span>
-                    <h3 className="text-lg font-black italic tracking-tight">{getRank()}</h3>
+                <div className="min-w-0">
+                    <span className="text-[8px] md:text-[10px] font-black text-red-500 uppercase tracking-widest">Rank</span>
+                    <h3 className="text-sm md:text-lg font-black italic tracking-tight truncate">{getRank()}</h3>
                 </div>
-                <div className="text-right">
-                    <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Level</span>
-                    <h3 className="text-2xl font-black text-white leading-none">{userLevel}</h3>
+                <div className="text-right shrink-0">
+                    <span className="text-[8px] md:text-[10px] font-black text-slate-500 uppercase tracking-widest">Level</span>
+                    <h3 className="text-xl md:text-2xl font-black text-white leading-none">{userLevel}</h3>
                 </div>
             </div>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+            <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
                 <div 
-                    className="h-full bg-emerald-500 transition-all duration-1000" 
+                    className="h-full bg-emerald-500 transition-all duration-1000 shadow-[0_0_8px_rgba(16,185,129,0.5)]" 
                     style={{ width: `${xpInCurrentLevel}%` }}
                 />
             </div>
         </div>
 
-        {/* Hot Streak and Level badge */}
+        {/* STATS STRIP */}
         {!isFinished && (
           <div className="flex justify-between items-end mb-4 px-2">
-            <div className="flex gap-6">
+            <div className="flex gap-4 md:gap-6">
                 <div className="flex flex-col">
-                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Total XP</span>
-                  <span className="text-xl font-black text-emerald-400">{xp}</span>
+                  <span className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest">XP</span>
+                  <span className="text-lg md:text-xl font-black text-emerald-400 leading-tight">{xp}</span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Hot Streak</span>
-                  <span className={`text-xl font-black transition-all ${streak > 0 ? 'text-orange-500 animate-pulse' : 'text-slate-700'}`}>
+                  <span className="text-[7px] md:text-[8px] font-black text-slate-500 uppercase tracking-widest">Streak</span>
+                  <span className={`text-lg md:text-xl font-black leading-tight transition-all ${streak > 0 ? 'text-orange-500' : 'text-slate-700'}`}>
                       {streak} {streak > 4 ? '🔥' : ''}
                   </span>
                 </div>
             </div>
-            <div className="bg-slate-800/50 px-3 py-1 rounded-lg border border-slate-700/50">
-              <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">Polish {currentDrill.level}</span>
+            <div className="bg-slate-800/50 px-2 py-1 rounded-md border border-slate-700/50 shrink-0">
+              <span className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase">PL {currentDrill.level}</span>
             </div>
           </div>
         )}
 
-        <div className="w-full h-1 bg-slate-800 rounded-full mb-8 overflow-hidden">
+        {/* SESSION PROGRESS */}
+        <div className="w-full h-1 bg-slate-800 rounded-full mb-6 md:mb-8 overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-red-600 via-rose-500 to-orange-400 transition-all duration-700"
             style={{ width: `${progress}%` }}
@@ -197,92 +184,88 @@ export default function PracticeLab() {
         </div>
 
         {isFinished ? (
-          <div className="bg-slate-900 border border-slate-800 rounded-[3rem] p-12 text-center shadow-2xl animate-in zoom-in duration-500">
-            <div className="mb-6 text-6xl">🏆</div>
-            <h2 className="text-3xl font-black tracking-tighter mb-2">SESSION COMPLETE</h2>
-            <p className="text-slate-400 mb-8 font-medium italic">You mastered {drills.length} sentences today!</p>
+          <motion.div initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} className="bg-slate-900 border border-slate-800 rounded-[2rem] md:rounded-[3rem] p-8 md:p-12 text-center shadow-2xl">
+            <div className="mb-4 text-5xl md:text-6xl">🏆</div>
+            <h2 className="text-2xl md:text-3xl font-black tracking-tighter mb-2 uppercase">Session Complete</h2>
+            <p className="text-slate-400 mb-8 font-medium italic text-sm">You mastered {drills.length} sentences!</p>
             
-            <div className="grid grid-cols-2 gap-4 mb-10">
-                <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
-                    <span className="block text-[10px] font-black text-slate-500 uppercase mb-1">Current XP</span>
-                    <span className="text-2xl font-black text-emerald-400">{xp}</span>
+            <div className="grid grid-cols-2 gap-3 md:gap-4 mb-8">
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                    <span className="block text-[8px] font-black text-slate-500 uppercase mb-1">XP</span>
+                    <span className="text-xl font-black text-emerald-400">{xp}</span>
                 </div>
-                <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/5">
-                    <span className="block text-[10px] font-black text-slate-500 uppercase mb-1">Final Streak</span>
-                    <span className="text-2xl font-black text-orange-500">{streak}</span>
+                <div className="bg-slate-800/50 p-4 rounded-xl border border-white/5">
+                    <span className="block text-[8px] font-black text-slate-500 uppercase mb-1">Streak</span>
+                    <span className="text-xl font-black text-orange-500">{streak}</span>
                 </div>
             </div>
 
-            <div className="space-y-4">
-                <button 
-                  onClick={restartSession}
-                  className="w-full py-5 bg-white text-black rounded-3xl font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl"
-                >
-                  🔄 Repeat Training
-                </button>
-            </div>
-          </div>
+            <button 
+              onClick={restartSession}
+              className="w-full py-4 md:py-5 bg-white text-black rounded-2xl md:rounded-3xl font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl active:scale-95"
+            >
+              🔄 Repeat Training
+            </button>
+          </motion.div>
         ) : (
           <>
-            <div className="flex flex-wrap gap-1.5 mb-8 justify-center opacity-50">
-                {drills.map((_, i) => (
-                    <div 
-                        key={i} 
-                        className={`h-1.5 w-6 rounded-full transition-colors ${i === currentIndex ? 'bg-red-500' : i < currentIndex ? 'bg-emerald-500' : 'bg-slate-800'}`} 
-                    />
-                ))}
-            </div>
-
-            <div className={`relative transition-all duration-500 rounded-[3rem] p-10 border-t-4 shadow-2xl ${
+            {/* DRILL CARD */}
+            <div className={`relative transition-all duration-500 rounded-[2rem] md:rounded-[3rem] p-6 md:p-10 border-t-4 shadow-2xl ${
               status === 'success' ? 'bg-emerald-950/20 border-emerald-500' : 
               status === 'error' ? 'bg-rose-950/20 border-rose-500 animate-shake' : 
               'bg-slate-900 border-slate-800'
             }`}>
-              <div className="flex flex-col items-center gap-8">
-                <div className="flex items-center gap-6">
-                  <button onClick={() => speak(currentDrill.polish)} className="w-16 h-16 bg-slate-800 border border-slate-700 rounded-2xl flex items-center justify-center text-2xl shadow-xl hover:bg-slate-700 active:scale-90 transition-all">🔊</button>
-                  <button onClick={startListening} className={`relative w-24 h-24 rounded-full flex items-center justify-center text-4xl shadow-2xl transition-all ${isListening ? 'bg-rose-500 scale-110 shadow-rose-500/50' : 'bg-red-600 hover:scale-105 active:scale-95'}`}>
+              <div className="flex flex-col items-center gap-6 md:gap-8">
+                {/* AUDIO CONTROLS */}
+                <div className="flex items-center gap-4 md:gap-6">
+                  <button onClick={() => speak(currentDrill.polish)} className="w-12 h-12 md:w-16 md:h-16 bg-slate-800 border border-slate-700 rounded-xl md:rounded-2xl flex items-center justify-center text-xl shadow-xl active:scale-90 transition-all">🔊</button>
+                  <button onClick={startListening} className={`relative w-16 h-16 md:w-24 md:h-24 rounded-full flex items-center justify-center text-3xl md:text-4xl shadow-2xl transition-all ${isListening ? 'bg-rose-500 scale-105 shadow-rose-500/50' : 'bg-red-600 hover:scale-105 active:scale-95'}`}>
                     {isListening ? "⏹️" : "🎙️"}
                   </button>
                 </div>
 
+                {/* INPUT ZONE */}
                 <div className="w-full space-y-2 text-center">
                   <textarea 
                     rows="2"
                     value={userInput}
                     onChange={(e) => { setUserInput(e.target.value); if(status !== 'idle') setStatus('idle'); }}
-                    className="w-full bg-transparent text-center text-2xl font-black placeholder:text-slate-800 outline-none resize-none overflow-hidden"
-                    placeholder="Write what you heard..."
+                    className="w-full bg-transparent text-center text-xl md:text-2xl font-black placeholder:text-slate-800 outline-none resize-none overflow-hidden"
+                    placeholder="Type the Polish..."
                   />
                   {showHint && (
-                    <div className="bg-slate-950/50 rounded-xl p-2 mt-2 border border-white/5">
-                        <p className="text-red-500/60 font-mono text-xs tracking-[0.3em] animate-pulse">{getHintText()}</p>
-                    </div>
+                    <motion.div initial={{opacity:0, y:5}} animate={{opacity:1, y:0}} className="bg-slate-950/50 rounded-xl p-2 mt-2 border border-white/5">
+                        <p className="text-red-500/60 font-mono text-[10px] tracking-[0.2em] uppercase">{getHintText()}</p>
+                    </motion.div>
                   )}
                 </div>
 
-                <div className="w-full pt-4">
+                {/* ACTION BUTTON */}
+                <div className="w-full">
                   {status !== "success" ? (
-                    <button onClick={handleVerify} disabled={!userInput || status === 'checking'} className="w-full py-5 bg-white text-black rounded-3xl font-black uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all shadow-xl disabled:opacity-20">
-                      {status === 'checking' ? 'Processing...' : 'Verify Recall'}
+                    <button onClick={handleVerify} disabled={!userInput || status === 'checking'} className="w-full py-4 md:py-5 bg-white text-black rounded-2xl md:rounded-3xl font-black uppercase tracking-widest transition-all shadow-xl disabled:opacity-10 active:scale-[0.98]">
+                      {status === 'checking' ? 'Validating...' : 'Verify'}
                     </button>
                   ) : (
-                    <button onClick={nextLevel} className="w-full py-5 bg-emerald-500 text-white rounded-3xl font-black uppercase tracking-widest animate-bounce shadow-lg shadow-emerald-900/40">
-                      {currentIndex + 1 === drills.length ? "Finish Session 🏁" : `Correct (+${showHint ? 5 : 20} XP) →`}
+                    <button onClick={nextLevel} className="w-full py-4 md:py-5 bg-emerald-500 text-white rounded-2xl md:rounded-3xl font-black uppercase tracking-widest shadow-lg shadow-emerald-900/40 active:scale-[0.98]">
+                      {currentIndex + 1 === drills.length ? "Finish 🏁" : `Next (+${showHint ? 5 : 20} XP) →`}
                     </button>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="mt-12 space-y-6">
-              <p className="text-center text-slate-400 font-medium italic text-lg leading-relaxed px-4 italic">"{currentDrill.english}"</p>
-              <div className="flex flex-col items-center gap-4 pt-4">
-                <button onClick={() => speak(currentDrill.polish, 0.4)} className="group flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest hover:text-red-500 transition-colors">🐢 Slow-Mo Mode</button>
+            {/* TRANSLATION & HELPERS */}
+            <div className="mt-8 space-y-6">
+              <p className="text-center text-slate-400 font-medium italic text-base md:text-lg leading-relaxed px-4">
+                "{currentDrill.english}"
+              </p>
+              <div className="flex flex-col items-center gap-3">
+                <button onClick={() => speak(currentDrill.polish, 0.4)} className="text-[9px] font-black text-slate-500 uppercase tracking-widest hover:text-red-500 py-2">🐢 Slow Mode</button>
                 <button onClick={async () => { 
                     setShowHint(true); 
                     await updateDoc(doc(db, "pending_users", user.uid), { streak: 0 }); 
-                  }} className="text-[10px] font-black text-slate-500/50 uppercase tracking-widest hover:text-white transition-colors underline underline-offset-4">💡 Use Hint (Kills Streak)</button>
+                  }} className="text-[9px] font-black text-slate-500/40 uppercase tracking-widest hover:text-white underline underline-offset-4">💡 Hint (Ends Streak)</button>
               </div>
             </div>
           </>
