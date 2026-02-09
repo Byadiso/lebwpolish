@@ -3,8 +3,10 @@ import { auth, db } from '../firebase';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { collection, query, where, getDocs } from 'firebase/firestore';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const ADMIN_EMAIL = "byadiso@gmail.com";
+const SUPPORT_EMAIL = "nganatech@gmail.com"; // New Support Email
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -23,10 +25,8 @@ export default function Login() {
 
     try {
       if (normalizedEmail === ADMIN_EMAIL) {
-        // --- ADMIN LOGIN (Standard Firebase Auth) ---
         await signInWithEmailAndPassword(auth, normalizedEmail, pass);
       } else {
-        // --- STUDENT LOGIN (6-Digit Access Key) ---
         const q = query(
           collection(db, "pending_users"), 
           where("email", "==", normalizedEmail),
@@ -34,16 +34,11 @@ export default function Login() {
         );
         
         const snapshot = await getDocs(q);
-        
-        if (snapshot.empty) {
-          throw new Error("Invalid email or access key.");
-        }
+        if (snapshot.empty) throw new Error("Invalid email or access key.");
 
         try {
-          // Try standard login with the passcode
           await signInWithEmailAndPassword(auth, normalizedEmail, pass.trim());
         } catch (signInErr) {
-          // If first-time user, create the account silently
           if (signInErr.code === 'auth/user-not-found' || signInErr.code === 'auth/invalid-credential') {
             await createUserWithEmailAndPassword(auth, normalizedEmail, pass.trim());
           } else {
@@ -64,71 +59,97 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4 font-sans">
-      <div className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-[#F8FAFC] px-4 font-sans overflow-hidden">
+      <div className="fixed top-0 left-0 w-full h-1 bg-red-600 z-50 shadow-[0_0_15px_rgba(220,38,38,0.3)]"></div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="w-full max-w-md relative"
+      >
         <form 
           onSubmit={handleLogin} 
-          className="p-10 bg-white rounded-[2.5rem] shadow-2xl border border-slate-100"
+          className="p-8 md:p-12 bg-white rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-slate-100 relative z-10"
         >
           <div className="mb-10 text-center">
-            <h2 className="text-4xl font-black text-red-600 tracking-tighter uppercase italic">
-              LEBW<span className="text-slate-900">POLISH</span>
+            <h2 className="text-4xl font-black text-slate-900 tracking-tighter uppercase italic leading-none">
+              LEBW<span className="text-red-600">POL</span>
             </h2>
-            <p className="text-slate-400 text-[10px] font-black uppercase tracking-[0.3em] mt-2">Writing Space</p>
+            <div className="flex items-center justify-center gap-2 mt-3">
+              <span className="h-[1px] w-4 bg-slate-200"></span>
+              <p className="text-slate-400 text-[9px] font-black uppercase tracking-[0.4em]">Secure Access</p>
+              <span className="h-[1px] w-4 bg-slate-200"></span>
+            </div>
           </div>
 
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border-2 border-red-100 text-red-600 text-xs font-bold rounded-2xl animate-pulse">
-              ⚠️ {error}
-            </div>
-          )}
+          <AnimatePresence mode="wait">
+            {error && (
+              <motion.div 
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-600 text-[11px] font-black uppercase tracking-tight rounded-r-xl"
+              >
+                {error}
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {success && (
-            <div className="mb-6 p-4 bg-green-50 border-2 border-green-100 text-green-600 text-xs font-bold rounded-2xl">
-              ✅ Autoryzacja pomyślna...
-            </div>
-          )}
-
-          <div className="space-y-5">
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 ml-1 tracking-widest">E-mail</label>
+          <div className="space-y-6">
+            <div className="relative group">
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest transition-colors group-focus-within:text-red-600">
+                Email Address
+              </label>
               <input 
                 required
                 type="email" 
-                placeholder="twoj@email.com" 
-                className="w-full p-4 bg-slate-50 border-2 border-slate-50 rounded-2xl focus:border-red-600 focus:bg-white outline-none transition-all font-bold" 
+                placeholder="name@example.com" 
+                className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:border-red-600 focus:bg-white outline-none transition-all font-bold text-slate-900" 
                 onChange={e => setEmail(e.target.value)} 
               />
             </div>
 
-            <div>
-              <label className="block text-[10px] font-black text-slate-400 uppercase mb-1.5 ml-1 tracking-widest">
-                {email.toLowerCase() === ADMIN_EMAIL ? "Hasło Admina" : "Kod Dostępu"}
+            <div className="relative group">
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-widest transition-colors group-focus-within:text-red-600">
+                {email.toLowerCase() === ADMIN_EMAIL ? "Admin Password" : "6-Digit Access Key"}
               </label>
               <input 
                 required
                 type="password" 
-                placeholder={email.toLowerCase() === ADMIN_EMAIL ? "••••••••" : "Kod 6-cyfrowy"} 
-                className="w-full p-4 bg-slate-50 border-2 border-slate-50 rounded-2xl focus:border-red-600 focus:bg-white outline-none transition-all font-bold tracking-widest" 
+                placeholder={email.toLowerCase() === ADMIN_EMAIL ? "••••••••" : "000 000"} 
+                className="w-full p-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:border-red-600 focus:bg-white outline-none transition-all font-bold tracking-[0.3em] text-slate-900 placeholder:tracking-normal" 
                 onChange={e => setPass(e.target.value)} 
               />
             </div>
 
             <button 
               disabled={loading || success}
-              className={`w-full py-5 rounded-2xl font-black text-xs uppercase tracking-[0.2em] text-white shadow-xl transition-all active:scale-95 mt-4 ${
-                loading || success ? "bg-slate-300" : "bg-red-600 hover:bg-red-700 shadow-red-100"
+              className={`w-full py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.25em] text-white transition-all active:scale-[0.98] mt-4 shadow-lg ${
+                loading || success ? "bg-slate-300" : "bg-slate-900 hover:bg-red-600 shadow-slate-200"
               }`}
             >
-              {loading ? "Weryfikacja..." : "Zaloguj się"}
+              {loading ? "Verifying..." : "Sign In"}
             </button>
           </div>
         </form>
         
-        <p className="mt-8 text-center text-slate-400 text-[10px] font-bold uppercase tracking-widest italic">
-          Brak kodu? Napisz do <span className="text-red-500 underline cursor-pointer">Administratora</span>
-        </p>
-      </div>
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mt-8 text-center"
+        >
+          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest italic">
+            Brak kodu? Napisz do: <br className="md:hidden" />
+            <a 
+              href={`mailto:${SUPPORT_EMAIL}?subject=Access Key Request`}
+              className="text-red-500 underline decoration-2 underline-offset-4 cursor-pointer hover:text-slate-900 transition-colors ml-1"
+            >
+              Administratora ({SUPPORT_EMAIL})
+            </a>
+          </p>
+        </motion.div>
+      </motion.div>
     </div>
   );
 }

@@ -55,10 +55,24 @@ export default function LearningSpace() {
     return onSnapshot(q, (snap) => setPosts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
   }, []);
 
-  useEffect(() => {
-    const q = query(collection(db, "resources"), orderBy('timestamp', 'desc'));
-    return onSnapshot(q, (snap) => setResources(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
-  }, []);
+useEffect(() => {
+  const q = query(collection(db, "resources"), limit(50));
+
+  return onSnapshot(q, (snap) => {
+    const data = snap.docs
+      .map(d => ({ id: d.id, ...d.data() }))
+      .sort((a, b) => {
+        if (!a.timestamp && !b.timestamp) return 0;
+        if (!a.timestamp) return 1;
+        if (!b.timestamp) return -1;
+        return b.timestamp.seconds - a.timestamp.seconds;
+      });
+
+    setResources(data);
+  });
+}, []);
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();

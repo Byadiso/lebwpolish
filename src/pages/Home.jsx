@@ -100,9 +100,18 @@ export default function Home() {
           <div className="w-1.5 h-1.5 bg-red-500 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
           <div className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce"></div>
         </div>
-        <p className="text-[10px] uppercase tracking-[0.4em] font-black text-slate-400">
-          Warszawa • Kraków • Wrocław
-        </p>
+                    <p className="mt-4 text-[10px] uppercase tracking-[0.4em] font-black text-slate-400">
+            made with love by{" "}
+            <a
+              href="https://www.nganatech.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline"
+            >
+              Nganatech
+            </a>
+          </p>
+
       </div>
     </div>
   );

@@ -33,10 +33,16 @@ const AdminDashboard = () => {
   const [gramCategory, setGramCategory] = useState("Tenses");
   const [gramLevel, setGramLevel] = useState("A1");
 
+  // New Resource States
+  const [resTitle, setResTitle] = useState("");
+  const [resUrl, setResUrl] = useState("");
+  const [resLevel, setResLevel] = useState("A1");
+
   // Live Lists
   const [pendingUsers, setPendingUsers] = useState([]);
   const [drills, setDrills] = useState([]);
   const [grammarTasks, setGrammarTasks] = useState([]);
+  const [resources, setResources] = useState([]); // Added Resources list
 
   useEffect(() => {
     const unsubUsers = onSnapshot(collection(db, "pending_users"), (s) => {
@@ -48,12 +54,31 @@ const AdminDashboard = () => {
     const unsubGram = onSnapshot(collection(db, "grammar_lab"), (s) => {
       setGrammarTasks(s.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
     });
-    return () => { unsubUsers(); unsubDrills(); unsubGram(); };
+    const unsubRes = onSnapshot(collection(db, "resources"), (s) => {
+      setResources(s.docs.map(d => ({id: d.id, ...d.data()})).sort((a,b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+    });
+    return () => { unsubUsers(); unsubDrills(); unsubGram(); unsubRes(); };
   }, []);
 
   const showStatus = (text, type = "success") => {
     setMessage({ text, type });
     setTimeout(() => setMessage({ text: "", type: "" }), 5000);
+  };
+
+  // NEW: Handle Resource Upload (Links/PDFs)
+  const handleAddResource = async (e) => {
+    e.preventDefault(); setLoading(true);
+    try {
+      await addDoc(collection(db, "resources"), {
+        title: resTitle.trim(),
+        url: resUrl.trim(),
+        level: resLevel,
+        createdAt: serverTimestamp()
+      });
+      showStatus("Resource Link Deployed!");
+      setResTitle(""); setResUrl("");
+    } catch (err) { showStatus("Resource failed.", "error"); }
+    finally { setLoading(false); }
   };
 
   const handleAddGrammar = async (e) => {
@@ -167,6 +192,28 @@ const AdminDashboard = () => {
           {/* MAIN COLUMN: FORMS */}
           <div className="lg:col-span-8 space-y-6 md:space-y-8">
             
+            {/* NEW: RESOURCE VAULT CARD */}
+            <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-200">
+              <div className="flex items-center gap-3 mb-6 md:mb-8">
+                <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white text-lg shadow-amber-100 shadow-lg">📁</div>
+                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Resource Vault</h2>
+              </div>
+              <form onSubmit={handleAddResource} className="space-y-4 md:space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                  <input required value={resTitle} onChange={(e) => setResTitle(e.target.value)} 
+                    className="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-xl md:rounded-2xl font-bold text-sm focus:border-amber-500 outline-none transition-all" placeholder="File Name (e.g. Grammar PDF)" />
+                  <input required value={resUrl} onChange={(e) => setResUrl(e.target.value)} 
+                    className="w-full bg-slate-50 border-2 border-slate-100 p-4 rounded-xl md:rounded-2xl font-bold text-sm focus:border-amber-500 outline-none transition-all" placeholder="Resource URL (Link)" />
+                </div>
+                <div className="flex flex-col md:flex-row gap-3">
+                  <select value={resLevel} onChange={(e) => setResLevel(e.target.value)} className="w-full md:flex-1 bg-slate-50 border-2 border-slate-100 p-4 rounded-xl md:rounded-2xl font-bold text-sm">
+                    <option value="A1">Level A1</option><option value="B1">Level B1</option><option value="C1">Level C1</option>
+                  </select>
+                  <button disabled={loading} className="w-full md:w-auto px-8 py-4 bg-amber-500 text-white rounded-xl md:rounded-2xl font-black uppercase text-xs hover:bg-amber-600 active:scale-95 transition-all">Upload Link 🔗</button>
+                </div>
+              </form>
+            </section>
+
             {/* GRAMMAR LAB CARD */}
             <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-200">
               <div className="flex items-center gap-3 mb-6 md:mb-8">
@@ -216,9 +263,7 @@ const AdminDashboard = () => {
           {/* SIDE COLUMN: USERS & MONITOR */}
           <div className="lg:col-span-4 space-y-6 md:space-y-8">
             
-            {/* IDENTITY & KEYS TABS (Mobile Optimized) */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
-              
               <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
                 <h3 className="font-black text-[10px] uppercase mb-4 text-slate-400 tracking-widest flex items-center gap-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Identity Manager
@@ -268,6 +313,23 @@ const AdminDashboard = () => {
               <h3 className="font-black text-[10px] uppercase text-indigo-400 mb-6 shrink-0 tracking-[0.3em]">System Monitor</h3>
               <div className="space-y-8 overflow-y-auto pr-2 flex-1 custom-scrollbar">
                 
+                {/* Resources Feed */}
+                <div className="space-y-4">
+                  <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Resource Archive</p>
+                  {resources.length === 0 && <p className="text-xs text-slate-700 italic">No files linked...</p>}
+                  {resources.map(r => (
+                    <div key={r.id} className="group flex justify-between items-start border-b border-white/5 pb-3">
+                      <div className="min-w-0 pr-4">
+                        <p className="text-xs font-bold text-slate-200 line-clamp-1">{r.title}</p>
+                        <p className="text-[8px] text-amber-400 font-black uppercase mt-1">Level {r.level} • External Link</p>
+                      </div>
+                      <button onClick={() => handleDelete('resources', r.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+
                 {/* Grammar Feed */}
                 <div className="space-y-4">
                   <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Grammar Feed</p>
