@@ -13,6 +13,7 @@ import Navbar from './components/Navbar';
 import PracticeLab from './pages/PracticeLab';
 import GrammarGauntlet from './pages/GrammarGauntlet';
 import VocabularyVault from './pages/VocabularyVault';
+import PolishWarForge from './pages/PolishWarForge';
 
 // A helper to protect pages from non-logged-in users
 const ProtectedRoute = ({ children }) => {
@@ -51,6 +52,10 @@ function App() {
 
             <Route path="/vocabularyvault" element={
               <ProtectedRoute><VocabularyVault /></ProtectedRoute>
+            } />
+
+             <Route path="/polish-simplified" element={
+              <ProtectedRoute><PolishWarForge /></ProtectedRoute>
             } />
 
             {/* Admin Only Route */}

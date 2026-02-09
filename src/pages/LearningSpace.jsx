@@ -400,6 +400,16 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* War section  LINK CARD */}
+            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Play and learn Polish</p>
+                <Link to="/polish-simplified" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
+                  Polish simplified
+                </Link>
+              </div>
+            </div>
+
           </div>
         </aside>
       </main>
