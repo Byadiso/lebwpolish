@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { FORGE_DATA } from "../data/forgeData"; 
+import { FORGE_DATA } from "../data/ForgeData"; 
 import { db } from "../firebase";
 import { useAuth } from "../context/AuthContext"; 
 import { query, collection, where, getDocs, updateDoc, increment, arrayUnion } from "firebase/firestore";
