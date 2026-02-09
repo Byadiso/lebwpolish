@@ -14,6 +14,7 @@ import PracticeLab from './pages/PracticeLab';
 import GrammarGauntlet from './pages/GrammarGauntlet';
 import VocabularyVault from './pages/VocabularyVault';
 import PolishWarForge from './pages/PolishWarForge';
+import LirycznaSymfonia from './pages/LirycznaSymfonia';
 
 // A helper to protect pages from non-logged-in users
 const ProtectedRoute = ({ children }) => {
@@ -56,6 +57,10 @@ function App() {
 
              <Route path="/polish-simplified" element={
               <ProtectedRoute><PolishWarForge /></ProtectedRoute>
+            } />
+
+             <Route path="/polish-music" element={
+              <ProtectedRoute><LirycznaSymfonia /></ProtectedRoute>
             } />
 
             {/* Admin Only Route */}

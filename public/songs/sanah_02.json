@@ -1,0 +1,171 @@
+{
+  "id": "sanah_02_full",
+  "title": "Tęsknię sobie",
+  "artist": "sanah",
+  "audioUrl": "/songs/sanah_tesknie_sobie.mp3",
+  "fullLyrics": [
+    {
+      "startTime": 0,
+      "original": "Śmiesznie jak płynie czas. On podpowiadał nie raz.",
+      "translation": "Funny how time flows. It suggested more than once.",
+      "words": [
+        {"pl": "Śmiesznie", "en": "Funny", "type": "Adverb"},
+        {"pl": "jak", "en": "how", "type": "Adverb"},
+        {"pl": "płynie", "en": "flows", "type": "Verb (Present)"},
+        {"pl": "czas", "en": "time", "type": "Noun"},
+        {"pl": "On", "en": "It/He", "type": "Pronoun"},
+        {"pl": "podpowiadał", "en": "suggested", "type": "Verb (Past)"},
+        {"pl": "nie", "en": "not", "type": "Particle"},
+        {"pl": "raz", "en": "once", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 10,
+      "original": "Mówiłam jeszcze powalczę. Chciałeś za kilka lat mieć u stóp cały świat.",
+      "translation": "I said I'll still fight. You wanted to have the whole world at your feet in a few years.",
+      "words": [
+        {"pl": "Mówiłam", "en": "I said", "type": "Verb (Past)"},
+        {"pl": "jeszcze", "en": "still", "type": "Adverb"},
+        {"pl": "powalczę", "en": "I will fight", "type": "Verb (Future)"},
+        {"pl": "Chciałeś", "en": "You wanted", "type": "Verb (Past)"},
+        {"pl": "kilka", "en": "a few", "type": "Number"},
+        {"pl": "lat", "en": "years", "type": "Noun"},
+        {"pl": "stóp", "en": "feet", "type": "Noun"},
+        {"pl": "świat", "en": "world", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 20,
+      "original": "Patrzyłam na to przez palce.",
+      "translation": "I turned a blind eye (looked through fingers).",
+      "words": [
+        {"pl": "Patrzyłam", "en": "I looked", "type": "Verb (Past)"},
+        {"pl": "na", "en": "at", "type": "Preposition"},
+        {"pl": "to", "en": "it", "type": "Pronoun"},
+        {"pl": "przez", "en": "through", "type": "Preposition"},
+        {"pl": "palce", "en": "fingers", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 30,
+      "original": "Kolejny raz sercem się baw. I tak jest od lat bezradne.",
+      "translation": "Play with my heart once again. It has been helpless for years anyway.",
+      "words": [
+        {"pl": "Kolejny", "en": "Another", "type": "Adjective"},
+        {"pl": "raz", "en": "time", "type": "Noun"},
+        {"pl": "sercem", "en": "heart", "type": "Noun"},
+        {"pl": "się", "en": "itself", "type": "Particle"},
+        {"pl": "baw", "en": "play", "type": "Verb (Imp.)"},
+        {"pl": "bezradne", "en": "helpless", "type": "Adjective"}
+      ]
+    },
+    {
+      "startTime": 40,
+      "original": "Nie ufam ci już. Odejdź z mych snów. Niczego dziś tak nie pragnę.",
+      "translation": "I don't trust you anymore. Leave my dreams. I desire nothing else today.",
+      "words": [
+        {"pl": "Nie", "en": "Not", "type": "Particle"},
+        {"pl": "ufam", "en": "I trust", "type": "Verb"},
+        {"pl": "Odejdź", "en": "Leave", "type": "Verb (Imp.)"},
+        {"pl": "snów", "en": "dreams", "type": "Noun"},
+        {"pl": "pragnę", "en": "I desire", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 50,
+      "original": "Wiem beze mnie tobie będzie dużo lżej. To już wiem o tobie.",
+      "translation": "I know it will be much easier for you without me. I know that now about you.",
+      "words": [
+        {"pl": "Wiem", "en": "I know", "type": "Verb"},
+        {"pl": "beze", "en": "without", "type": "Preposition"},
+        {"pl": "tobie", "en": "you", "type": "Pronoun"},
+        {"pl": "będzie", "en": "will be", "type": "Verb (Future)"},
+        {"pl": "lżej", "en": "easier", "type": "Adjective"}
+      ]
+    },
+    {
+      "startTime": 60,
+      "original": "Głucha cisza gdy jesteś daleko hen. To nie sen. Tylko tęsknię sobie.",
+      "translation": "Deafening silence when you're far away. It's not a dream. I'm just longing.",
+      "words": [
+        {"pl": "Głucha", "en": "Deaf", "type": "Adjective"},
+        {"pl": "cisza", "en": "silence", "type": "Noun"},
+        {"pl": "daleko", "en": "far", "type": "Adverb"},
+        {"pl": "sen", "en": "dream", "type": "Noun"},
+        {"pl": "tęsknię", "en": "I miss", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 70,
+      "original": "Wybacz traciłem czas. Tyle rzeczy nie tak. Myślałem, że tak już skończę.",
+      "translation": "Forgive me, I was wasting time. So many things wrong. I thought I'd end like this.",
+      "words": [
+        {"pl": "Wybacz", "en": "Forgive", "type": "Verb"},
+        {"pl": "traciłem", "en": "I was losing", "type": "Verb (Past)"},
+        {"pl": "rzeczy", "en": "things", "type": "Noun"},
+        {"pl": "skończę", "en": "I will finish", "type": "Verb (Future)"}
+      ]
+    },
+    {
+      "startTime": 80,
+      "original": "Nie odbieraj mi szans. Jesteś wszystkim co mam. Pójdę za tobą gdzie powiesz.",
+      "translation": "Don't take my chances. You're all I have. I'll follow you wherever you say.",
+      "words": [
+        {"pl": "odbieraj", "en": "take away", "type": "Verb"},
+        {"pl": "szans", "en": "chances", "type": "Noun"},
+        {"pl": "wszystkim", "en": "everything", "type": "Pronoun"},
+        {"pl": "Pójdę", "en": "I will go", "type": "Verb (Future)"}
+      ]
+    },
+    {
+      "startTime": 90,
+      "original": "Kolejny raz inny ten sam. Łzy płoną w środku serca.",
+      "translation": "Another time, different but the same. Tears burn inside the heart.",
+      "words": [
+        {"pl": "inny", "en": "different", "type": "Adjective"},
+        {"pl": "sam", "en": "same", "type": "Adjective"},
+        {"pl": "Łzy", "en": "Tears", "type": "Noun"},
+        {"pl": "płoną", "en": "burn", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 100,
+      "original": "Głupio mi tak. Zawiodłem nas. Nie ma już dla mnie miejsca.",
+      "translation": "I feel foolish. I failed us. There is no more room for me.",
+      "words": [
+        {"pl": "Głupio", "en": "Foolishly", "type": "Adverb"},
+        {"pl": "Zawiodłem", "en": "I failed", "type": "Verb (Past)"},
+        {"pl": "miejsca", "en": "place/room", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 110,
+      "original": "[Chorus x2] Wiem beze mnie tobie będzie dużo lżej. Tylko tęsknię sobie.",
+      "translation": "I know it will be easier for you without me. I'm just longing.",
+      "words": [
+        {"pl": "Wiem", "en": "I know", "type": "Verb"},
+        {"pl": "lżej", "en": "easier", "type": "Adjective"},
+        {"pl": "tęsknię", "en": "I miss", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 130,
+      "original": "Po tobie, Po tobie, Po tobie. Tęsknię sobie.",
+      "translation": "After you, after you, after you. I'm longing.",
+      "words": [
+        {"pl": "Po", "en": "After", "type": "Preposition"},
+        {"pl": "tobie", "en": "you", "type": "Pronoun"},
+        {"pl": "Tęsknię", "en": "I miss", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 140,
+      "original": "[Outro] Kolejny raz sercem się baw... Niczego dziś tak nie pragnę.",
+      "translation": "Play with my heart once again... I desire nothing else today.",
+      "words": [
+        {"pl": "baw", "en": "play", "type": "Verb"},
+        {"pl": "pragnę", "en": "I desire", "type": "Verb"}
+      ]
+    }
+  ]
+}

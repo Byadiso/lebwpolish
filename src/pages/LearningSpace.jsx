@@ -410,6 +410,16 @@ useEffect(() => {
               </div>
             </div>
 
+            {/* Listen to music section  LINK CARD */}
+            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
+              <div className="relative z-10">
+                <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2">Music and learning Polish</p>
+                <Link to="/polish-music" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
+                  Listen to Polish vibe
+                </Link>
+              </div>
+            </div>
+
           </div>
         </aside>
       </main>

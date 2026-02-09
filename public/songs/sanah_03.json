@@ -1,0 +1,190 @@
+{
+  "id": "sanah_03",
+  "title": "Szampan",
+  "artist": "sanah",
+  "audioUrl": "/songs/sanah_szampan.mp3",
+  "fullLyrics": [
+    {
+      "startTime": 0,
+      "original": "Kochanie mnie to jak pory roku, po miesiącach mroku słońce świeci zza chmur.",
+      "translation": "Loving me is like the seasons; after months of darkness, the sun shines from behind the clouds.",
+      "words": [
+        {"pl": "Kochanie", "en": "Loving", "type": "Gerund"},
+        {"pl": "mnie", "en": "me", "type": "Pronoun"},
+        {"pl": "to", "en": "is", "type": "Particle"},
+        {"pl": "jak", "en": "like", "type": "Adverb"},
+        {"pl": "pory", "en": "seasons", "type": "Noun"},
+        {"pl": "roku", "en": "of the year", "type": "Noun"},
+        {"pl": "po", "en": "after", "type": "Preposition"},
+        {"pl": "miesiącach", "en": "months", "type": "Noun"},
+        {"pl": "mroku", "en": "darkness", "type": "Noun"},
+        {"pl": "słońce", "en": "sun", "type": "Noun"},
+        {"pl": "świeci", "en": "shines", "type": "Verb"},
+        {"pl": "zza", "en": "from behind", "type": "Preposition"},
+        {"pl": "chmur", "en": "clouds", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 8,
+      "original": "Kochanie mnie to poza do skoku, nad przepaścią głęboką, potem już tylko w dół.",
+      "translation": "Loving me is a pose for a jump, over a deep abyss, then only downwards.",
+      "words": [
+        {"pl": "poza", "en": "pose", "type": "Noun"},
+        {"pl": "do", "en": "for", "type": "Preposition"},
+        {"pl": "skoku", "en": "jump", "type": "Noun"},
+        {"pl": "nad", "en": "over", "type": "Preposition"},
+        {"pl": "przepaścią", "en": "abyss", "type": "Noun"},
+        {"pl": "głęboką", "en": "deep", "type": "Adjective"},
+        {"pl": "potem", "en": "afterwards", "type": "Adverb"},
+        {"pl": "tylko", "en": "only", "type": "Particle"},
+        {"pl": "w", "en": "in/to", "type": "Preposition"},
+        {"pl": "dół", "en": "down", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 16,
+      "original": "Kochanie mnie jak zima w pergoli, mróz, co ci przyfasoli, a ty liczysz na cud.",
+      "translation": "Loving me is like winter in a pergola, frost that punches you, and you hope for a miracle.",
+      "words": [
+        {"pl": "zima", "en": "winter", "type": "Noun"},
+        {"pl": "w", "en": "in", "type": "Preposition"},
+        {"pl": "pergoli", "en": "pergola", "type": "Noun"},
+        {"pl": "mróz", "en": "frost", "type": "Noun"},
+        {"pl": "co", "en": "that", "type": "Pronoun"},
+        {"pl": "ci", "en": "you", "type": "Pronoun"},
+        {"pl": "przyfasoli", "en": "will punch", "type": "Verb (Future)"},
+        {"pl": "liczysz", "en": "you count", "type": "Verb"},
+        {"pl": "na", "en": "for", "type": "Preposition"},
+        {"pl": "cud", "en": "miracle", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 24,
+      "original": "Uciekam, ale idę powoli, może ktoś mnie dogoni, ale dosyć mam szkód.",
+      "translation": "I'm running away, but walking slowly, maybe someone catches me, but I've had enough damage.",
+      "words": [
+        {"pl": "Uciekam", "en": "I escape", "type": "Verb"},
+        {"pl": "ale", "en": "but", "type": "Conjunction"},
+        {"pl": "idę", "en": "I go", "type": "Verb"},
+        {"pl": "powoli", "en": "slowly", "type": "Adverb"},
+        {"pl": "może", "en": "maybe", "type": "Adverb"},
+        {"pl": "ktoś", "en": "someone", "type": "Pronoun"},
+        {"pl": "dogoni", "en": "will catch up", "type": "Verb"},
+        {"pl": "dosyć", "en": "enough", "type": "Adverb"},
+        {"pl": "mam", "en": "I have", "type": "Verb"},
+        {"pl": "szkód", "en": "damages", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 32,
+      "original": "Słyszę, jak ptak o tym śpiewa, kwiaty, trawa, cały świat, i potoki, i drzewa gawędzą sobie tak.",
+      "translation": "I hear how a bird sings about it, flowers, grass, the whole world, and streams and trees chat like that.",
+      "words": [
+        {"pl": "Słyszę", "en": "I hear", "type": "Verb"},
+        {"pl": "ptak", "en": "bird", "type": "Noun"},
+        {"pl": "cały", "en": "whole", "type": "Adjective"},
+        {"pl": "świat", "en": "world", "type": "Noun"},
+        {"pl": "potoki", "en": "streams", "type": "Noun"},
+        {"pl": "drzewa", "en": "trees", "type": "Noun"},
+        {"pl": "gawędzą", "en": "chat", "type": "Verb"},
+        {"pl": "sobie", "en": "to themselves", "type": "Pronoun"}
+      ]
+    },
+    {
+      "startTime": 40,
+      "original": "Ona nie grosza warta, puść ją wolno, bo brak już słów. Do tyłu nie zerkaj, bo zamienisz się w soli słup.",
+      "translation": "She's not worth a penny, let her go, because words are gone. Don't look back, or you'll turn into a pillar of salt.",
+      "words": [
+        {"pl": "grosza", "en": "penny", "type": "Noun"},
+        {"pl": "warta", "en": "worth", "type": "Adjective"},
+        {"pl": "puść", "en": "let go", "type": "Verb"},
+        {"pl": "wolno", "en": "free", "type": "Adverb"},
+        {"pl": "zerkaj", "en": "glance/look", "type": "Verb"},
+        {"pl": "zamienisz", "en": "will change", "type": "Verb"},
+        {"pl": "soli", "en": "of salt", "type": "Noun"},
+        {"pl": "słup", "en": "pillar/post", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 48,
+      "original": "Smaczna jak bułka tarta, słucha Mozarta i kocha róż. Mówią miłość jest ślepa, a ty za dużo widziałeś już.",
+      "translation": "Tasty like breadcrumbs, she listens to Mozart and loves pink. They say love is blind, and you've seen too much.",
+      "words": [
+        {"pl": "smaczna", "en": "tasty", "type": "Adjective"},
+        {"pl": "bułka", "en": "roll", "type": "Noun"},
+        {"pl": "tarta", "en": "grated", "type": "Adjective"},
+        {"pl": "słucha", "en": "listens", "type": "Verb"},
+        {"pl": "kocha", "en": "loves", "type": "Verb"},
+        {"pl": "róż", "en": "pink", "type": "Noun"},
+        {"pl": "ślepa", "en": "blind", "type": "Adjective"},
+        {"pl": "widziałeś", "en": "you saw", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 58,
+      "original": "Kochanie mnie to jak ze storczykiem, bo się wiąże z ryzykiem, padnie drugiego dnia.",
+      "translation": "Loving me is like an orchid, because it involves risk, it will drop on the second day.",
+      "words": [
+        {"pl": "storczykiem", "en": "orchid", "type": "Noun"},
+        {"pl": "wiąże", "en": "binds/connects", "type": "Verb"},
+        {"pl": "ryzykiem", "en": "risk", "type": "Noun"},
+        {"pl": "padnie", "en": "will fall/die", "type": "Verb"},
+        {"pl": "drugiego", "en": "second", "type": "Adjective"},
+        {"pl": "dnia", "en": "day", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 66,
+      "original": "Kochanie mnie jak walka z nawykiem, nie pozbędziesz się mykiem, a ta batalia trwa.",
+      "translation": "Loving me is like a fight with a habit, you won't get rid of it with a trick, and this battle goes on.",
+      "words": [
+        {"pl": "walka", "en": "fight", "type": "Noun"},
+        {"pl": "nawykiem", "en": "habit", "type": "Noun"},
+        {"pl": "pozbędziesz", "en": "will get rid of", "type": "Verb"},
+        {"pl": "mykiem", "en": "with a trick", "type": "Noun (Slang)"},
+        {"pl": "batalia", "en": "battle", "type": "Noun"},
+        {"pl": "trwa", "en": "lasts/continues", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 74,
+      "original": "Więc upadam i się ratuję krzykiem, cichym, ciemnym kącikiem, potem już cicho sza.",
+      "translation": "So I fall and save myself with a scream, a quiet dark corner, then quiet hush.",
+      "words": [
+        {"pl": "upadam", "en": "I fall", "type": "Verb"},
+        {"pl": "ratuję", "en": "I save", "type": "Verb"},
+        {"pl": "krzykiem", "en": "scream", "type": "Noun"},
+        {"pl": "cichym", "en": "quiet", "type": "Adjective"},
+        {"pl": "kącikiem", "en": "corner", "type": "Noun"},
+        {"pl": "sza", "en": "hush", "type": "Interjection"}
+      ]
+    },
+    {
+      "startTime": 82,
+      "original": "Czy za błędy mogę przelać ci blikiem? Ja mam problem z cennikiem, dobrze wie, kto mnie zna.",
+      "translation": "Can I pay for my mistakes via Blik? I have a problem with the price list, whoever knows me knows well.",
+      "words": [
+        {"pl": "błędy", "en": "mistakes", "type": "Noun"},
+        {"pl": "przelać", "en": "transfer", "type": "Verb"},
+        {"pl": "blikiem", "en": "Blik", "type": "Noun"},
+        {"pl": "cennikiem", "en": "price list", "type": "Noun"},
+        {"pl": "dobrze", "en": "well", "type": "Adverb"},
+        {"pl": "zna", "en": "knows", "type": "Verb"}
+      ]
+    },
+    {
+      "startTime": 90,
+      "original": "Poradzisz sobie sam, zadałam za dużo ran. Jest wiele na tym globie, już po dobie będzie raj.",
+      "translation": "You will manage on your own, I've caused too many wounds. There are many on this globe, after a day it will be paradise.",
+      "words": [
+        {"pl": "poradzisz", "en": "will manage", "type": "Verb"},
+        {"pl": "sam", "en": "alone/self", "type": "Adjective"},
+        {"pl": "zadałam", "en": "I inflicted", "type": "Verb (Past)"},
+        {"pl": "ran", "en": "wounds", "type": "Noun"},
+        {"pl": "globie", "en": "globe", "type": "Noun"},
+        {"pl": "dobie", "en": "24 hours", "type": "Noun"},
+        {"pl": "raj", "en": "paradise", "type": "Noun"}
+      ]
+    }
+  ]
+}

@@ -130,11 +130,11 @@ export default function PracticeLab() {
   );
 
   return (
-    <div className="min-h-screen bg-[#0F172A] text-white font-sans selection:bg-red-500/30 overflow-x-hidden">
+    <div className="min-h-screen bg-[#0F172A] text-white font-sans selection:bg-red-500/30 overflow-x-hidden pb-32">
       {showConfetti && <Confetti numberOfPieces={150} recycle={false} colors={['#EF4444', '#FFFFFF', '#10B981']} />}
       
       <div className="max-w-xl mx-auto px-4 py-6 md:py-12">
-        {/* TOP HUD - COMPACT ON MOBILE */}
+        {/* TOP HUD */}
         <div className="mb-6 p-4 bg-slate-900/80 rounded-2xl md:rounded-3xl border border-slate-800 shadow-xl">
             <div className="flex justify-between items-center mb-3">
                 <div className="min-w-0">
@@ -271,6 +271,35 @@ export default function PracticeLab() {
           </>
         )}
       </div>
+
+      {/* FLOATING MUSIC LAB CTA - FIXED TO BOTTOM TO AVOID BLOCKING DRILLS */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-[#0F172A] via-[#0F172A]/90 to-transparent pointer-events-none">
+          <div className="max-w-xl mx-auto pointer-events-auto">
+              <motion.button 
+                whileHover={{ y: -5 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => window.location.href = "/polish-music"}
+                className="w-full group relative overflow-hidden bg-slate-900 border border-indigo-500/30 rounded-2xl p-4 flex items-center justify-between shadow-2xl shadow-indigo-500/20"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-lg shadow-lg group-hover:rotate-12 transition-transform">
+                    🎵
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-[8px] font-black text-indigo-400 uppercase tracking-widest">Optional Immersion</span>
+                    <h3 className="text-sm font-black italic uppercase tracking-tight text-white">Music & Lyrics Lab</h3>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[9px] font-bold text-slate-500 group-hover:text-indigo-400 transition-colors">START LISTENING</span>
+                  <span className="text-indigo-500 group-hover:translate-x-1 transition-transform">→</span>
+                </div>
+                {/* Visual Flair */}
+                <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-indigo-500/5 to-transparent" />
+              </motion.button>
+          </div>
+      </div>
+
       <style jsx>{`
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .animate-shake { animation: shake 0.2s ease-in-out infinite; }

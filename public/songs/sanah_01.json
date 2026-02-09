@@ -1,0 +1,230 @@
+{
+  "id": "sanah_01_full",
+  "title": "Nic dwa razy",
+  "artist": "sanah",
+  "audioUrl": "/songs/sanah_nic_dwa_razy.mp3",
+  "fullLyrics": [
+    {
+      "startTime": 0,
+      "original": "Nic dwa razy się nie zdarza i nie zdarzy.",
+      "translation": "Nothing happens twice and it won't happen again.",
+      "words": [
+        {"pl": "Nic", "en": "Nothing", "type": "Pronoun"},
+        {"pl": "dwa", "en": "two", "type": "Number"},
+        {"pl": "razy", "en": "times", "type": "Noun"},
+        {"pl": "się", "en": "itself", "type": "Particle"},
+        {"pl": "nie", "en": "not", "type": "Particle"},
+        {"pl": "zdarza", "en": "happens", "type": "Verb (Present)"},
+        {"pl": "i", "en": "and", "type": "Conjunction"},
+        {"pl": "nie", "en": "not", "type": "Particle"},
+        {"pl": "zdarzy", "en": "will happen", "type": "Verb (Future)"}
+      ]
+    },
+    {
+      "startTime": 5,
+      "original": "Z tej przyczyny zrodziliśmy się bez wprawy i pomrzemy bez rutyny.",
+      "translation": "For that reason, we were born without skill and we shall die without routine.",
+      "words": [
+        {"pl": "Z", "en": "From", "type": "Preposition"},
+        {"pl": "tej", "en": "this", "type": "Pronoun"},
+        {"pl": "przyczyny", "en": "reason", "type": "Noun"},
+        {"pl": "zrodziliśmy", "en": "born", "type": "Verb (Past)"},
+        {"pl": "się", "en": "ourselves", "type": "Particle"},
+        {"pl": "bez", "en": "without", "type": "Preposition"},
+        {"pl": "wprawy", "en": "skill", "type": "Noun"},
+        {"pl": "i", "en": "and", "type": "Conjunction"},
+        {"pl": "pomrzemy", "en": "die", "type": "Verb (Future)"},
+        {"pl": "bez", "en": "without", "type": "Preposition"},
+        {"pl": "rutyny", "en": "routine", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 10,
+      "original": "Choćbyśmy uczniami byli najtępszymi w szkole świata,",
+      "translation": "Even if we were the dullest students in the school of the world,",
+      "words": [
+        {"pl": "Choćbyśmy", "en": "Even if we", "type": "Conjunction"},
+        {"pl": "uczniami", "en": "students", "type": "Noun"},
+        {"pl": "byli", "en": "were", "type": "Verb (Past)"},
+        {"pl": "najtępszymi", "en": "dullest", "type": "Adjective"},
+        {"pl": "w", "en": "in", "type": "Preposition"},
+        {"pl": "szkole", "en": "school", "type": "Noun"},
+        {"pl": "świata", "en": "world", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 15,
+      "original": "nie będziemy repetować żadnej zimy ani lata.",
+      "translation": "we will not repeat any winter or summer.",
+      "words": [
+        {"pl": "nie", "en": "not", "type": "Particle"},
+        {"pl": "będziemy", "en": "we will", "type": "Verb (Future)"},
+        {"pl": "repetować", "en": "repeat", "type": "Verb (Infinitive)"},
+        {"pl": "żadnej", "en": "any", "type": "Adjective"},
+        {"pl": "zimy", "en": "winter", "type": "Noun"},
+        {"pl": "ani", "en": "or/nor", "type": "Conjunction"},
+        {"pl": "lata", "en": "summer", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 20,
+      "original": "Żaden dzień się nie powtórzy, nie ma dwóch podobnych nocy,",
+      "translation": "No day will repeat itself, there are no two similar nights,",
+      "words": [
+        {"pl": "Żaden", "en": "None/No", "type": "Adjective"},
+        {"pl": "dzień", "en": "day", "type": "Noun"},
+        {"pl": "się", "en": "itself", "type": "Particle"},
+        {"pl": "nie", "en": "not", "type": "Particle"},
+        {"pl": "powtórzy", "en": "repeat", "type": "Verb (Future)"},
+        {"pl": "nie", "en": "not", "type": "Particle"},
+        {"pl": "ma", "en": "has/there is", "type": "Verb"},
+        {"pl": "dwóch", "en": "two", "type": "Number"},
+        {"pl": "podobnych", "en": "similar", "type": "Adjective"},
+        {"pl": "nocy", "en": "nights", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 25,
+      "original": "dwóch tych samych pocałunków, dwóch jednakich spojrzeń w oczy.",
+      "translation": "two of the same kisses, two identical looks in the eyes.",
+      "words": [
+        {"pl": "dwóch", "en": "two", "type": "Number"},
+        {"pl": "tych", "en": "the", "type": "Pronoun"},
+        {"pl": "samych", "en": "same", "type": "Adjective"},
+        {"pl": "pocałunków", "en": "kisses", "type": "Noun"},
+        {"pl": "dwóch", "en": "two", "type": "Number"},
+        {"pl": "jednakich", "en": "identical/same", "type": "Adjective"},
+        {"pl": "spojrzeń", "en": "looks/glances", "type": "Noun"},
+        {"pl": "w", "en": "in", "type": "Preposition"},
+        {"pl": "oczy", "en": "eyes", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 30,
+      "original": "Wczoraj, kiedy twoje imię ktoś wymówił przy mnie głośno,",
+      "translation": "Yesterday, when someone said your name loudly near me,",
+      "words": [
+        {"pl": "Wczoraj", "en": "Yesterday", "type": "Adverb"},
+        {"pl": "kiedy", "en": "when", "type": "Conjunction"},
+        {"pl": "twoje", "en": "your", "type": "Pronoun"},
+        {"pl": "imię", "en": "name", "type": "Noun"},
+        {"pl": "ktoś", "en": "someone", "type": "Pronoun"},
+        {"pl": "wymówił", "en": "pronounced", "type": "Verb (Past)"},
+        {"pl": "przy", "en": "near", "type": "Preposition"},
+        {"pl": "mnie", "en": "me", "type": "Pronoun"},
+        {"pl": "głośno", "en": "loudly", "type": "Adverb"}
+      ]
+    },
+    {
+      "startTime": 35,
+      "original": "tak mi było, jakby róża przez otwarte wpadła okno.",
+      "translation": "I felt as if a rose fell through an open window.",
+      "words": [
+        {"pl": "tak", "en": "so", "type": "Adverb"},
+        {"pl": "mi", "en": "to me", "type": "Pronoun"},
+        {"pl": "było", "en": "was", "type": "Verb (Past)"},
+        {"pl": "jakby", "en": "as if", "type": "Conjunction"},
+        {"pl": "róża", "en": "rose", "type": "Noun"},
+        {"pl": "przez", "en": "through", "type": "Preposition"},
+        {"pl": "otwarte", "en": "open", "type": "Adjective"},
+        {"pl": "wpadła", "en": "fell in", "type": "Verb (Past)"},
+        {"pl": "okno", "en": "window", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 40,
+      "original": "Dziś, kiedy jesteśmy razem, odwróciłam twarz ku ścianie.",
+      "translation": "Today, when we are together, I turned my face to the wall.",
+      "words": [
+        {"pl": "Dziś", "en": "Today", "type": "Adverb"},
+        {"pl": "kiedy", "en": "when", "type": "Conjunction"},
+        {"pl": "jesteśmy", "en": "we are", "type": "Verb"},
+        {"pl": "razem", "en": "together", "type": "Adverb"},
+        {"pl": "odwróciłam", "en": "turned", "type": "Verb (Past)"},
+        {"pl": "twarz", "en": "face", "type": "Noun"},
+        {"pl": "ku", "en": "towards", "type": "Preposition"},
+        {"pl": "ścianie", "en": "wall", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 45,
+      "original": "Róża? Jak wygląda róża? Czy to kwiat? A może kamień?",
+      "translation": "Rose? What does a rose look like? Is it a flower? Or maybe a stone?",
+      "words": [
+        {"pl": "Róża", "en": "Rose", "type": "Noun"},
+        {"pl": "Jak", "en": "How", "type": "Adverb"},
+        {"pl": "wygląda", "en": "looks like", "type": "Verb (Present)"},
+        {"pl": "róża", "en": "rose", "type": "Noun"},
+        {"pl": "Czy", "en": "Is it/Whether", "type": "Particle"},
+        {"pl": "to", "en": "this", "type": "Pronoun"},
+        {"pl": "kwiat", "en": "flower", "type": "Noun"},
+        {"pl": "A", "en": "And/But", "type": "Conjunction"},
+        {"pl": "może", "en": "maybe", "type": "Adverb"},
+        {"pl": "kamień", "en": "stone", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 50,
+      "original": "Czemu ty się, zła godzino, z niepotrzebnym mieszasz lękiem?",
+      "translation": "Why do you, evil hour, mix with unnecessary fear?",
+      "words": [
+        {"pl": "Czemu", "en": "Why", "type": "Adverb"},
+        {"pl": "ty", "en": "you", "type": "Pronoun"},
+        {"pl": "się", "en": "yourself", "type": "Particle"},
+        {"pl": "zła", "en": "evil/bad", "type": "Adjective"},
+        {"pl": "godzino", "en": "hour", "type": "Noun"},
+        {"pl": "z", "en": "with", "type": "Preposition"},
+        {"pl": "niepotrzebnym", "en": "unnecessary", "type": "Adjective"},
+        {"pl": "mieszasz", "en": "mix", "type": "Verb"},
+        {"pl": "lękiem", "en": "fear", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 55,
+      "original": "Jesteś - a więc musisz minąć. Miniesz - a więc to jest piękne.",
+      "translation": "You are - so you must pass. You will pass - so that is beautiful.",
+      "words": [
+        {"pl": "Jesteś", "en": "You are", "type": "Verb"},
+        {"pl": "a", "en": "and/so", "type": "Conjunction"},
+        {"pl": "więc", "en": "so/therefore", "type": "Conjunction"},
+        {"pl": "musisz", "en": "must", "type": "Verb"},
+        {"pl": "minąć", "en": "pass", "type": "Verb (Infinitive)"},
+        {"pl": "Miniesz", "en": "You will pass", "type": "Verb (Future)"},
+        {"pl": "a", "en": "and/so", "type": "Conjunction"},
+        {"pl": "więc", "en": "so/therefore", "type": "Conjunction"},
+        {"pl": "to", "en": "it", "type": "Pronoun"},
+        {"pl": "jest", "en": "is", "type": "Verb"},
+        {"pl": "piękne", "en": "beautiful", "type": "Adjective"}
+      ]
+    },
+    {
+      "startTime": 60,
+      "original": "Uśmiechnięci, wpółobjęci spróbujemy szukać zgody,",
+      "translation": "Smiling, halfway embracing, we will try to seek harmony,",
+      "words": [
+        {"pl": "Uśmiechnięci", "en": "Smiling", "type": "Adjective"},
+        {"pl": "wpółobjęci", "en": "half-embracing", "type": "Adjective"},
+        {"pl": "spróbujemy", "en": "we will try", "type": "Verb (Future)"},
+        {"pl": "szukać", "en": "seek", "type": "Verb (Infinitive)"},
+        {"pl": "zgody", "en": "harmony/agreement", "type": "Noun"}
+      ]
+    },
+    {
+      "startTime": 65,
+      "original": "choć różnimy się od siebie jak dwie krople czystej wody.",
+      "translation": "though we differ from each other like two drops of pure water.",
+      "words": [
+        {"pl": "choć", "en": "though", "type": "Conjunction"},
+        {"pl": "różnimy", "en": "differ", "type": "Verb (Present)"},
+        {"pl": "się", "en": "ourselves", "type": "Particle"},
+        {"pl": "od", "en": "from", "type": "Preposition"},
+        {"pl": "siebie", "en": "each other", "type": "Pronoun"},
+        {"pl": "jak", "en": "like", "type": "Adverb"},
+        {"pl": "dwie", "en": "two", "type": "Number"},
+        {"pl": "krople", "en": "drops", "type": "Noun"},
+        {"pl": "czystej", "en": "pure", "type": "Adjective"},
+        {"pl": "wody", "en": "water", "type": "Noun"}
+      ]
+    }
+  ]
+}
