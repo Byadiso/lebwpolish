@@ -51,28 +51,6 @@ Most language apps focus on recognition. **LEBWPolish** focuses on **reconstruct
 
 ---
 
-## Project Structure
-
-```text
-src/
-├── components/
-│   ├── Navigation.jsx      # Adaptive Menu
-│   ├── WritingForge.jsx    # The Sentence Engine
-│   └── SocialFeed.jsx      # Peer-to-peer writing view
-├── data/
-│   └── forgeData.js        # Lesson & Level content
-├── pages/
-│   ├── Home.jsx            # Landing Page
-│   ├── LearningSpace.jsx   # Collaborative Writing Room
-│   ├── Profile.jsx         # Stats & Streak Tracker
-│   └── AdminDashboard.jsx  # User & Permission Management
-└── firebase/
-    └── config.js           # Database & Storage setup
-
-```
-
----
-
 ## Getting Started
 
 1. **Clone & Install**
