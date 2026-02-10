@@ -2,14 +2,17 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
-// Import your pages
+// Core Identity Pages
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
+import EnrollmentGuard from './components/EnrollmentGuard';
+import Navbar from './components/Navbar';
+
+// Learning Modules (Labs)
 import LearningSpace from './pages/LearningSpace';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
-import Navbar from './components/Navbar';
 import PracticeLab from './pages/PracticeLab';
 import GrammarGauntlet from './pages/GrammarGauntlet';
 import VocabularyVault from './pages/VocabularyVault';
@@ -17,61 +20,58 @@ import PolishWarForge from './pages/PolishWarForge';
 import LirycznaSymfonia from './pages/LirycznaSymfonia';
 import ScenarioEngine from './pages/ScenarioEngine';
 
-// A helper to protect pages from non-logged-in users
+// Secure Gatekeeper Helper
 const ProtectedRoute = ({ children }) => {
   const { user } = useAuth();
-  return user ? children : <Navigate to="/login" />;
+  return user ? children : <Navigate to="/guest" />;
 };
 
 function App() {
   return (
     <AuthProvider>
       <Router>
-        <div className="min-h-screen bg-slate-50">
+        <div className="min-h-screen bg-[#fafafa]">
           <Navbar />
           <Routes>
+            {/* --- PUBLIC ACCESS ROUTES: THE OPEN LABS --- */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
+            <Route path="/guest" element={<EnrollmentGuard />} />
             
-            {/* Protected Student Routes */}
+            {/* These paths are now open for immediate use. 
+                They match the grid cards on the Home page.
+            */}
+            <Route path="/grammar" element={<GrammarGauntlet />} />
+            <Route path="/shadow-protocol" element={<ScenarioEngine />} />
+            <Route path="/vocabularyvault" element={<VocabularyVault />} />
+            <Route path="/polish-simplified" element={<PolishWarForge />} />
+
+            {/* --- PROTECTED STUDENT ROUTES: PERSONAL PROGRESS --- */}
+            {/* These routes require an active Fluency Profile (Login) */}
             <Route path="/space" element={
               <ProtectedRoute><LearningSpace /></ProtectedRoute>
             } />
+            
             <Route path="/profile" element={
               <ProtectedRoute><Profile /></ProtectedRoute>
             } />
 
-
-            
             <Route path="/practice" element={
               <ProtectedRoute><PracticeLab /></ProtectedRoute>
             } />
 
-            <Route path="/grammar" element={
-              <ProtectedRoute><GrammarGauntlet /></ProtectedRoute>
-            } />
-
-            <Route path="/vocabularyvault" element={
-              <ProtectedRoute><VocabularyVault /></ProtectedRoute>
-            } />
-
-             <Route path="/polish-simplified" element={
-              <ProtectedRoute><PolishWarForge /></ProtectedRoute>
-            } />
-
-             <Route path="/polish-music" element={
+            <Route path="/polish-music" element={
               <ProtectedRoute><LirycznaSymfonia /></ProtectedRoute>
             } />
 
-            <Route path="/shadow-protocol" element={
-              <ProtectedRoute><ScenarioEngine /></ProtectedRoute>
-            } />
-
-            {/* Admin Only Route */}
+            {/* --- ADMIN ONLY --- */}
             <Route path="/admin" element={
               <ProtectedRoute><AdminDashboard /></ProtectedRoute>
             } />
+
+            {/* Fallback for undefined routes */}
+            <Route path="*" element={<Navigate to="/" />} />
           </Routes>
         </div>
       </Router>

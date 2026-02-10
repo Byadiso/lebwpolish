@@ -7,52 +7,92 @@ import { doc, updateDoc, increment } from "firebase/firestore";
 
 export default function ScenarioEngine() {
   const { user, profile } = useAuth();
-  const [currentMissionIndex, setCurrentMissionIndex] = useState(0);
-  const [currentStep, setCurrentStep] = useState(0);
+  
+  // PERSISTENCE HELPERS
+  const getSaved = (key, fallback) => {
+    const saved = localStorage.getItem(key);
+    if (saved === null) return fallback;
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return saved;
+    }
+  };
+
+  // MISSION STATE
+  const [currentMissionIndex, setCurrentMissionIndex] = useState(() => getSaved("shadow_mission_index", 0));
+  const [currentStep, setCurrentStep] = useState(() => getSaved("shadow_step_index", 0));
+
+  // XP & LOG PERSISTENCE
+  const [sessionXP, setSessionXP] = useState(() => getSaved("shadow_session_xp", 0));
+  const [missionEarnings, setMissionEarnings] = useState(() => getSaved("shadow_mission_earnings", 0));
+  const [missionLog, setMissionLog] = useState(() => getSaved("shadow_mission_log", []));
+
   const [userInput, setUserInput] = useState("");
   const [feedback, setFeedback] = useState({ status: "idle", message: "" });
   const [patience, setPatience] = useState(100);
   const [showHint, setShowHint] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const textareaRef = useRef(null);
+  const [shake, setShake] = useState(false);
 
+  const textareaRef = useRef(null);
   const mission = missions[currentMissionIndex];
   const objective = mission?.objectives[currentStep];
 
-  // Voice Synthesis Logic
+  // EFFECT: Auto-save all progress to localStorage
+  useEffect(() => {
+    localStorage.setItem("shadow_mission_index", JSON.stringify(currentMissionIndex));
+    localStorage.setItem("shadow_step_index", JSON.stringify(currentStep));
+    localStorage.setItem("shadow_session_xp", JSON.stringify(sessionXP));
+    localStorage.setItem("shadow_mission_earnings", JSON.stringify(missionEarnings));
+    localStorage.setItem("shadow_mission_log", JSON.stringify(missionLog));
+  }, [currentMissionIndex, currentStep, sessionXP, missionEarnings, missionLog]);
+
+  const calculateXP = () => 50 + Math.floor(patience / 2);
+
+  const handleHardReset = () => {
+    if (window.confirm("CAUTION: This will abort the current operation and reset mission progress. Points earned so far will remain in your total. Proceed?")) {
+      setCurrentMissionIndex(0);
+      setCurrentStep(0);
+      setSessionXP(0);
+      setMissionEarnings(0);
+      setMissionLog([]);
+      setPatience(100);
+      setUserInput("");
+      setFeedback({ status: "idle", message: "" });
+      localStorage.clear();
+    }
+  };
+
   const speakTransmission = (text) => {
     if (!window.speechSynthesis) return;
-    
-    // Cancel any ongoing speech
     window.speechSynthesis.cancel();
-
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "pl-PL"; // Force Polish accent
-    utterance.rate = 0.85;    // Slightly slower for learning clarity
-    
+    utterance.lang = "pl-PL";
+    utterance.rate = 0.9;
     utterance.onstart = () => setIsSpeaking(true);
     utterance.onend = () => setIsSpeaking(false);
-    
     window.speechSynthesis.speak(utterance);
   };
 
   useEffect(() => {
     setShowHint(false);
+    if (objective) speakTransmission(objective.label);
   }, [currentStep, currentMissionIndex]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setPatience((prev) => (prev > 0 ? prev - 1 : 0));
-    }, 1500);
+    }, 2000);
     return () => clearInterval(timer);
   }, [currentStep, currentMissionIndex]);
 
   const injectChar = (char) => {
+    if (!textareaRef.current) return;
     const start = textareaRef.current.selectionStart;
     const end = textareaRef.current.selectionEnd;
     const newText = userInput.substring(0, start) + char + userInput.substring(end);
     setUserInput(newText);
-    
     setTimeout(() => {
       textareaRef.current.focus();
       textareaRef.current.setSelectionRange(start + 1, start + 1);
@@ -61,206 +101,272 @@ export default function ScenarioEngine() {
 
   const handleVerify = async () => {
     if (!objective) return;
-
-    const normalize = (s) => s
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") 
-      .replace(/[.,?!]/g, "")
-      .trim();
+    const normalize = (s) => s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[.,?!]/g, "").trim();
     
     if (normalize(userInput) === normalize(objective.correct)) {
-      setFeedback({ status: "success", message: "OBJECTIVE SECURED" });
-      speakTransmission(objective.correct); // Audio reinforcement on success
+      const earnedXP = calculateXP();
+      
+      setSessionXP(prev => prev + earnedXP);
+      setMissionEarnings(prev => prev + earnedXP);
+      
+      // Update Mission Log
+      setMissionLog(prev => [...prev, { 
+        label: objective.label, 
+        correct: objective.correct, 
+        xp: earnedXP 
+      }]);
+      
+      setFeedback({ status: "success", message: `+${earnedXP} XP - OBJECTIVE SECURED` });
+      speakTransmission(objective.correct);
       
       try {
         const userRef = doc(db, "pending_users", user.uid);
         await updateDoc(userRef, {
-          xp: increment(50 + Math.floor(patience / 2)),
+          xp: increment(earnedXP),
           streak: increment(1)
         });
-      } catch (e) { console.error("Firebase update failed"); }
+      } catch (e) { console.error("Firebase update failed", e); }
 
       setTimeout(() => {
         if (currentStep + 1 < mission.objectives.length) {
-          setCurrentStep(currentStep + 1);
+          setCurrentStep(prev => prev + 1);
           setUserInput("");
           setFeedback({ status: "idle", message: "" });
-        } else if (currentMissionIndex + 1 < missions.length) {
-          setFeedback({ status: "complete", message: "MISSION ACCOMPLISHED. RELOADING..." });
+        } else {
+          setFeedback({ 
+            status: "complete", 
+            message: `MISSION COMPLETE: +${missionEarnings + earnedXP} TOTAL XP` 
+          });
+          
           setTimeout(() => {
-            setCurrentMissionIndex(currentMissionIndex + 1);
+            setCurrentMissionIndex((prev) => (prev + 1) % missions.length);
             setCurrentStep(0);
             setUserInput("");
             setPatience(100);
+            setMissionEarnings(0);
+            setMissionLog([]); // Clear log for new mission
             setFeedback({ status: "idle", message: "" });
-          }, 2000);
-        } else {
-          setFeedback({ status: "complete", message: "ALL PROTOCOLS COMPLETED" });
+          }, 3000);
         }
-      }, 1500);
+      }, 1200);
     } else {
-      setFeedback({ status: "error", message: "PROTOCOL BREACH: TRY AGAIN" });
+      setShake(true); 
+      setFeedback({ status: "error", message: "PROTOCOL BREACH" });
       setPatience((prev) => Math.max(0, prev - 15));
+      setTimeout(() => setShake(false), 500);
     }
   };
 
-  if (!mission) return <div className="text-emerald-500 p-20 font-mono text-center uppercase tracking-widest">End of Operation</div>;
+  if (!mission) return <div className="text-emerald-500 p-20 font-mono text-center uppercase tracking-widest animate-pulse">End of Operation</div>;
 
   return (
-    <div className="min-h-screen bg-[#050505] text-emerald-500 font-mono p-3 md:p-8 selection:bg-emerald-500 selection:text-black">
-      <div className="max-w-3xl mx-auto border border-emerald-900/40 rounded-xl p-4 md:p-8 bg-emerald-950/5 relative overflow-hidden backdrop-blur-sm">
-        
-        <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-10 bg-[length:100%_2px,3px_100%]" />
+    <div className="min-h-screen bg-[#050505] text-emerald-500 font-mono p-2 md:p-8 flex flex-col items-center selection:bg-emerald-500 selection:text-black">
+      
+      {/* HUD HEADER */}
+      <div className="w-full max-w-3xl flex justify-between items-center mb-4 px-2">
+        <div className="flex flex-col">
+          <span className="text-[10px] text-emerald-800 font-black tracking-widest uppercase">Rank: {profile?.rank || "RECRUIT"}</span>
+          <div className="flex items-center gap-2">
+            <motion.span 
+              key={(profile?.xp || 0) + sessionXP}
+              initial={{ opacity: 0.5, y: -5 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="text-2xl font-black text-white tracking-tighter"
+            >
+              {(profile?.xp || 0) + sessionXP}
+            </motion.span>
+            <span className="text-[10px] text-emerald-500 font-bold italic underline decoration-emerald-800">TOTAL_POINTS</span>
+          </div>
+        </div>
+        <div className="text-right flex flex-col items-end">
+          <button 
+            onClick={handleHardReset}
+            className="text-[9px] text-red-900 border border-red-900/30 px-2 py-0.5 rounded hover:bg-red-500 hover:text-white transition-all mb-2"
+          >
+            TERMINATE MISSION
+          </button>
+          <div>
+            <span className="text-[10px] text-emerald-800 font-black tracking-widest uppercase">Multiplier</span>
+            <div className="text-xl font-black text-emerald-400">x{(1 + patience/100).toFixed(1)}</div>
+          </div>
+        </div>
+      </div>
 
-        {/* HEADER */}
-        <div className="flex justify-between items-center mb-6 relative z-20">
-          <div className="flex-1">
-            <h1 className="text-[10px] tracking-[0.3em] text-emerald-800 uppercase font-bold">Shadow Protocol v1.3</h1>
-            <h2 className="text-xl md:text-3xl font-black italic tracking-tighter text-white uppercase truncate">
+      <motion.div 
+        animate={shake ? { x: [-10, 10, -10, 10, 0] } : {}}
+        className="w-full max-w-3xl border border-emerald-900/40 rounded-2xl p-4 md:p-8 bg-emerald-950/5 relative overflow-hidden backdrop-blur-md shadow-2xl"
+      >
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-emerald-900/20">
+          <motion.div 
+            className="h-full bg-emerald-500 shadow-[0_0_15px_#10b981]"
+            initial={{ width: 0 }}
+            animate={{ width: `${((currentStep) / mission.objectives.length) * 100}%` }}
+          />
+        </div>
+
+        {/* MISSION TITLE */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 mt-2 relative z-20">
+          <div>
+            <span className="text-[8px] px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/30 text-emerald-500 font-bold rounded mb-1 inline-block uppercase tracking-widest">
+              B1 Level Operation
+            </span>
+            <h2 className="text-xl md:text-3xl font-black text-white uppercase tracking-tighter leading-none">
               {mission.title}
             </h2>
           </div>
-          <div className="text-right ml-4">
-            <span className="block text-[8px] text-emerald-800 tracking-widest">MULT</span>
-            <span className="text-lg md:text-2xl font-black text-emerald-400">x{(1 + patience/100).toFixed(1)}</span>
+          
+          <div className="flex flex-col justify-center">
+            <div className="flex justify-between items-end text-[9px] mb-1 uppercase tracking-widest font-black">
+              <span className="text-emerald-800">Cognitive Stability</span>
+              <span className={patience < 30 ? "text-red-500 animate-pulse" : "text-emerald-500"}>{patience}%</span>
+            </div>
+            <div className="h-1.5 w-full bg-black rounded-full border border-emerald-900/30 overflow-hidden">
+              <motion.div 
+                className={`h-full ${patience < 30 ? 'bg-red-600 shadow-[0_0_10px_red]' : 'bg-emerald-500'}`}
+                animate={{ width: `${patience}%` }}
+              />
+            </div>
           </div>
         </div>
 
-        {/* STRESS METER */}
-        <div className="mb-6 relative z-20">
-          <div className="flex justify-between text-[10px] mb-1.5 uppercase tracking-widest font-bold">
-            <span className="opacity-60">Patience Level</span>
-            <span className={patience < 30 ? "text-red-500 animate-pulse" : ""}>{patience}%</span>
+        {/* CONTEXT & OBJECTIVE */}
+        <div className="space-y-4 mb-6">
+          <div className="bg-emerald-500/5 border-l-2 border-emerald-500/50 p-3 rounded-r-lg text-xs md:text-sm text-emerald-50/80 leading-relaxed italic relative group">
+            <button 
+              onClick={() => speakTransmission(mission.context)}
+              className="absolute top-2 right-2 p-1 text-[8px] border border-emerald-500/50 rounded hover:bg-emerald-500 hover:text-black transition-all"
+            >
+              PLAY LOG
+            </button>
+            {mission.context}
           </div>
-          <div className="h-1.5 w-full bg-emerald-950 rounded-full overflow-hidden border border-emerald-900/30">
-            <motion.div 
-              className={`h-full shadow-[0_0_15px] ${patience < 30 ? 'bg-red-600 shadow-red-600' : 'bg-emerald-500 shadow-emerald-500'}`}
-              animate={{ width: `${patience}%` }}
-              transition={{ duration: 0.5 }}
-            />
-          </div>
-        </div>
 
-        {/* MISSION LOG */}
-        <div className="bg-emerald-950/30 border-l-2 border-emerald-500/50 p-3 md:p-4 rounded-r mb-6 text-xs md:text-sm text-emerald-100/80 leading-relaxed italic">
-          <span className="text-emerald-500 not-italic font-bold mr-2 text-[10px]">MISSION_LOG:</span>
-          {mission.context}
-        </div>
-
-        {/* OBJECTIVE BOX */}
-        <div className="mb-6 bg-black/40 p-4 rounded-lg border border-emerald-900/20">
-          <div className="flex items-center gap-2 mb-2">
-            <span className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-[10px] text-emerald-500 font-black uppercase tracking-tighter">Required Input</span>
+          <div className="p-4 bg-black/40 rounded-xl border border-emerald-900/30 text-center">
+            <span className="text-[8px] text-emerald-700 uppercase font-black block mb-1">Decrypted Objective</span>
+            <p className="text-lg md:text-2xl text-white font-bold tracking-tight italic">
+              "{objective?.label}"
+            </p>
           </div>
-          <p className="text-lg md:text-xl text-white font-bold leading-tight">
-            {objective?.label}
-          </p>
         </div>
 
         {/* INPUT AREA */}
-        <div className="relative group z-20 mb-4">
+        <div className="relative z-20 mb-6">
           <textarea
             ref={textareaRef}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            className="w-full bg-transparent border-b-2 border-emerald-900/50 focus:border-emerald-400 transition-all text-xl md:text-2xl py-3 outline-none resize-none placeholder:text-emerald-900/50 min-h-[60px]"
-            placeholder="TYPE TRANSMISSION..."
-            rows="1"
+            onKeyDown={(e) => e.key === 'Enter' && (e.preventDefault(), handleVerify())}
+            className={`w-full bg-black/60 border-2 rounded-xl p-4 md:p-6 transition-all text-xl md:text-3xl outline-none resize-none placeholder:text-emerald-900/20 min-h-[100px] text-center font-bold ${feedback.status === 'error' ? 'border-red-500' : 'border-emerald-900/50 focus:border-emerald-400'}`}
+            placeholder="TYPE IN POLISH..."
           />
 
-          {/* POLISH KEYBOARD BAR */}
-          <div className="flex flex-wrap gap-1.5 mt-4 py-3 border-t border-emerald-900/20">
+          <div className="flex overflow-x-auto gap-1.5 mt-4 pb-2 no-scrollbar md:grid md:grid-cols-9">
             {['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'].map(char => (
               <button
                 key={char}
                 onClick={() => injectChar(char)}
-                className="flex-1 min-w-[35px] h-10 flex items-center justify-center bg-emerald-900/20 rounded border border-emerald-800/40 text-sm hover:bg-emerald-500 hover:text-black transition-all font-bold active:scale-90"
+                className="flex-shrink-0 w-12 h-12 md:w-auto flex items-center justify-center bg-emerald-950/40 rounded-lg border border-emerald-900/50 text-xl hover:bg-emerald-500 hover:text-black transition-all font-bold active:scale-90"
               >
                 {char}
               </button>
             ))}
           </div>
           
-          <AnimatePresence>
+          <AnimatePresence mode="wait">
             {feedback.message && (
               <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0 }}
-                className={`mt-4 text-[10px] md:text-xs font-black p-3 rounded border flex items-center gap-3 uppercase ${
+                className={`mt-4 p-3 rounded-lg border-2 text-center font-black uppercase text-[10px] md:text-xs tracking-[0.2em] ${
                   feedback.status === 'success' || feedback.status === 'complete' 
-                  ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' 
-                  : 'bg-red-500/10 border-red-500 text-red-500'
+                  ? 'bg-emerald-500 text-black border-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.3)]' 
+                  : 'bg-red-950/90 border-red-500 text-red-500'
                 }`}
               >
-                <div className={`h-2 w-2 rounded-full ${feedback.status === 'success' ? 'bg-emerald-500' : 'bg-red-500'}`} />
                 {feedback.message}
-              </motion.div>
-            )}
-
-            {showHint && (
-              <motion.div 
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4 p-4 bg-blue-500/10 border border-blue-500/40 rounded overflow-hidden"
-              >
-                <div className="flex justify-between items-start mb-2">
-                    <span className="font-black text-[9px] uppercase text-blue-400 tracking-widest">Decrypted Intel</span>
-                    <button 
-                        onClick={() => speakTransmission(objective?.correct)}
-                        className={`flex items-center gap-2 text-[10px] font-bold px-2 py-1 rounded border transition-all ${isSpeaking ? 'bg-blue-500 text-black border-blue-500 animate-pulse' : 'border-blue-500/50 text-blue-400 hover:bg-blue-500/20'}`}
-                    >
-                        {isSpeaking ? "SYNCING..." : "PLAY AUDIO SYNC"}
-                    </button>
-                </div>
-                <p className="text-blue-200 text-xs italic leading-relaxed">
-                    {objective?.hint}
-                </p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* PRIMARY ACTIONS */}
-        <div className="mt-8 flex flex-col md:flex-row gap-3 relative z-20">
+        {/* MISSION LOG TERMINAL */}
+        {missionLog.length > 0 && (
+          <div className="mb-6 p-4 bg-black/80 border border-emerald-900/40 rounded-xl max-h-40 overflow-y-auto no-scrollbar">
+            <span className="text-[8px] font-black text-emerald-800 uppercase block mb-2 tracking-widest">Operation History Log</span>
+            <div className="space-y-1">
+              {missionLog.map((log, i) => (
+                <div key={i} className="flex justify-between items-center text-[10px] border-b border-emerald-900/10 py-1">
+                  <span className="text-emerald-500/60 font-bold">{log.label}</span>
+                  <span className="text-white font-black">{log.correct}</span>
+                  <span className="text-emerald-400 font-bold">+{log.xp} XP</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* ACTIONS */}
+        <div className="flex flex-col md:flex-row gap-3 relative z-20">
           <button 
             onClick={handleVerify}
-            className="flex-[2] bg-emerald-500 text-black font-black py-4 uppercase tracking-[0.1em] text-sm hover:bg-white transition-all active:scale-[0.98] shadow-[0_0_20px_rgba(16,185,129,0.2)]"
+            className="flex-[2] bg-emerald-500 text-black font-black py-4 rounded-xl uppercase tracking-widest text-sm hover:brightness-110 active:scale-95 transition-all shadow-xl shadow-emerald-500/10"
           >
             Execute Protocol
           </button>
           <button 
             onClick={() => setShowHint(!showHint)}
-            className={`flex-1 px-4 py-4 border transition-all uppercase text-[10px] font-black ${
-              showHint ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'border-emerald-900 text-emerald-900 hover:text-emerald-400'
+            className={`flex-1 py-4 rounded-xl border-2 transition-all uppercase text-[10px] font-black ${
+              showHint ? 'bg-blue-600 text-white border-blue-400 shadow-lg' : 'border-emerald-900 text-emerald-800 hover:text-emerald-400'
             }`}
           >
-            {showHint ? "Close Intel" : "Request Intel"}
+            {showHint ? "Hide Intel" : "Request Intel"}
           </button>
         </div>
 
-        {/* MISSION STATS FOOTER */}
-        <div className="mt-8 pt-6 border-t border-emerald-900/30 grid grid-cols-2 md:grid-cols-4 gap-4 relative z-20 opacity-60">
-            <div className="text-left md:text-center">
-                <span className="block text-[7px] text-emerald-800 uppercase font-bold">Focus</span>
-                <span className="text-[10px] font-black text-white">{objective?.caseFocus}</span>
+        {/* HINT AREA */}
+        <AnimatePresence>
+            {showHint && (
+              <motion.div 
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: 'auto', opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                className="mt-4 p-4 bg-blue-950/20 border border-blue-500/30 rounded-xl overflow-hidden"
+              >
+                <div className="flex justify-between items-center mb-2">
+                    <span className="text-[8px] font-black uppercase text-blue-400 tracking-tighter decoration-dotted underline">Encrypted Intel</span>
+                    <button 
+                      onClick={() => speakTransmission(objective?.correct)} 
+                      className={`text-[8px] font-black px-2 py-1 rounded border border-blue-500/50 transition-all ${isSpeaking ? 'bg-blue-500 text-black' : 'text-blue-400 hover:bg-blue-500/20'}`}
+                    >
+                      {isSpeaking ? "TRANSMITTING..." : "VOICE SYNC"}
+                    </button>
+                </div>
+                <p className="text-blue-100 text-xs italic leading-relaxed">{objective?.hint}</p>
+              </motion.div>
+            )}
+        </AnimatePresence>
+
+        {/* FOOTER STATS */}
+        <div className="mt-8 pt-6 border-t border-emerald-900/20 grid grid-cols-2 md:grid-cols-4 gap-4 opacity-40 hover:opacity-100 transition-opacity">
+            <div>
+                <span className="block text-[8px] uppercase font-black text-emerald-800 tracking-widest">Target Case</span>
+                <span className="text-[10px] font-bold text-white">{objective?.caseFocus}</span>
             </div>
-            <div className="text-right md:text-center">
-                <span className="block text-[7px] text-emerald-800 uppercase font-bold">Difficulty</span>
-                <span className="text-[10px] font-black text-white">{mission.difficulty}</span>
+            <div>
+                <span className="block text-[8px] uppercase font-black text-emerald-800 tracking-widest">Difficulty</span>
+                <span className="text-[10px] font-bold text-white">{mission.difficulty}</span>
             </div>
-            <div className="text-left md:text-center">
-                <span className="block text-[7px] text-emerald-800 uppercase font-bold">Rank</span>
-                <span className="text-[10px] font-black text-white truncate">{profile?.rank || "NOVICE"}</span>
+            <div>
+                <span className="block text-[8px] uppercase font-black text-emerald-800 tracking-widest">Mission Status</span>
+                <span className="text-[10px] font-bold text-white">STEP {currentStep + 1} / {mission.objectives.length}</span>
             </div>
-            <div className="text-right md:text-center">
-                <span className="block text-[7px] text-emerald-800 uppercase font-bold">XP Pool</span>
-                <span className="text-[10px] font-black text-emerald-400">+{50 + Math.floor(patience / 2)}</span>
+            <div className="text-right">
+                <span className="block text-[8px] uppercase font-black text-emerald-800 tracking-widest">Est. Reward</span>
+                <span className="text-[10px] font-black text-emerald-400">+{calculateXP()} XP</span>
             </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
