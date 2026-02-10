@@ -13,17 +13,33 @@ export default function ScenarioEngine() {
   const [feedback, setFeedback] = useState({ status: "idle", message: "" });
   const [patience, setPatience] = useState(100);
   const [showHint, setShowHint] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const textareaRef = useRef(null);
 
   const mission = missions[currentMissionIndex];
   const objective = mission?.objectives[currentStep];
 
-  // Reset hint when objective changes
+  // Voice Synthesis Logic
+  const speakTransmission = (text) => {
+    if (!window.speechSynthesis) return;
+    
+    // Cancel any ongoing speech
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = "pl-PL"; // Force Polish accent
+    utterance.rate = 0.85;    // Slightly slower for learning clarity
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    
+    window.speechSynthesis.speak(utterance);
+  };
+
   useEffect(() => {
     setShowHint(false);
   }, [currentStep, currentMissionIndex]);
 
-  // Stress Meter Logic
   useEffect(() => {
     const timer = setInterval(() => {
       setPatience((prev) => (prev > 0 ? prev - 1 : 0));
@@ -55,6 +71,7 @@ export default function ScenarioEngine() {
     
     if (normalize(userInput) === normalize(objective.correct)) {
       setFeedback({ status: "success", message: "OBJECTIVE SECURED" });
+      speakTransmission(objective.correct); // Audio reinforcement on success
       
       try {
         const userRef = doc(db, "pending_users", user.uid);
@@ -88,25 +105,24 @@ export default function ScenarioEngine() {
     }
   };
 
-  if (!mission) return <div className="text-emerald-500 p-20 font-mono text-center">ALL MISSIONS CLEARED.</div>;
+  if (!mission) return <div className="text-emerald-500 p-20 font-mono text-center uppercase tracking-widest">End of Operation</div>;
 
   return (
     <div className="min-h-screen bg-[#050505] text-emerald-500 font-mono p-3 md:p-8 selection:bg-emerald-500 selection:text-black">
       <div className="max-w-3xl mx-auto border border-emerald-900/40 rounded-xl p-4 md:p-8 bg-emerald-950/5 relative overflow-hidden backdrop-blur-sm">
         
-        {/* CRT SCANLINE EFFECT */}
         <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.1)_50%),linear-gradient(90deg,rgba(255,0,0,0.03),rgba(0,255,0,0.01),rgba(0,0,255,0.03))] z-10 bg-[length:100%_2px,3px_100%]" />
 
         {/* HEADER */}
         <div className="flex justify-between items-center mb-6 relative z-20">
           <div className="flex-1">
-            <h1 className="text-[10px] tracking-[0.3em] text-emerald-800 uppercase font-bold">Shadow Protocol v1.2</h1>
+            <h1 className="text-[10px] tracking-[0.3em] text-emerald-800 uppercase font-bold">Shadow Protocol v1.3</h1>
             <h2 className="text-xl md:text-3xl font-black italic tracking-tighter text-white uppercase truncate">
               {mission.title}
             </h2>
           </div>
           <div className="text-right ml-4">
-            <span className="block text-[8px] text-emerald-800">MULT</span>
+            <span className="block text-[8px] text-emerald-800 tracking-widest">MULT</span>
             <span className="text-lg md:text-2xl font-black text-emerald-400">x{(1 + patience/100).toFixed(1)}</span>
           </div>
         </div>
@@ -126,13 +142,13 @@ export default function ScenarioEngine() {
           </div>
         </div>
 
-        {/* LOG/CONTEXT */}
+        {/* MISSION LOG */}
         <div className="bg-emerald-950/30 border-l-2 border-emerald-500/50 p-3 md:p-4 rounded-r mb-6 text-xs md:text-sm text-emerald-100/80 leading-relaxed italic">
           <span className="text-emerald-500 not-italic font-bold mr-2 text-[10px]">MISSION_LOG:</span>
           {mission.context}
         </div>
 
-        {/* OBJECTIVE */}
+        {/* OBJECTIVE BOX */}
         <div className="mb-6 bg-black/40 p-4 rounded-lg border border-emerald-900/20">
           <div className="flex items-center gap-2 mb-2">
             <span className="h-2 w-2 bg-emerald-500 rounded-full animate-pulse" />
@@ -154,8 +170,8 @@ export default function ScenarioEngine() {
             rows="1"
           />
 
-          {/* CHARACTER BAR - Mobile Responsive */}
-          <div className="flex flex-wrap gap-1.5 mt-4 py-3 border-t border-emerald-900/20 overflow-x-auto no-scrollbar">
+          {/* POLISH KEYBOARD BAR */}
+          <div className="flex flex-wrap gap-1.5 mt-4 py-3 border-t border-emerald-900/20">
             {['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'].map(char => (
               <button
                 key={char}
@@ -188,16 +204,26 @@ export default function ScenarioEngine() {
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: 'auto' }}
-                className="mt-4 p-3 bg-blue-500/10 border border-blue-500/50 rounded text-blue-400 text-xs italic"
+                className="mt-4 p-4 bg-blue-500/10 border border-blue-500/40 rounded overflow-hidden"
               >
-                <span className="font-black block text-[9px] mb-1 uppercase not-italic">Decrypted Intel:</span>
-                {objective?.hint}
+                <div className="flex justify-between items-start mb-2">
+                    <span className="font-black text-[9px] uppercase text-blue-400 tracking-widest">Decrypted Intel</span>
+                    <button 
+                        onClick={() => speakTransmission(objective?.correct)}
+                        className={`flex items-center gap-2 text-[10px] font-bold px-2 py-1 rounded border transition-all ${isSpeaking ? 'bg-blue-500 text-black border-blue-500 animate-pulse' : 'border-blue-500/50 text-blue-400 hover:bg-blue-500/20'}`}
+                    >
+                        {isSpeaking ? "SYNCING..." : "PLAY AUDIO SYNC"}
+                    </button>
+                </div>
+                <p className="text-blue-200 text-xs italic leading-relaxed">
+                    {objective?.hint}
+                </p>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* ACTIONS */}
+        {/* PRIMARY ACTIONS */}
         <div className="mt-8 flex flex-col md:flex-row gap-3 relative z-20">
           <button 
             onClick={handleVerify}
@@ -211,27 +237,27 @@ export default function ScenarioEngine() {
               showHint ? 'bg-blue-500/20 border-blue-500 text-blue-400' : 'border-emerald-900 text-emerald-900 hover:text-emerald-400'
             }`}
           >
-            {showHint ? "Hide Intel" : "Request Intel"}
+            {showHint ? "Close Intel" : "Request Intel"}
           </button>
         </div>
 
-        {/* STATS FOOTER */}
-        <div className="mt-8 pt-6 border-t border-emerald-900/30 grid grid-cols-2 md:grid-cols-4 gap-4 relative z-20 opacity-60 hover:opacity-100 transition-opacity">
-            <div className="text-left md:text-center border-r border-emerald-900/20 md:border-r-0">
+        {/* MISSION STATS FOOTER */}
+        <div className="mt-8 pt-6 border-t border-emerald-900/30 grid grid-cols-2 md:grid-cols-4 gap-4 relative z-20 opacity-60">
+            <div className="text-left md:text-center">
                 <span className="block text-[7px] text-emerald-800 uppercase font-bold">Focus</span>
                 <span className="text-[10px] font-black text-white">{objective?.caseFocus}</span>
             </div>
-            <div className="text-right md:text-center border-emerald-900/20 md:border-r">
+            <div className="text-right md:text-center">
                 <span className="block text-[7px] text-emerald-800 uppercase font-bold">Difficulty</span>
                 <span className="text-[10px] font-black text-white">{mission.difficulty}</span>
             </div>
-            <div className="text-left md:text-center border-r border-emerald-900/20">
+            <div className="text-left md:text-center">
                 <span className="block text-[7px] text-emerald-800 uppercase font-bold">Rank</span>
-                <span className="text-[10px] font-black text-white truncate">{profile?.rank || "RECRUIT"}</span>
+                <span className="text-[10px] font-black text-white truncate">{profile?.rank || "NOVICE"}</span>
             </div>
             <div className="text-right md:text-center">
-                <span className="block text-[7px] text-emerald-800 uppercase font-bold">Reward</span>
-                <span className="text-[10px] font-black text-emerald-400">+{50 + Math.floor(patience / 2)} XP</span>
+                <span className="block text-[7px] text-emerald-800 uppercase font-bold">XP Pool</span>
+                <span className="text-[10px] font-black text-emerald-400">+{50 + Math.floor(patience / 2)}</span>
             </div>
         </div>
       </div>
