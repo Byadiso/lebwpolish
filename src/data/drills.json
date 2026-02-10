@@ -1,0 +1,16 @@
+[
+  {
+    "id": "drill_001",
+    "polish": "Dzień dobry, jak się masz?",
+    "english": "Good morning, how are you?",
+    "level": "A1",
+    "category": "Greetings"
+  },
+  {
+    "id": "drill_002",
+    "polish": "Lubię uczyć się języka polskiego.",
+    "english": "I like learning the Polish language.",
+    "level": "A2",
+    "category": "Hobbies"
+  }
+]
