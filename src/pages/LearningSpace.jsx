@@ -55,24 +55,20 @@ export default function LearningSpace() {
     return onSnapshot(q, (snap) => setPosts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
   }, []);
 
-useEffect(() => {
-  const q = query(collection(db, "resources"), limit(50));
-
-  return onSnapshot(q, (snap) => {
-    const data = snap.docs
-      .map(d => ({ id: d.id, ...d.data() }))
-      .sort((a, b) => {
-        if (!a.timestamp && !b.timestamp) return 0;
-        if (!a.timestamp) return 1;
-        if (!b.timestamp) return -1;
-        return b.timestamp.seconds - a.timestamp.seconds;
-      });
-
-    setResources(data);
-  });
-}, []);
-
-
+  useEffect(() => {
+    const q = query(collection(db, "resources"), limit(50));
+    return onSnapshot(q, (snap) => {
+      const data = snap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => {
+          if (!a.timestamp && !b.timestamp) return 0;
+          if (!a.timestamp) return 1;
+          if (!b.timestamp) return -1;
+          return b.timestamp.seconds - a.timestamp.seconds;
+        });
+      setResources(data);
+    });
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -141,7 +137,7 @@ useEffect(() => {
   return (
     <div className="min-h-screen bg-[#FDFDFD] text-slate-900 pb-20">
       
-      {/* VOCABULARY VAULT OVERLAY - Fully Responsive */}
+      {/* VOCABULARY VAULT OVERLAY */}
       {showVault && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setShowVault(false)} />
@@ -347,10 +343,50 @@ useEffect(() => {
           </div>
         </div>
 
-        {/* SIDEBAR: Resources and Stats */}
+        {/* SIDEBAR */}
         <aside className="lg:col-span-4 space-y-8">
           <div className="lg:sticky lg:top-24 space-y-8">
             
+            {/* SHADOW PROTOCOL TACTICAL ENTRY */}
+            <Link to="/shadow-protocol" className="block group">
+              <div className="relative overflow-hidden bg-slate-950 rounded-[2rem] md:rounded-[2.5rem] p-1 shadow-[0_20px_50px_rgba(16,185,129,0.1)] transition-all hover:scale-[1.02] active:scale-95 border border-emerald-500/20">
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent)] group-hover:opacity-100 opacity-50 transition-opacity" />
+                <div className="relative bg-slate-900 rounded-[1.8rem] p-6 md:p-8 overflow-hidden">
+                  <div className="flex justify-between items-center mb-6">
+                    <div className="flex items-center gap-2">
+                      <span className="relative flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                      </span>
+                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">System: Active</span>
+                    </div>
+                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest border border-slate-800 px-2 py-1 rounded">B1 Protocol</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h3 className="text-xl md:text-2xl font-black text-white italic tracking-tighter uppercase mb-1">
+                        Shadow<span className="text-emerald-500">Protocol</span>
+                      </h3>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-relaxed">
+                        Inicjuj symulację wysokiego napięcia. <br/>
+                        <span className="text-emerald-900 group-hover:text-emerald-500 transition-colors"> ... Autoryzacja wymagana</span>
+                      </p>
+                    </div>
+                    <div className="w-12 h-12 md:w-14 md:h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/30 group-hover:bg-emerald-500 group-hover:text-black transition-all duration-500">
+                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
+                       </svg>
+                    </div>
+                  </div>
+                  <div className="mt-6 flex gap-1">
+                    {[1, 2, 3, 4, 5, 6].map((i) => (
+                      <div key={i} className={`h-1 flex-1 rounded-full ${i < 4 ? 'bg-emerald-500' : 'bg-slate-800'}`} />
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </Link>
+
             {/* CLICKABLE VOCABULARY CARD */}
             <button 
               onClick={() => setShowVault(true)}
@@ -400,7 +436,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* War section  LINK CARD */}
+            {/* Polish Simplified LINK CARD */}
             <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
               <div className="relative z-10">
                 <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Play and learn Polish</p>
@@ -410,7 +446,7 @@ useEffect(() => {
               </div>
             </div>
 
-            {/* Listen to music section  LINK CARD */}
+            {/* Polish Music LINK CARD */}
             <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
               <div className="relative z-10">
                 <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2">Music and learning Polish</p>
