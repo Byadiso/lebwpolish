@@ -19,6 +19,7 @@ import VocabularyVault from './pages/VocabularyVault';
 import PolishWarForge from './pages/PolishWarForge';
 import LirycznaSymfonia from './pages/LirycznaSymfonia';
 import ScenarioEngine from './pages/ScenarioEngine';
+import PolishReadingEngine from './pages/PolishReadingEngine';
 
 // Secure Gatekeeper Helper
 const ProtectedRoute = ({ children }) => {
@@ -46,6 +47,7 @@ function App() {
             <Route path="/shadow-protocol" element={<ScenarioEngine />} />
             <Route path="/vocabularyvault" element={<VocabularyVault />} />
             <Route path="/polish-simplified" element={<PolishWarForge />} />
+            <Route path="/reading-practice" element={<PolishReadingEngine />} />
 
             {/* --- PROTECTED STUDENT ROUTES: PERSONAL PROGRESS --- */}
             {/* These routes require an active Fluency Profile (Login) */}
