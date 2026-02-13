@@ -3,10 +3,12 @@ import { useAuth } from "../context/AuthContext";
 import { db } from "../firebase";
 import { query, collection, where, getDocs, updateDoc, arrayUnion, increment } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
+import { useNavigate } from "react-router-dom"; // Added for routing
 import { GRAMMAR_VAULT } from "../data/grammarVault";
 
-export default function GrammarGauntlet() {
+export default function GrammarGauntlet({ onNavigateToCases }) {
   const { user, profile } = useAuth();
+  const navigate = useNavigate(); // Initialize navigation
   const [selectedNode, setSelectedNode] = useState(null);
   const [loading, setLoading] = useState(false);
   const [userAnswer, setUserAnswer] = useState(null);
@@ -21,7 +23,7 @@ export default function GrammarGauntlet() {
     setUserAnswer(null);
     setError(false);
     setIsCorrect(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Reset scroll on lesson change
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedNode]);
 
   const handleMastery = async (nodeId) => {
@@ -69,7 +71,31 @@ export default function GrammarGauntlet() {
           </motion.div>
         </header>
 
-        {/* Responsive Grid: 1 col on mobile, 2 col on large tablets/desktop */}
+        {/* CLICKABLE PREMIUM BLOCK: DIRECTS TO /PRACTICE */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="max-w-4xl mx-auto mb-8"
+        >
+          <button 
+            type="button"
+            onClick={() => navigate("/practice-polish-case")} // Updated to navigate to /practice
+            className="w-full relative overflow-hidden group p-6 rounded-3xl bg-gradient-to-r from-indigo-600 to-violet-700 border border-white/20 shadow-2xl flex items-center justify-between cursor-pointer active:scale-[0.98] transition-all"
+          >
+            <div className="relative z-10 text-left pointer-events-none">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Specialized Mastery</span>
+              <h2 className="text-xl md:text-2xl font-black italic uppercase text-white">The 7 Polish Cases</h2>
+              <p className="text-xs text-indigo-100 mt-1 font-medium">Master declension: Nominative to Vocative</p>
+            </div>
+            
+            <div className="relative z-10 bg-white/20 p-3 rounded-2xl backdrop-blur-md group-hover:scale-110 transition-transform pointer-events-none">
+              <span className="text-2xl">🇵🇱</span>
+            </div>
+
+            <div className="absolute top-0 -inset-full h-full w-1/2 z-0 block transform -skew-x-12 bg-gradient-to-r from-transparent to-white/10 opacity-40 group-hover:animate-shine pointer-events-none" />
+          </button>
+        </motion.div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 max-w-4xl mx-auto">
           {GRAMMAR_VAULT.map((node, i) => {
             const isDone = completed.includes(node.id);
@@ -114,7 +140,6 @@ export default function GrammarGauntlet() {
           </button>
 
           <div className="bg-slate-900/90 rounded-[2rem] md:rounded-[3rem] border border-white/5 shadow-2xl overflow-hidden">
-            {/* Header Section */}
             <div className="bg-gradient-to-br from-indigo-600 to-indigo-800 p-8 md:p-10 relative">
               <div className="relative z-10">
                 <span className="text-white/60 text-[9px] font-black uppercase tracking-[0.3em]">Mastery Module</span>
@@ -128,7 +153,6 @@ export default function GrammarGauntlet() {
             </div>
 
             <div className="p-6 md:p-12 space-y-8 md:space-y-10">
-              {/* The Logic */}
               <section>
                 <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4">The Logic</h5>
                 <p className="text-lg md:text-xl text-slate-200 font-medium leading-relaxed italic border-l-4 border-indigo-500 pl-4 md:pl-6">
@@ -136,7 +160,6 @@ export default function GrammarGauntlet() {
                 </p>
               </section>
 
-              {/* Technical Breakdown */}
               <section className="grid gap-4 md:gap-6">
                 {activeLesson.sections.map((sec, idx) => (
                   <div key={idx} className="bg-[#020617] p-5 md:p-6 rounded-2xl border border-white/5">
@@ -149,7 +172,6 @@ export default function GrammarGauntlet() {
                 ))}
               </section>
 
-              {/* CHALLENGE ZONE */}
               <section className={`transition-all duration-500 border-2 rounded-[1.5rem] md:rounded-[2.5rem] p-6 md:p-8 ${
                 isCorrect || alreadyCompleted ? 'bg-emerald-500/5 border-emerald-500/30' : 'bg-indigo-500/5 border-dashed border-indigo-500/20'
               }`}>
@@ -187,7 +209,6 @@ export default function GrammarGauntlet() {
                 )}
               </section>
 
-              {/* ACTION FOOTER */}
               <div className="pt-4 flex flex-col gap-4">
                 <button
                   disabled={loading || alreadyCompleted || !userAnswer || isCorrect}
