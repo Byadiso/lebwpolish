@@ -3,163 +3,175 @@ export const CASES_VAULT = [
     id: "mianownik",
     icon: "👤",
     label: "Case 1",
-    concept: "Mianownik",
-    lesson: "The Nominative case is the subject of your sentence. It answers 'Kto? Co?' (Who? What?). This is the default dictionary form.",
+    concept: "Mianownik (The 'Who is it?' Case)",
+    lesson: "The default form. No changes! Use it for the subject of the sentence.",
     sections: [
       {
-        title: "Primary Use",
-        content: "Used for the person or thing performing the action.",
-        ex: "Student (kto?) czyta książkę."
+        title: "Think of it like...",
+        content: "The name tag on a person. It just tells you who they are.",
+        ex: "To jest mój brat. Ta pizza jest duża."
+      },
+      {
+        title: "Plural Forms (More than one)",
+        content: "👦 Boys & 👧 Girls usually end in -e, -y, or -i. 📦 Neuter (Nijaki) ends in -a.",
+        ex: "Dwa domy, Trzy kobiety, Cztery okna."
       }
     ],
     challenge: {
-      q: "Identify the subject form: '______ (kobieta) pracuje.'",
-      options: ["Kobietę", "Kobieta", "Kobiety", "Kobiecie"],
-      correct: "Kobieta"
+      q: "Identify the plural subject: 'Moje ______ (okno) są otwarte.'",
+      options: ["oknie", "okna", "oknu", "oknem"],
+      correct: "okna",
+      hint: "For Neuter (Nijaki) nouns like 'okno', the plural ending is always -a."
     }
   },
   {
     id: "dopełniacz",
     icon: "🚫",
     label: "Case 2",
-    concept: "Dopełniacz",
-    lesson: "The Genitive is the 'B1 Priority'. Use it after 'NIE' (negation), for possession, or after quantities.",
+    concept: "Dopełniacz (The 'Empty' Case)",
+    lesson: "Use this whenever you say 'NIE' (No), talk about possession, or quantities.",
     sections: [
       {
-        title: "The Negation Rule",
-        content: "If you negate a verb that takes the Accusative, it switches to Genitive.",
-        ex: "Mam czas -> Nie mam czasu."
+        title: "How to swap letters",
+        content: "👦 Boy adjectives get -ego. 👧 Girl adjectives get -ej. 👧 Girl nouns: -a turns into -y/-i.",
+        ex: "Nie mam zimnej wody. Szukam mojego brata."
       },
       {
-        title: "Feminine Change",
-        content: "Ending -a changes to -y or -i.",
-        ex: "Nie ma kawy (kawa)."
+        title: "Plural Forms",
+        content: "📦 Adjectives: -ych / -ich. 👦 Boys: often -ów. 👧 Girls/Neuter: usually the ending is removed.",
+        ex: "Nie mam nowych butów. Dużo kobiet."
       }
     ],
     challenge: {
-      q: "Negate this: 'Nie mam ______ (pieniądze/pieniądz).'",
-      options: ["pieniądz", "pieniądza", "pieniądzem", "pieniądzu"],
-      correct: "pieniądza"
+      q: "Negate the plural: 'Nie mam ______ (nowe) samochodów.'",
+      options: ["nowe", "nowych", "nowym", "nowymi"],
+      correct: "nowych",
+      hint: "In Genitive Plural, adjectives for all genders end in -ych or -ich."
     }
   },
   {
     id: "celownik",
     icon: "🎁",
     label: "Case 3",
-    concept: "Celownik",
-    lesson: "The Dative case means 'to someone'. Used with verbs like 'dać' (give), 'pomagać' (help), or 'dziękować' (thank).",
+    concept: "Celownik (The 'Gift' Case)",
+    lesson: "The 'To/For' case. Use it when you give, help, or say thanks to someone.",
     sections: [
       {
-        title: "Masculine Ending",
-        content: "Usually ends in -owi.",
-        ex: "Daję prezent bratu (brat)."
+        title: "How to swap letters",
+        content: "👦 Boys: add -owi. 👧 Girls: -a becomes -e. 📦 Adjectives: add -emu.",
+        ex: "Daję to bratu. Pomagam koleżance."
       },
       {
-        title: "Feminine Ending",
-        content: "Usually ends in -e (softening the consonant).",
-        ex: "Pomagam mamie (mama)."
+        title: "Plural Forms",
+        content: "📦 Adjectives: -ym / -im. 👥 Nouns: ALWAYS end in -om regardless of gender.",
+        ex: "Dziękuję dobrym ludziom."
       }
     ],
     challenge: {
-      q: "Help someone: 'Pomagam ______ (student).'",
-      options: ["studenta", "studentem", "studentowi", "studencie"],
-      correct: "studentowi"
+      q: "Give to a group: 'Daję prezenty ______ (dzieci).'",
+      options: ["dzieci", "dzieciach", "dzieciom", "dziećmi"],
+      correct: "dzieciom",
+      hint: "The 'Gift' case for plural nouns ALWAYS ends in -om, no matter the gender!"
     }
   },
   {
     id: "biernik",
     icon: "🎯",
     label: "Case 4",
-    concept: "Biernik",
-    lesson: "The Accusative case is the direct object. Remember the Masculine rule: Animate (living) gets -a, Inanimate (objects) stays the same.",
+    concept: "Biernik (The 'Action' Case)",
+    lesson: "Use this for the target of your action (Buying, seeing, eating).",
     sections: [
       {
-        title: "Feminine Rule",
-        content: "Nouns ending in -a change to -ę.",
-        ex: "Mam kawę (kawa)."
+        title: "Living vs. Inanimate",
+        content: "👦 Boys (Living): add -a. 📦 Objects: No change. 👧 Girls: -a turns to -ę (adjective -ą).",
+        ex: "Widzę psa (living). Widzę dom (object). Piję kawę."
       },
       {
-        title: "Masculine Inanimate",
-        content: "Things like phones or bread do not change.",
-        ex: "Kupuję chleb (chleb)."
+        title: "Plural Forms",
+        content: "👦 People: -ych + -ów. 👧 Girls/Objects: Same as Case 1 plural (-e, -y, -a).",
+        ex: "Mam nowe książki. Widzę dobrych kolegów."
       }
     ],
     challenge: {
-      q: "Fill the direct object: 'Widzę ______ (brat).'",
-      options: ["brat", "brata", "bratu", "bratem"],
-      correct: "brata"
+      q: "Target a feminine noun: 'Mam ______ (nowa) pracę.'",
+      options: ["nowa", "nowej", "nową", "nowym"],
+      correct: "nową",
+      hint: "For feminine singular words in the 'Action' case, adjectives change -a to -ą."
     }
   },
   {
     id: "narzednik",
     icon: "🤝",
     label: "Case 5",
-    concept: "Narzędnik",
-    lesson: "The Instrumental case describes 'with whom' (z kim) or 'with what' (z czym). Also used for professions.",
+    concept: "Narzędnik (The 'With' Case)",
+    lesson: "Use this after 'Z' (With) or when talking about your job.",
     sections: [
       {
-        title: "The 'With' Rule",
-        content: "Always use Narzędnik after the preposition 'z'.",
-        ex: "Idę z kolegą."
+        title: "How to swap letters",
+        content: "👦 Boys: Add -em. 👧 Girls: Add -ą. 📦 Adjectives: Add -ym/-im.",
+        ex: "Z bratem. Z mamą. Jestem uczniem."
       },
       {
-        title: "Identity",
-        content: "Feminine ending is always -ą.",
-        ex: "Jestem nauczycielką."
+        title: "Plural Forms",
+        content: "📦 Adjectives: -ymi / -imi. 👥 Nouns: ALWAYS end in -ami regardless of gender.",
+        ex: "Idę z nowymi kolegami."
       }
     ],
     challenge: {
-      q: "Complete the sentence: 'Interesuję się ______ (historia).'",
-      options: ["historię", "historii", "historią", "historia"],
-      correct: "historią"
+      q: "Company check: 'Idę na spacer z ______ (moje) psami.'",
+      options: ["moje", "moich", "moimi", "moim"],
+      correct: "moimi",
+      hint: "When using 'Z' (with) in plural, adjectives end in -ymi or -imi."
     }
   },
   {
     id: "miejscownik",
     icon: "📍",
     label: "Case 6",
-    concept: "Miejscownik",
-    lesson: "The Locative is used ONLY after prepositions like 'o' (about), 'w' (in), or 'na' (on).",
+    concept: "Miejscownik (The 'Location' Case)",
+    lesson: "Only used after: W (in), NA (on), O (about), Przy (at).",
     sections: [
       {
-        title: "Talking About",
-        content: "Mówię o... (I'm talking about...)",
-        ex: "Mówię o bracie."
+        title: "The tricky swap",
+        content: "👦👧 Nouns: Usually -ie or -u. 📦 Adjectives: -ym/-im or -ej.",
+        ex: "W domu. Na stole. O mamie."
       },
       {
-        title: "Location",
-        content: "Used for being at a location.",
-        ex: "Na uniwersytecie."
+        title: "Plural Forms",
+        content: "📦 Adjectives: -ych / -ich. 👥 Nouns: ALWAYS end in -ach regardless of gender.",
+        ex: "W tych dużych miastach."
       }
     ],
     challenge: {
-      q: "Location check: 'Mieszkam w ______ (dom).'",
-      options: ["dom", "doma", "domu", "domem"],
-      correct: "domu"
+      q: "Location plural: 'Byliśmy w ______ (te) parkach.'",
+      options: ["tych", "tym", "te", "tymi"],
+      correct: "tych",
+      hint: "In the 'Location' case plural, adjectives end in -ych or -ich (just like Case 2 plural)."
     }
   },
   {
     id: "wolacz",
     icon: "📣",
     label: "Case 7",
-    concept: "Wołacz",
-    lesson: "The Vocative is used when calling or addressing someone directly. While informal Polish uses Nominative, Vocative is essential for formal/polite address.",
+    concept: "Wołacz (The 'Calling' Case)",
+    lesson: "Used for calling names or direct address.",
     sections: [
       {
-        title: "Common Use",
-        content: "Used for titles and family members.",
-        ex: "Panie Profesorze! (Professor!)"
+        title: "How to swap letters",
+        content: "👧 Girls: -a changes to -o. 👦 Boys: add -u or -ie.",
+        ex: "Mamo! Tato! Marku!"
       },
       {
-        title: "Feminine Names",
-        content: "Names ending in -a often change to -o.",
-        ex: "Anno! (Anna!)"
+        title: "Plural Forms",
+        content: "IDENTICAL to Mianownik (Case 1) plural.",
+        ex: "Drodzy studenci!"
       }
     ],
     challenge: {
-      q: "Call your mother: '______! (mama), chodź tutaj!'",
-      options: ["Mama", "Mamo", "Mamie", "Mamą"],
-      correct: "Mamo"
+      q: "Address your Dad: 'Kochany ______ (tata), słuchaj!'",
+      options: ["tata", "tacie", "tato", "tatą"],
+      correct: "tato",
+      hint: "Even though 'tata' is a man, it ends in -a, so it follows the 'Girl rule' in Wołacz: change -a to -o."
     }
   }
 ];

@@ -12,6 +12,7 @@ export default function PolishCaseCodex() {
   const [userAnswer, setUserAnswer] = useState(null);
   const [error, setError] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
+  const [showHint, setShowHint] = useState(false); // Added state for hint visibility
 
   const activeIndex = CASES_VAULT.findIndex(n => n.id === selectedNode);
   const activeLesson = CASES_VAULT[activeIndex];
@@ -21,26 +22,29 @@ export default function PolishCaseCodex() {
     setUserAnswer(null);
     setError(false);
     setIsCorrect(false);
+    setShowHint(false); // Reset hint when node changes
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [selectedNode]);
 
   const handleMastery = async (nodeId) => {
     if (userAnswer !== activeLesson.challenge.correct) {
       setError(true);
+      setShowHint(true); // Reveal hint on error
       setIsCorrect(false);
       return;
     }
 
     setLoading(true);
     setError(false);
+    setShowHint(false);
     
     try {
       const q = query(collection(db, "pending_users"), where("email", "==", user.email.toLowerCase()));
       const snap = await getDocs(q);
       if (!snap.empty) {
         await updateDoc(snap.docs[0].ref, {
-          completedCases: arrayUnion(nodeId), // Changed to completedCases
-          xp: increment(150), // Higher XP for Case Mastery
+          completedCases: arrayUnion(nodeId),
+          xp: increment(150),
           grammarPoints: increment(25)
         });
         setIsCorrect(true);
@@ -137,7 +141,7 @@ export default function PolishCaseCodex() {
                     <h6 className="text-indigo-300 font-black text-xs uppercase mb-2">{sec.title}</h6>
                     <p className="text-slate-400 text-sm mb-4 leading-relaxed">{sec.content}</p>
                     <div className="bg-emerald-500/10 inline-flex items-center gap-3 px-4 py-2 rounded-xl text-emerald-400 font-bold text-sm">
-                       👉 {sec.ex}
+                        👉 {sec.ex}
                     </div>
                   </div>
                 ))}
@@ -171,11 +175,25 @@ export default function PolishCaseCodex() {
                         </button>
                     ))}
                 </div>
-                {error && (
-                    <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-4 text-rose-500 text-[10px] font-black uppercase tracking-[0.2em] text-center">
-                        ❌ Case ending incorrect. Try again.
-                    </motion.p>
-                )}
+
+                {/* UPDATED HINT SECTION */}
+                <AnimatePresence>
+                  {showHint && !isCorrect && !alreadyCompleted && (
+                    <motion.div 
+                      initial={{ opacity: 0, height: 0 }} 
+                      animate={{ opacity: 1, height: 'auto' }} 
+                      exit={{ opacity: 0, height: 0 }}
+                      className="mt-6 p-4 bg-rose-500/10 border border-rose-500/20 rounded-xl"
+                    >
+                      <p className="text-rose-500 text-[10px] font-black uppercase tracking-widest mb-1">
+                        Helpful Insight
+                      </p>
+                      <p className="text-rose-200/80 text-xs italic leading-relaxed">
+                        {activeLesson.challenge.hint}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </section>
 
               <div className="pt-4 flex flex-col gap-4">
