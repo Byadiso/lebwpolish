@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { 
   collection, query, onSnapshot, addDoc, serverTimestamp, 
@@ -9,6 +9,7 @@ import { useAuth } from "../context/AuthContext";
 import confetti from 'canvas-confetti';
 
 const ADMIN_EMAIL = "byadiso@gmail.com";
+const POLISH_CHARS = ['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'];
 
 const MISSIONS = [
   { id: 1, label: "Hipoteza", prompt: "Co byś zrobił/a, gdybyś wygrał/a milion złotych?", icon: "💰" },
@@ -34,6 +35,27 @@ export default function LearningSpace() {
   const [activeCommentBox, setActiveCommentBox] = useState(null); 
   const [commentText, setCommentText] = useState("");
   const [comments, setComments] = useState({}); 
+
+  // PolishReadingEngine Refs
+  const mainTextareaRef = useRef(null);
+  const vocabInputRef = useRef(null);
+  const editPostRef = useRef(null);
+
+  const insertChar = (char, ref, currentText, setter) => {
+    const input = ref.current;
+    if (!input) return;
+
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const newText = currentText.substring(0, start) + char + currentText.substring(end);
+    
+    setter(newText);
+    
+    setTimeout(() => {
+      input.focus();
+      input.setSelectionRange(start + 1, start + 1);
+    }, 0);
+  };
 
   const isAdmin = user?.email === ADMIN_EMAIL;
   const effectiveLevel = profile?.level || (isAdmin ? "C1" : "A1");
@@ -109,6 +131,7 @@ export default function LearningSpace() {
   const toggleComments = (postId) => {
     if (activeCommentBox === postId) return setActiveCommentBox(null);
     setActiveCommentBox(postId);
+    setCommentText("");
     const q = query(collection(db, "global_posts", postId, "comments"), orderBy('timestamp', 'asc'));
     onSnapshot(q, (snap) => setComments(prev => ({ ...prev, [postId]: snap.docs.map(d => ({ id: d.id, ...d.data() })) })));
   };
@@ -218,19 +241,50 @@ export default function LearningSpace() {
                 <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-6 italic leading-tight">"{activeMission.prompt}"</h2>
 
                 <form onSubmit={handleSubmit} className="space-y-5">
+                    {/* PolishReadingEngine Toolbelt for Main Editor */}
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {POLISH_CHARS.map(char => (
+                        <button
+                          key={char}
+                          type="button"
+                          onClick={() => insertChar(char, mainTextareaRef, text, setText)}
+                          className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-indigo-600 hover:text-white rounded-lg text-xs font-black transition-colors"
+                        >
+                          {char}
+                        </button>
+                      ))}
+                    </div>
+
                     <textarea 
+                        ref={mainTextareaRef}
                         required value={text} onChange={(e) => setText(e.target.value)}
                         placeholder="Napisz coś ambitnego..."
                         className="w-full bg-slate-50/50 border-none text-lg md:text-xl focus:ring-2 focus:ring-indigo-100 rounded-3xl p-6 placeholder:text-slate-300 resize-none min-h-[160px] font-medium transition-all"
                     />
                     
                     <div className="flex flex-col md:flex-row items-center gap-4">
-                        <input 
-                            value={vocab} onChange={(e) => setVocab(e.target.value)}
-                            placeholder="Słówka (oddzielone przecinkiem)"
-                            className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold focus:border-indigo-400 outline-none shadow-sm"
-                        />
-                        <button disabled={!text.trim() || isSubmitting} className="w-full md:w-auto px-10 py-4 rounded-2xl font-black text-xs tracking-[0.2em] bg-indigo-600 text-white shadow-xl shadow-indigo-200 uppercase">
+                        <div className="w-full space-y-2">
+                          {/* PolishReadingEngine Toolbelt for Vocab Input */}
+                          <div className="flex flex-wrap gap-1">
+                            {POLISH_CHARS.map(char => (
+                              <button
+                                key={char}
+                                type="button"
+                                onClick={() => insertChar(char, vocabInputRef, vocab, setVocab)}
+                                className="w-6 h-6 flex items-center justify-center bg-slate-50 hover:bg-indigo-400 hover:text-white rounded text-[10px] font-black transition-colors"
+                              >
+                                {char}
+                              </button>
+                            ))}
+                          </div>
+                          <input 
+                              ref={vocabInputRef}
+                              value={vocab} onChange={(e) => setVocab(e.target.value)}
+                              placeholder="Słówka (oddzielone przecinkiem)"
+                              className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold focus:border-indigo-400 outline-none shadow-sm"
+                          />
+                        </div>
+                        <button disabled={!text.trim() || isSubmitting} className="w-full md:w-auto px-10 py-4 rounded-2xl font-black text-xs tracking-[0.2em] bg-indigo-600 text-white shadow-xl shadow-indigo-200 uppercase self-end">
                             {isSubmitting ? "..." : "OPUBLIKUJ"}
                         </button>
                     </div>
@@ -287,7 +341,24 @@ export default function LearningSpace() {
 
                 {editingId === p.id ? (
                   <div className="space-y-3 bg-slate-50 p-4 md:p-6 rounded-2xl mb-4">
-                    <textarea value={editText} onChange={(e) => setEditText(e.target.value)} className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-800 font-bold outline-none" />
+                    <div className="flex flex-wrap gap-1 mb-2">
+                      {POLISH_CHARS.map(char => (
+                        <button
+                          key={char}
+                          type="button"
+                          onClick={() => insertChar(char, editPostRef, editText, setEditText)}
+                          className="w-6 h-6 flex items-center justify-center bg-white hover:bg-indigo-600 hover:text-white rounded text-[10px] font-black shadow-sm transition-colors"
+                        >
+                          {char}
+                        </button>
+                      ))}
+                    </div>
+                    <textarea 
+                      ref={editPostRef}
+                      value={editText} 
+                      onChange={(e) => setEditText(e.target.value)} 
+                      className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-800 font-bold outline-none" 
+                    />
                     <div className="flex gap-2">
                       <button onClick={() => handleEditPost(p.id)} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Zapisz</button>
                       <button onClick={() => setEditingId(null)} className="text-slate-400 text-[10px] font-black uppercase px-4">Anuluj</button>
@@ -329,7 +400,28 @@ export default function LearningSpace() {
                         </div>
                       ))}
                       <div className="pt-2">
-                        <textarea value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Napisz feedback..." className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm outline-none font-medium" />
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {POLISH_CHARS.map(char => (
+                            <button
+                              key={char}
+                              type="button"
+                              onClick={() => {
+                                const currentRef = { current: document.getElementById(`comment-${p.id}`) };
+                                insertChar(char, currentRef, commentText, setCommentText);
+                              }}
+                              className="w-6 h-6 flex items-center justify-center bg-white hover:bg-indigo-600 hover:text-white rounded text-[10px] font-black shadow-sm transition-colors"
+                            >
+                              {char}
+                            </button>
+                          ))}
+                        </div>
+                        <textarea 
+                          id={`comment-${p.id}`}
+                          value={commentText} 
+                          onChange={(e) => setCommentText(e.target.value)} 
+                          placeholder="Napisz feedback..." 
+                          className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm outline-none font-medium" 
+                        />
                         <div className="flex flex-wrap justify-end gap-3 mt-3">
                           <button onClick={() => handlePostComment(p.id, true)} className="text-[10px] font-black text-rose-500 uppercase px-3 py-1">Poprawka✍️</button>
                           <button onClick={() => handlePostComment(p.id, false)} className="bg-indigo-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">Wyślij</button>
@@ -343,7 +435,7 @@ export default function LearningSpace() {
           </div>
         </div>
 
-        {/* SIDEBAR */}
+        {/* SIDEBAR - PRESERVED ALL ELEMENTS */}
         <aside className="lg:col-span-4 space-y-8">
           <div className="lg:sticky lg:top-24 space-y-8">
             
