@@ -39,6 +39,7 @@ export default function Navbar() {
           <Link to="/space" className={navLinkStyle}>Writing Space</Link>
           <Link to="/practice" className={navLinkStyle}>Practice Listen</Link>
           <Link to="/grammar" className={navLinkStyle}>Practice Grammar</Link>
+          <Link to="/reading-practice" className={navLinkStyle}>Reading Space</Link>
           
           {user ? (
             <div className="flex items-center gap-4 border-l border-slate-800 pl-6">
