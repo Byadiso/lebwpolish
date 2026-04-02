@@ -65,10 +65,6 @@ export default function KoniugacjaMaster() {
       <header className="bg-[#020617]/80 backdrop-blur-xl border-b border-white/5 p-4 shrink-0">
         <div className="max-w-[1600px] mx-auto flex items-center justify-between">
           <div className="flex items-center gap-8">
-            {/* <div className="font-black uppercase tracking-tighter italic text-xl flex items-center gap-2">
-                <span className="w-8 h-8 bg-red-600 rounded flex items-center justify-center text-white not-italic text-sm">L</span>
-                LEBW <span className="text-red-600">POLISH</span>
-            </div> */}
             <div className="h-6 w-px bg-white/10 hidden md:block" />
             <nav className="hidden md:flex gap-1 bg-white/5 p-1 rounded-xl">
                 {groups.map((g) => (
