@@ -1,16 +1,162 @@
 [
   {
     "id": "drill_001",
-    "polish": "Dzień dobry, jak się masz?",
-    "english": "Good morning, how are you?",
-    "level": "A1",
-    "category": "Greetings"
+    "polish": "Gdybym wiedział, że tak będzie, nie zgodziłbym się na to.",
+    "english": "If I had known it would turn out this way, I wouldn't have agreed to it.",
+    "level": "B1",
+    "category": "Conditionals",
+    "tip": "Gdybym = If I (conditional). Notice the -bym ending for 'I would'."
   },
   {
     "id": "drill_002",
-    "polish": "Lubię uczyć się języka polskiego.",
-    "english": "I like learning the Polish language.",
-    "level": "A2",
-    "category": "Hobbies"
+    "polish": "Mimo że jest późno, nadal muszę skończyć ten raport.",
+    "english": "Even though it's late, I still have to finish this report.",
+    "level": "B1",
+    "category": "Concession",
+    "tip": "Mimo że = even though / despite the fact that. Very common in formal speech."
+  },
+  {
+    "id": "drill_003",
+    "polish": "Zależy mi na tym, żebyś był szczęśliwy.",
+    "english": "It matters to me that you are happy.",
+    "level": "B1",
+    "category": "Emotions",
+    "tip": "Zależy mi na = it matters to me / I care about. Followed by dative."
+  },
+  {
+    "id": "drill_004",
+    "polish": "Nie spodziewałem się, że to okaże się takie trudne.",
+    "english": "I didn't expect it to turn out to be so difficult.",
+    "level": "B1",
+    "category": "Expectations",
+    "tip": "Okazać się = to turn out / to prove to be. Very useful verb in Polish."
+  },
+  {
+    "id": "drill_005",
+    "polish": "Warto poświęcić czas na naukę nowych rzeczy.",
+    "english": "It's worth spending time learning new things.",
+    "level": "B1",
+    "category": "Values",
+    "tip": "Warto + infinitive = it's worth doing something. Poświęcić = to dedicate / to sacrifice."
+  },
+  {
+    "id": "drill_006",
+    "polish": "Przez całe życie starałem się robić to, co jest słuszne.",
+    "english": "Throughout my whole life I tried to do what is right.",
+    "level": "B1",
+    "category": "Life & Values",
+    "tip": "Przez całe życie = throughout one's whole life. Słuszne = right / correct / just."
+  },
+  {
+    "id": "drill_007",
+    "polish": "Im więcej ćwiczysz, tym lepiej mówisz po polsku.",
+    "english": "The more you practise, the better you speak Polish.",
+    "level": "B1",
+    "category": "Comparisons",
+    "tip": "Im... tym... = the more... the more... A classic comparative construction."
+  },
+  {
+    "id": "drill_008",
+    "polish": "Trudno mi zrozumieć, dlaczego podjął taką decyzję.",
+    "english": "It is hard for me to understand why he made such a decision.",
+    "level": "B1",
+    "category": "Opinions",
+    "tip": "Trudno mi = it is hard for me. Podjąć decyzję = to make a decision."
+  },
+  {
+    "id": "drill_009",
+    "polish": "Szkoda, że nie mogłeś przyjść na to spotkanie.",
+    "english": "It's a pity you couldn't come to that meeting.",
+    "level": "B1",
+    "category": "Regret",
+    "tip": "Szkoda, że = it's a pity that / what a shame that. Followed by past tense."
+  },
+  {
+    "id": "drill_010",
+    "polish": "Zanim wyjdziesz, upewnij się, że zamknąłeś okna.",
+    "english": "Before you leave, make sure you've closed the windows.",
+    "level": "B1",
+    "category": "Instructions",
+    "tip": "Zanim = before (with future meaning). Upewnić się = to make sure."
+  },
+  {
+    "id": "drill_011",
+    "polish": "Czy mógłbyś mi wyjaśnić, o co w tym chodzi?",
+    "english": "Could you explain to me what this is all about?",
+    "level": "B1",
+    "category": "Requests",
+    "tip": "Mógłbyś = could you (polite conditional). O co chodzi = what it's about."
+  },
+  {
+    "id": "drill_012",
+    "polish": "Zawsze marzyłem o podróżowaniu po całym świecie.",
+    "english": "I always dreamed of travelling all over the world.",
+    "level": "B1",
+    "category": "Dreams",
+    "tip": "Marzyć o + locative = to dream of something. Po całym świecie = all over the world."
+  },
+  {
+    "id": "drill_013",
+    "polish": "Nie ma sensu martwić się o rzeczy, na które nie mamy wpływu.",
+    "english": "There is no point in worrying about things we have no control over.",
+    "level": "B1",
+    "category": "Philosophy",
+    "tip": "Nie ma sensu + infinitive = there's no point in doing something. Mieć wpływ na = to have influence over."
+  },
+  {
+    "id": "drill_014",
+    "polish": "Dopiero po jakimś czasie zrozumiałem, co miała na myśli.",
+    "english": "Only after some time did I understand what she meant.",
+    "level": "B1",
+    "category": "Reflection",
+    "tip": "Dopiero = only / not until. Mieć na myśli = to mean / to have in mind."
+  },
+  {
+    "id": "drill_015",
+    "polish": "Chciałbym, żebyś częściej dzielił się swoją opinią.",
+    "english": "I would like you to share your opinion more often.",
+    "level": "B1",
+    "category": "Communication",
+    "tip": "Chciałbym, żebyś = I would like you to... Dzielić się = to share."
+  },
+  {
+    "id": "drill_016",
+    "polish": "Przyzwyczaiłem się do życia w dużym mieście.",
+    "english": "I got used to living in a big city.",
+    "level": "B1",
+    "category": "Lifestyle",
+    "tip": "Przyzwyczaić się do = to get used to. Followed by genitive or verbal noun."
+  },
+  {
+    "id": "drill_017",
+    "polish": "Nie sądzę, żeby to był najlepszy pomysł w tej sytuacji.",
+    "english": "I don't think that would be the best idea in this situation.",
+    "level": "B1",
+    "category": "Opinions",
+    "tip": "Nie sądzę, żeby = I don't think that (used with subjunctive / conditional)."
+  },
+  {
+    "id": "drill_018",
+    "polish": "To zależy od wielu czynników, które trudno przewidzieć.",
+    "english": "It depends on many factors that are hard to predict.",
+    "level": "B1",
+    "category": "Analysis",
+    "tip": "Zależeć od = to depend on. Przewidzieć = to predict / to foresee."
+  },
+  {
+    "id": "drill_019",
+    "polish": "Gdy byłem młody, nie doceniałem tego, co miałem.",
+    "english": "When I was young, I didn't appreciate what I had.",
+    "level": "B1",
+    "category": "Reflection",
+    "tip": "Doceniać = to appreciate / to value. A key verb for expressing gratitude in Polish."
+  },
+  {
+    "id": "drill_020",
+    "polish": "Proszę, daj mi znać, jeśli będziesz potrzebował pomocy.",
+    "english": "Please let me know if you need any help.",
+    "level": "B1",
+    "category": "Communication",
+    "tip": "Dać znać = to let someone know. Jeśli = if (for real conditions, not hypothetical)."
   }
 ]
