@@ -23,7 +23,7 @@ import PolishReadingEngine from './pages/PolishReadingEngine';
 import PolishCaseCodex from './pages/PolishCaseCodex';
 import ReadingComprehension from './pages/ReadingComprehension';
 import KoniugacjaMaster from './pages/KoniugacjaMaster';
-import B1ShadowBoxer from './pages/B1shadowBoxer';
+import B1ShadowBoxer from './pages/B1ShadowBoxer';
 
 // Secure Gatekeeper Helper
 const ProtectedRoute = ({ children }) => {
