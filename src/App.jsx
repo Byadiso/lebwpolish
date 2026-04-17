@@ -24,6 +24,7 @@ import PolishCaseCodex from './pages/PolishCaseCodex';
 import ReadingComprehension from './pages/ReadingComprehension';
 import KoniugacjaMaster from './pages/KoniugacjaMaster';
 import B1ShadowBoxer from './pages/B1ShadowBoxer';
+import PolishArena from './pages/PolishArena';
 
 // Secure Gatekeeper Helper
 const ProtectedRoute = ({ children }) => {
@@ -56,6 +57,7 @@ function App() {
             <Route path="/Reading-comprehension" element={<ReadingComprehension />} />
             <Route path="/conjugation-practice" element={<KoniugacjaMaster />} />
              <Route path="/B1-ready" element={<B1ShadowBoxer />} />
+             <Route path="/play" element={<PolishArena />} />
 
             {/* --- PROTECTED STUDENT ROUTES: PERSONAL PROGRESS --- */}
             {/* These routes require an active Fluency Profile (Login) */}
