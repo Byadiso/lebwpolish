@@ -12,11 +12,33 @@ const ADMIN_EMAIL = "byadiso@gmail.com";
 const POLISH_CHARS = ['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'];
 
 const MISSIONS = [
-  { id: 1, label: "Hipoteza", prompt: "Co byś zrobił/a, gdybyś wygrał/a milion złotych?", icon: "💰" },
-  { id: 2, label: "Wspomnienie", prompt: "Opisz swoje ulubione miejsce z dzieciństwa.", icon: "🏠" },
-  { id: 3, label: "Opinia", prompt: "Czy lepiej mieszkać w mieście czy na wsi? Dlaczego?", icon: "🏙️" },
-  { id: 4, label: "Plany", prompt: "Gdzie pojedziesz na następne wakacje? Użyj czasu przyszłego.", icon: "🏖️" }
+  { id: 1, label: "Hipoteza", prompt: "Co byś zrobił/a, gdybyś wygrał/a milion złotych?", icon: "💰", xp: 50, color: "#FFD700" },
+  { id: 2, label: "Wspomnienie", prompt: "Opisz swoje ulubione miejsce z dzieciństwa.", icon: "🏠", xp: 40, color: "#FF6B9D" },
+  { id: 3, label: "Opinia", prompt: "Czy lepiej mieszkać w mieście czy na wsi? Dlaczego?", icon: "🏙️", xp: 60, color: "#00E5FF" },
+  { id: 4, label: "Plany", prompt: "Gdzie pojedziesz na następne wakacje? Użyj czasu przyszłego.", icon: "🏖️", xp: 70, color: "#7C3AED" }
 ];
+
+const LEVEL_THRESHOLDS = [0, 100, 250, 500, 900, 1500, 2500];
+const LEVEL_NAMES = ["Nowicjusz", "Uczeń", "Praktykant", "Adept", "Mistrz", "Ekspert", "Legenda"];
+const LEVEL_COLORS = ["#6B7280", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899"];
+
+const getLevel = (xp) => {
+  let level = 0;
+  for (let i = LEVEL_THRESHOLDS.length - 1; i >= 0; i--) {
+    if (xp >= LEVEL_THRESHOLDS[i]) { level = i; break; }
+  }
+  return level;
+};
+
+const getXpProgress = (xp) => {
+  const level = getLevel(xp);
+  if (level >= LEVEL_NAMES.length - 1) return 100;
+  const current = xp - LEVEL_THRESHOLDS[level];
+  const needed = LEVEL_THRESHOLDS[level + 1] - LEVEL_THRESHOLDS[level];
+  return Math.min((current / needed) * 100, 100);
+};
+
+const COMBO_MESSAGES = ["NIEŹLE! +5 COMBO", "ŚWIETNIE! +10 COMBO", "OGIEŃ! +20 COMBO", "LEGENDARNY! +50 COMBO"];
 
 export default function LearningSpace() {
   const { profile, user, loading: authLoading } = useAuth();
@@ -34,88 +56,142 @@ export default function LearningSpace() {
   const [deleteConfirmId, setDeleteConfirmId] = useState(null); 
   const [activeCommentBox, setActiveCommentBox] = useState(null); 
   const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState({}); 
+  const [comments, setComments] = useState({});
 
-  // PolishReadingEngine Refs
+  // Game state
+  const [xp, setXp] = useState(0);
+  const [combo, setCombo] = useState(0);
+  const [showXpPop, setShowXpPop] = useState(null);
+  const [showCombo, setShowCombo] = useState(false);
+  const [lastPostTime, setLastPostTime] = useState(null);
+  const [pulseEditor, setPulseEditor] = useState(false);
+  const [slotSpin, setSlotSpin] = useState(false);
+  const [newPostIds, setNewPostIds] = useState(new Set());
+
   const mainTextareaRef = useRef(null);
   const vocabInputRef = useRef(null);
   const editPostRef = useRef(null);
 
-  const insertChar = (char, ref, currentText, setter) => {
-    const input = ref.current;
-    if (!input) return;
-
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-    const newText = currentText.substring(0, start) + char + currentText.substring(end);
-    
-    setter(newText);
-    
-    setTimeout(() => {
-      input.focus();
-      input.setSelectionRange(start + 1, start + 1);
-    }, 0);
-  };
-
   const isAdmin = user?.email === ADMIN_EMAIL;
   const effectiveLevel = profile?.level || (isAdmin ? "C1" : "A1");
+
+  const totalXp = (profile?.xp || 0) + xp;
+  const currentLevel = getLevel(totalXp);
+  const xpProgress = getXpProgress(totalXp);
 
   const getWordCount = (str) => str.trim() ? str.trim().split(/\s+/).length : 0;
   const wordCount = getWordCount(text);
 
   const getMilestone = (count) => {
-    if (count === 0) return { label: "Czekamy na Twój tekst...", color: "text-slate-400" };
-    if (count < 10) return { label: "Rozgrzewka ✨", color: "text-blue-500" };
-    if (count < 25) return { label: "Płynna Myśl 🌊", color: "text-emerald-500" };
-    return { label: "Poziom B1: Ekspert! 🏆", color: "text-amber-500 font-black italic" };
+    if (count === 0) return { label: "Gotowy do walki?", color: "#6B7280", stars: 0 };
+    if (count < 10) return { label: "ROZGRZEWKA", color: "#3B82F6", stars: 1 };
+    if (count < 25) return { label: "PŁYNNA MYŚL", color: "#10B981", stars: 2 };
+    if (count < 40) return { label: "MISTRZ SŁOWA", color: "#F59E0B", stars: 3 };
+    return { label: "LEGENDARNY!", color: "#EC4899", stars: 4 };
   };
 
   const milestone = getMilestone(wordCount);
 
+  const insertChar = (char, ref, currentText, setter) => {
+    const input = ref.current;
+    if (!input) return;
+    const start = input.selectionStart;
+    const end = input.selectionEnd;
+    const newText = currentText.substring(0, start) + char + currentText.substring(end);
+    setter(newText);
+    setTimeout(() => { input.focus(); input.setSelectionRange(start + 1, start + 1); }, 0);
+  };
+
   useEffect(() => {
     const q = query(collection(db, "global_posts"), orderBy('timestamp', 'desc'), limit(50));
-    return onSnapshot(q, (snap) => setPosts(snap.docs.map(doc => ({ id: doc.id, ...doc.data() }))));
+    return onSnapshot(q, (snap) => {
+      const newPosts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      setPosts(prev => {
+        const prevIds = new Set(prev.map(p => p.id));
+        const fresh = newPosts.filter(p => !prevIds.has(p.id)).map(p => p.id);
+        if (fresh.length > 0) {
+          setNewPostIds(s => new Set([...s, ...fresh]));
+          setTimeout(() => setNewPostIds(s => { const n = new Set(s); fresh.forEach(id => n.delete(id)); return n; }), 2000);
+        }
+        return newPosts;
+      });
+    });
   }, []);
 
   useEffect(() => {
     const q = query(collection(db, "resources"), limit(50));
     return onSnapshot(q, (snap) => {
-      const data = snap.docs
-        .map(d => ({ id: d.id, ...d.data() }))
-        .sort((a, b) => {
-          if (!a.timestamp && !b.timestamp) return 0;
-          if (!a.timestamp) return 1;
-          if (!b.timestamp) return -1;
-          return b.timestamp.seconds - a.timestamp.seconds;
-        });
+      const data = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+        .sort((a, b) => (!a.timestamp && !b.timestamp) ? 0 : !a.timestamp ? 1 : !b.timestamp ? -1 : b.timestamp.seconds - a.timestamp.seconds);
       setResources(data);
     });
   }, []);
+
+  // Combo timer
+  useEffect(() => {
+    if (combo > 0) {
+      const timer = setTimeout(() => setCombo(0), 30000);
+      return () => clearTimeout(timer);
+    }
+  }, [combo]);
+
+  const triggerXpPop = (amount) => {
+    setShowXpPop(amount);
+    setTimeout(() => setShowXpPop(null), 1500);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim() || isSubmitting) return;
     setIsSubmitting(true);
+    setSlotSpin(true);
+
     try {
       const vocabList = vocab.split(',').map(v => v.trim().toLowerCase()).filter(v => v !== "");
+      const now = Date.now();
+      const isHotStreak = lastPostTime && (now - lastPostTime) < 600000; // 10min
+      const newCombo = isHotStreak ? combo + 1 : 1;
+      const baseXp = activeMission.xp + Math.min(wordCount * 2, 100);
+      const comboBonus = Math.min(newCombo * 10, 100);
+      const totalEarned = baseXp + comboBonus;
+
       await addDoc(collection(db, "global_posts"), {
-        content: text,
-        vocabulary: vocabList,
-        wordCount,
-        missionType: activeMission.label,
-        author: profile?.cityName || (isAdmin ? "Instruktor" : "Student"),
-        authorEmail: user.email,
-        authorLevel: effectiveLevel,
-        uid: user.uid,
-        likes: [],
-        timestamp: serverTimestamp(),
+        content: text, vocabulary: vocabList, wordCount,
+        missionType: activeMission.label, author: profile?.cityName || (isAdmin ? "Instruktor" : "Student"),
+        authorEmail: user.email, authorLevel: effectiveLevel, uid: user.uid,
+        likes: [], timestamp: serverTimestamp(),
       });
+
       if (vocabList.length > 0) {
-        await setDoc(doc(db, "users", user.uid), { vocabulary: arrayUnion(...vocabList) }, { merge: true });
+        await setDoc(doc(db, "users", user.uid), { vocabulary: arrayUnion(...vocabList), xp: (profile?.xp || 0) + totalEarned }, { merge: true });
+      } else {
+        await setDoc(doc(db, "users", user.uid), { xp: (profile?.xp || 0) + totalEarned }, { merge: true });
       }
-      confetti({ particleCount: Math.min(wordCount * 4, 150), spread: 80, origin: { y: 0.8 }, colors: ['#4F46E5', '#FB7185', '#FBBF24'] });
+
+      setXp(prev => prev + totalEarned);
+      setCombo(newCombo);
+      setLastPostTime(now);
+      triggerXpPop(totalEarned);
+
+      if (newCombo >= 2) {
+        setShowCombo(true);
+        setTimeout(() => setShowCombo(false), 2000);
+      }
+
+      const particleCount = Math.min(wordCount * 5, 200);
+      confetti({ particleCount, spread: 90, origin: { y: 0.7 }, colors: [activeMission.color, '#FFD700', '#FF6B9D'] });
+      if (wordCount >= 40) {
+        setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FFD700'] }), 300);
+        setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FFD700'] }), 500);
+      }
+
       setText(""); setVocab("");
-    } catch (err) { console.error(err); } finally { setIsSubmitting(false); }
+      setPulseEditor(true);
+      setTimeout(() => setPulseEditor(false), 1000);
+    } catch (err) { console.error(err); } finally {
+      setIsSubmitting(false);
+      setTimeout(() => setSlotSpin(false), 800);
+    }
   };
 
   const handleRemoveVocab = async (word) => {
@@ -139,15 +215,18 @@ export default function LearningSpace() {
   const handlePostComment = async (postId, isCorrection = false) => {
     if (!commentText.trim()) return;
     await addDoc(collection(db, "global_posts", postId, "comments"), {
-      content: commentText, author: profile?.cityName || (isAdmin ? "Admin" : "User"), 
+      content: commentText, author: profile?.cityName || (isAdmin ? "Admin" : "User"),
       uid: user.uid, isCorrection, timestamp: serverTimestamp(),
     });
     setCommentText("");
+    triggerXpPop(10);
+    setXp(prev => prev + 10);
   };
 
   const handleLike = async (p) => {
     const isLiked = p.likes?.includes(user.uid);
     await updateDoc(doc(db, "global_posts", p.id), { likes: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid) });
+    if (!isLiked) { triggerXpPop(5); setXp(prev => prev + 5); }
   };
 
   const confirmDelete = async (id) => {
@@ -155,39 +234,1021 @@ export default function LearningSpace() {
     setDeleteConfirmId(null);
   };
 
-  if (authLoading) return <div className="h-screen flex items-center justify-center bg-slate-50 font-black text-indigo-400 animate-pulse tracking-widest uppercase italic">Wczytywanie Przestrzeni...</div>;
+  if (authLoading) return (
+    <div style={{ background: '#0A0A0F', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ fontSize: '48px', animation: 'spin 1s linear infinite' }}>🎰</div>
+      <p style={{ color: '#7C3AED', fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.3em', fontSize: '12px', textTransform: 'uppercase', animation: 'pulse 1s ease-in-out infinite' }}>Ładowanie areny...</p>
+      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }`}</style>
+    </div>
+  );
+
+  const streakDays = profile?.streak || 0;
 
   return (
-    <div className="min-h-screen bg-[#FDFDFD] text-slate-900 pb-20">
-      
-      {/* VOCABULARY VAULT OVERLAY */}
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap');
+        
+        :root {
+          --neon-purple: #7C3AED;
+          --neon-pink: #EC4899;
+          --neon-cyan: #00E5FF;
+          --neon-gold: #FFD700;
+          --neon-green: #10B981;
+          --bg-void: #0A0A0F;
+          --bg-card: #12121A;
+          --bg-card2: #1A1A26;
+          --border-glow: rgba(124, 58, 237, 0.3);
+          --text-primary: #F0F0FF;
+          --text-muted: #6B7280;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        .ls-root { 
+          min-height: 100vh; 
+          background: var(--bg-void); 
+          color: var(--text-primary);
+          font-family: 'Space Grotesk', sans-serif;
+          padding-bottom: 80px;
+          position: relative;
+          overflow-x: hidden;
+        }
+
+        .ls-root::before {
+          content: '';
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: 
+            radial-gradient(ellipse 800px 400px at 20% 10%, rgba(124,58,237,0.08) 0%, transparent 70%),
+            radial-gradient(ellipse 600px 300px at 80% 80%, rgba(236,72,153,0.06) 0%, transparent 70%);
+          pointer-events: none;
+          z-index: 0;
+        }
+
+        /* XP POP */
+        .xp-pop {
+          position: fixed;
+          top: 80px; right: 24px;
+          background: linear-gradient(135deg, #7C3AED, #EC4899);
+          color: white;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 28px;
+          letter-spacing: 0.1em;
+          padding: 12px 24px;
+          border-radius: 16px;
+          z-index: 9999;
+          animation: xpPop 1.5s ease-out forwards;
+          box-shadow: 0 0 40px rgba(124,58,237,0.6);
+          pointer-events: none;
+        }
+        @keyframes xpPop {
+          0% { transform: translateY(20px) scale(0.8); opacity: 0; }
+          20% { transform: translateY(-10px) scale(1.1); opacity: 1; }
+          60% { transform: translateY(-20px) scale(1); opacity: 1; }
+          100% { transform: translateY(-60px) scale(0.9); opacity: 0; }
+        }
+
+        /* COMBO BANNER */
+        .combo-banner {
+          position: fixed;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          z-index: 9999;
+          text-align: center;
+          animation: comboBurst 2s ease-out forwards;
+          pointer-events: none;
+        }
+        .combo-banner-text {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: clamp(48px, 10vw, 96px);
+          background: linear-gradient(135deg, #FFD700, #FF6B9D, #7C3AED);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+          text-shadow: none;
+          filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
+          letter-spacing: 0.05em;
+        }
+        @keyframes comboBurst {
+          0% { transform: translate(-50%,-50%) scale(0.3) rotate(-5deg); opacity: 0; }
+          30% { transform: translate(-50%,-50%) scale(1.2) rotate(2deg); opacity: 1; }
+          60% { transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 1; }
+          100% { transform: translate(-50%,-50%) scale(1.3) rotate(0deg); opacity: 0; }
+        }
+
+        /* NAVBAR */
+        .ls-nav {
+          position: sticky; top: 0; z-index: 50;
+          background: rgba(10,10,15,0.9);
+          backdrop-filter: blur(20px);
+          border-bottom: 1px solid rgba(124,58,237,0.2);
+          padding: 0 16px;
+        }
+        .ls-nav-inner {
+          max-width: 1280px;
+          margin: 0 auto;
+          height: 70px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+        }
+        .ls-logo {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+        .ls-logo-icon {
+          width: 44px; height: 44px;
+          background: linear-gradient(135deg, #7C3AED, #EC4899);
+          border-radius: 12px;
+          display: flex; align-items: center; justify-content: center;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 22px;
+          color: white;
+          box-shadow: 0 0 20px rgba(124,58,237,0.5);
+          transform: rotate(3deg);
+          flex-shrink: 0;
+        }
+        .ls-logo-text {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 22px;
+          letter-spacing: 0.05em;
+          color: white;
+        }
+        .ls-logo-text span { color: var(--neon-purple); }
+        .ls-logo-sub {
+          font-size: 9px;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+        }
+
+        /* XP BAR IN NAV */
+        .ls-nav-xp {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex-shrink: 0;
+        }
+        .ls-xp-level-badge {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 11px;
+          letter-spacing: 0.1em;
+          padding: 4px 10px;
+          border-radius: 8px;
+          white-space: nowrap;
+        }
+        .ls-xp-bar-wrap {
+          display: flex; flex-direction: column; gap: 3px; min-width: 80px;
+        }
+        .ls-xp-bar-track {
+          height: 6px;
+          background: rgba(255,255,255,0.06);
+          border-radius: 99px;
+          overflow: hidden;
+        }
+        .ls-xp-bar-fill {
+          height: 100%;
+          border-radius: 99px;
+          transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+          position: relative;
+        }
+        .ls-xp-bar-fill::after {
+          content: '';
+          position: absolute;
+          top: 0; right: 0; bottom: 0;
+          width: 20px;
+          background: rgba(255,255,255,0.4);
+          border-radius: 99px;
+          filter: blur(4px);
+        }
+
+        /* STREAK */
+        .ls-streak {
+          display: flex; align-items: center; gap: 6px;
+          background: rgba(239,68,68,0.1);
+          border: 1px solid rgba(239,68,68,0.2);
+          padding: 6px 12px;
+          border-radius: 10px;
+          font-weight: 800;
+          font-size: 13px;
+          color: #EF4444;
+          white-space: nowrap;
+          flex-shrink: 0;
+        }
+        .ls-streak.hot {
+          animation: streakPulse 2s ease-in-out infinite;
+          box-shadow: 0 0 20px rgba(239,68,68,0.3);
+        }
+        @keyframes streakPulse {
+          0%,100% { box-shadow: 0 0 10px rgba(239,68,68,0.2); }
+          50% { box-shadow: 0 0 25px rgba(239,68,68,0.5); }
+        }
+
+        /* MAIN LAYOUT */
+        .ls-main {
+          max-width: 1280px;
+          margin: 0 auto;
+          padding: 32px 16px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 32px;
+          position: relative;
+          z-index: 1;
+        }
+        @media (min-width: 1024px) {
+          .ls-main { grid-template-columns: 1fr 380px; }
+        }
+
+        /* CARD BASE */
+        .ls-card {
+          background: var(--bg-card);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 24px;
+          overflow: hidden;
+          position: relative;
+        }
+        .ls-card-glow {
+          box-shadow: 0 0 40px rgba(124,58,237,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+
+        /* MISSION SELECTOR */
+        .mission-tabs {
+          display: flex;
+          gap: 8px;
+          overflow-x: auto;
+          padding-bottom: 4px;
+          scrollbar-width: none;
+          -ms-overflow-style: none;
+        }
+        .mission-tabs::-webkit-scrollbar { display: none; }
+        .mission-tab {
+          padding: 8px 16px;
+          border-radius: 10px;
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.12em;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+          border: 1px solid transparent;
+          background: rgba(255,255,255,0.04);
+          color: var(--text-muted);
+        }
+        .mission-tab:hover { background: rgba(124,58,237,0.18); color: #C4B5FD; border-color: rgba(124,58,237,0.4); }
+        .mission-tab.active {
+          color: white;
+          border-color: currentColor;
+          box-shadow: 0 0 16px currentColor;
+        }
+        .mission-xp-badge {
+          display: inline-block;
+          font-size: 9px;
+          font-family: 'JetBrains Mono', monospace;
+          font-weight: 700;
+          opacity: 0.7;
+          margin-left: 4px;
+        }
+
+        /* EDITOR CARD */
+        .editor-card {
+          padding: 28px;
+        }
+        @media (min-width: 768px) { .editor-card { padding: 36px; } }
+
+        .mission-prompt {
+          font-size: clamp(16px, 3vw, 22px);
+          font-weight: 700;
+          line-height: 1.4;
+          color: white;
+          margin: 20px 0 24px;
+          padding: 20px 24px;
+          border-radius: 16px;
+          border-left: 3px solid;
+          background: rgba(255,255,255,0.03);
+          font-style: italic;
+        }
+
+        .polish-chars {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4px;
+          margin-bottom: 8px;
+        }
+        .polish-char-btn {
+          width: 32px; height: 32px;
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(255,255,255,0.06);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 8px;
+          font-size: 13px;
+          font-weight: 800;
+          cursor: pointer;
+          transition: all 0.15s;
+          color: white;
+          font-family: 'Space Grotesk', sans-serif;
+        }
+        .polish-char-btn:hover {
+          background: var(--neon-purple);
+          border-color: var(--neon-purple);
+          box-shadow: 0 0 12px rgba(124,58,237,0.5);
+          transform: scale(1.1);
+        }
+        .polish-char-btn.small {
+          width: 26px; height: 26px;
+          font-size: 11px;
+          border-radius: 6px;
+        }
+
+        .main-textarea {
+          width: 100%;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px;
+          padding: 20px 24px;
+          font-size: 18px;
+          line-height: 1.7;
+          color: #E8E8FF;
+          font-family: 'Space Grotesk', sans-serif;
+          resize: none;
+          min-height: 160px;
+          outline: none;
+          transition: all 0.2s;
+          caret-color: var(--neon-purple);
+          -webkit-text-fill-color: #E8E8FF;
+        }
+        .main-textarea::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
+        .main-textarea:focus {
+          border-color: rgba(124,58,237,0.5);
+          background: rgba(15,10,30,0.8);
+          box-shadow: 0 0 0 3px rgba(124,58,237,0.1), 0 0 30px rgba(124,58,237,0.1);
+          color: #E8E8FF;
+          -webkit-text-fill-color: #E8E8FF;
+        }
+        .main-textarea.pulse-success {
+          animation: successPulse 0.8s ease-out;
+        }
+        @keyframes successPulse {
+          0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
+          50% { box-shadow: 0 0 0 20px rgba(16,185,129,0); }
+          100% { box-shadow: none; }
+        }
+
+        .vocab-input {
+          width: 100%;
+          background: rgba(15,10,30,0.6);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          padding: 14px 18px;
+          font-size: 14px;
+          color: #D0C8FF;
+          -webkit-text-fill-color: #D0C8FF;
+          font-family: 'Space Grotesk', sans-serif;
+          outline: none;
+          font-weight: 600;
+          transition: all 0.2s;
+        }
+        .vocab-input::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
+        .vocab-input:focus {
+          border-color: rgba(236,72,153,0.4);
+          background: rgba(15,10,30,0.8);
+          box-shadow: 0 0 0 2px rgba(236,72,153,0.1);
+          color: #D0C8FF;
+          -webkit-text-fill-color: #D0C8FF;
+        }
+
+        /* WORD COUNT / METER */
+        .word-meter {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255,255,255,0.06);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .word-meter-label {
+          font-size: 10px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          font-family: 'JetBrains Mono', monospace;
+        }
+        .word-meter-bar {
+          flex: 1;
+          height: 8px;
+          background: rgba(255,255,255,0.05);
+          border-radius: 99px;
+          overflow: hidden;
+          max-width: 200px;
+        }
+        .word-meter-fill {
+          height: 100%;
+          border-radius: 99px;
+          transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+          position: relative;
+        }
+        .word-count-num {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 11px;
+          font-weight: 700;
+          color: rgba(255,255,255,0.3);
+          flex-shrink: 0;
+        }
+        .star-rating {
+          display: flex;
+          gap: 2px;
+        }
+
+        /* SUBMIT BUTTON */
+        .submit-btn {
+          padding: 16px 32px;
+          border-radius: 14px;
+          font-size: 11px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          cursor: pointer;
+          border: none;
+          color: white;
+          font-family: 'Space Grotesk', sans-serif;
+          background: linear-gradient(135deg, #7C3AED, #EC4899);
+          box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+          transition: all 0.2s;
+          white-space: nowrap;
+          flex-shrink: 0;
+          position: relative;
+          overflow: hidden;
+        }
+        .submit-btn::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -100%;
+          width: 100%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          transition: left 0.4s;
+        }
+        .submit-btn:hover::before { left: 100%; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(124,58,237,0.5); }
+        .submit-btn:active { transform: scale(0.97); }
+        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .submit-btn.spinning {
+          animation: slotSpin 0.15s linear infinite;
+        }
+        @keyframes slotSpin {
+          0% { background-position: 0% 50%; }
+          100% { background-position: 100% 50%; }
+        }
+
+        /* COMBO BAR */
+        .combo-bar {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 16px;
+          background: rgba(255,215,0,0.06);
+          border: 1px solid rgba(255,215,0,0.2);
+          border-radius: 12px;
+          margin-top: 12px;
+        }
+        .combo-flames { font-size: 20px; }
+        .combo-text {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 16px;
+          letter-spacing: 0.1em;
+          color: var(--neon-gold);
+        }
+        .combo-desc {
+          font-size: 10px;
+          color: rgba(255,215,0,0.5);
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+        .combo-multiplier {
+          margin-left: auto;
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 24px;
+          color: var(--neon-gold);
+          text-shadow: 0 0 20px rgba(255,215,0,0.8);
+        }
+
+        /* FEED POSTS */
+        .post-card {
+          padding: 24px;
+          transition: all 0.3s;
+        }
+        @media (min-width: 768px) { .post-card { padding: 28px 32px; } }
+        .post-card:hover {
+          border-color: rgba(124,58,237,0.2);         
+          background: rgb(44, 40, 97);
+        }
+        .post-card.new-post {
+          animation: newPostSlide 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+          border-color: rgba(124,58,237,0.4);
+          box-shadow: 0 0 30px rgba(124,58,237,0.15);
+        }
+        @keyframes newPostSlide {
+          from { transform: translateX(-10px); opacity: 0; }
+          to { transform: translateX(0); opacity: 1; }
+        }
+
+        .post-avatar {
+          width: 44px; height: 44px;
+          border-radius: 12px;
+          display: flex; align-items: center; justify-content: center;
+          font-weight: 900;
+          font-size: 18px;
+          color: white;
+          font-family: 'Bebas Neue', sans-serif;
+          flex-shrink: 0;
+        }
+        .post-author { font-size: 13px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em; }
+        .post-level {
+          font-size: 9px;
+          font-weight: 800;
+          padding: 2px 8px;
+          border-radius: 6px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+        }
+        .post-mission {
+          font-size: 9px;
+          font-weight: 700;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.15em;
+          margin-top: 2px;
+        }
+
+        .post-content {
+          font-size: 17px;
+          line-height: 1.75;
+          color: rgba(240,240,255,0.9);
+          font-style: italic;
+          padding: 16px 20px;
+          border-left: 3px solid rgba(124,58,237,0.3);
+          background: rgba(255,255,255,0.02);
+          border-radius: 0 12px 12px 0;
+          margin: 16px 0;
+        }
+
+        .vocab-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+        .vocab-tag {
+          font-size: 9px;
+          font-weight: 800;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.5);
+          padding: 4px 10px;
+          border-radius: 8px;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          font-family: 'JetBrains Mono', monospace;
+        }
+
+        .post-actions {
+          display: flex;
+          align-items: center;
+          gap: 24px;
+          padding-top: 16px;
+          border-top: 1px solid rgba(255,255,255,0.05);
+        }
+        .action-btn {
+          display: flex; align-items: center; gap: 6px;
+          background: none; border: none; cursor: pointer;
+          color: rgba(255,255,255,0.3);
+          font-size: 11px; font-weight: 800;
+          text-transform: uppercase; letter-spacing: 0.1em;
+          transition: all 0.2s;
+          font-family: 'Space Grotesk', sans-serif;
+          padding: 6px 10px;
+          border-radius: 8px;
+        }
+        .action-btn:hover { color: #C4B5FD; background: rgba(124,58,237,0.12); }
+        .action-btn.liked { color: #EF4444; }
+        .action-btn.liked:hover { color: #EF4444; background: rgba(239,68,68,0.1); }
+        .action-btn span.icon { font-size: 18px; transition: transform 0.2s; }
+        .action-btn:hover span.icon { transform: scale(1.3) rotate(-5deg); }
+        .action-btn.liked:active span.icon { animation: heartBeat 0.3s ease-out; }
+        @keyframes heartBeat {
+          0% { transform: scale(1); }
+          50% { transform: scale(1.5); }
+          100% { transform: scale(1.2); }
+        }
+
+        /* COMMENT ZONE */
+        .comment-zone {
+          margin-top: 20px;
+          background: rgba(255,255,255,0.02);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 16px;
+          padding: 20px;
+        }
+        .comment-item {
+          display: flex;
+          gap: 12px;
+          padding: 12px;
+          background: rgba(255,255,255,0.02);
+          border-radius: 10px;
+          margin-bottom: 8px;
+        }
+        .comment-stripe { width: 3px; border-radius: 99px; flex-shrink: 0; }
+        .comment-author { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #C4B5FD; }
+        .comment-text { font-size: 14px; color: rgba(240,240,255,0.7); margin-top: 4px; line-height: 1.5; }
+        .comment-input {
+          width: 100%;
+          background: rgba(15,10,30,0.6);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 12px;
+          padding: 12px 16px;
+          font-size: 14px;
+          color: #D0C8FF;
+          -webkit-text-fill-color: #D0C8FF;
+          font-family: 'Space Grotesk', sans-serif;
+          outline: none;
+          resize: none;
+          transition: all 0.2s;
+          margin-top: 12px;
+        }
+        .comment-input:focus {
+          border-color: rgba(124,58,237,0.4);
+          background: rgba(15,10,30,0.9);
+          box-shadow: 0 0 0 2px rgba(124,58,237,0.1);
+          color: #D0C8FF;
+          -webkit-text-fill-color: #D0C8FF;
+        }
+        .comment-input::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
+
+        /* EDIT ZONE */
+        .edit-zone {
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 16px;
+          padding: 20px;
+          margin: 16px 0;
+        }
+        .edit-textarea {
+          width: 100%;
+          background: rgba(15,10,30,0.7);
+          border: 1px solid rgba(124,58,237,0.3);
+          border-radius: 12px;
+          padding: 14px 18px;
+          font-size: 15px;
+          color: #E0D8FF;
+          -webkit-text-fill-color: #E0D8FF;
+          font-family: 'Space Grotesk', sans-serif;
+          resize: none;
+          outline: none;
+          font-weight: 500;
+          line-height: 1.6;
+          transition: all 0.2s;
+        }
+        .edit-textarea:focus {
+          background: rgba(15,10,30,0.9);
+          border-color: rgba(124,58,237,0.6);
+          box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
+          color: #E0D8FF;
+          -webkit-text-fill-color: #E0D8FF;
+        }
+
+        /* SIDEBAR */
+        .sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+        /* SHADOW PROTOCOL */
+        .shadow-card {
+          background: #0D0D14;
+          border: 1px solid rgba(16,185,129,0.2);
+          border-radius: 22px;
+          padding: 24px;
+          position: relative;
+          overflow: hidden;
+          transition: all 0.3s;
+          display: block;
+          text-decoration: none;
+        }
+        .shadow-card::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(circle at 50% 50%, rgba(16,185,129,0.06), transparent);
+          opacity: 0;
+          transition: opacity 0.3s;
+        }
+        .shadow-card:hover { transform: scale(1.02); border-color: rgba(16,185,129,0.4); box-shadow: 0 20px 60px rgba(16,185,129,0.1); }
+        .shadow-card:hover::before { opacity: 1; }
+        .shadow-card:active { transform: scale(0.98); }
+        .shadow-live-dot {
+          width: 8px; height: 8px;
+          border-radius: 50%;
+          background: #10B981;
+          position: relative;
+        }
+        .shadow-live-dot::before {
+          content: '';
+          position: absolute;
+          inset: -3px;
+          border-radius: 50%;
+          background: rgba(16,185,129,0.4);
+          animation: ping 1.5s ease-in-out infinite;
+        }
+        @keyframes ping {
+          0% { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(2); opacity: 0; }
+        }
+        .shadow-title {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 28px;
+          letter-spacing: 0.05em;
+          color: white;
+        }
+        .shadow-title span { color: #10B981; }
+        .shadow-arrow {
+          width: 48px; height: 48px;
+          background: rgba(16,185,129,0.1);
+          border: 1px solid rgba(16,185,129,0.3);
+          border-radius: 14px;
+          display: flex; align-items: center; justify-content: center;
+          transition: all 0.3s;
+          color: #10B981;
+          font-size: 20px;
+          flex-shrink: 0;
+        }
+        .shadow-card:hover .shadow-arrow {
+          background: #10B981;
+          color: black;
+        }
+        .shadow-progress-bars { display: flex; gap: 4px; margin-top: 20px; }
+        .shadow-bar { height: 3px; flex: 1; border-radius: 99px; }
+
+        /* VOCAB CARD */
+        .vocab-card {
+          background: linear-gradient(135deg, #1a0533, #0f0f2a);
+          border: 1px solid rgba(124,58,237,0.3);
+          border-radius: 22px;
+          padding: 28px;
+          cursor: pointer;
+          transition: all 0.3s;
+          position: relative;
+          overflow: hidden;
+          text-align: left;
+          color: white;
+          font-family: 'Space Grotesk', sans-serif;
+        }
+        .vocab-card::after {
+          content: '';
+          position: absolute;
+          bottom: -30px; right: -30px;
+          width: 120px; height: 120px;
+          background: var(--neon-purple);
+          border-radius: 50%;
+          opacity: 0.1;
+          transition: all 0.5s;
+        }
+        .vocab-card:hover { transform: scale(1.02); box-shadow: 0 20px 60px rgba(124,58,237,0.2); }
+        .vocab-card:hover::after { transform: scale(2); opacity: 0.15; }
+        .vocab-card:active { transform: scale(0.98); }
+        .vocab-count {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 56px;
+          line-height: 1;
+          background: linear-gradient(135deg, #7C3AED, #EC4899);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        /* VAULT MODAL */
+        .vault-overlay {
+          position: fixed; inset: 0; z-index: 100;
+          background: rgba(0,0,0,0.7);
+          backdrop-filter: blur(12px);
+          display: flex; align-items: center; justify-content: center;
+          padding: 16px;
+        }
+        .vault-modal {
+          background: #0F0F1A;
+          border: 1px solid rgba(124,58,237,0.3);
+          border-radius: 28px;
+          width: 100%;
+          max-width: 600px;
+          max-height: 85vh;
+          display: flex;
+          flex-direction: column;
+          overflow: hidden;
+          box-shadow: 0 40px 100px rgba(124,58,237,0.2);
+          animation: vaultOpen 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+          position: relative;
+        }
+        @keyframes vaultOpen {
+          from { transform: scale(0.9) translateY(20px); opacity: 0; }
+          to { transform: scale(1) translateY(0); opacity: 1; }
+        }
+        .vault-header {
+          padding: 28px 32px;
+          border-bottom: 1px solid rgba(255,255,255,0.06);
+          background: rgba(124,58,237,0.05);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .vault-title {
+          font-family: 'Bebas Neue', sans-serif;
+          font-size: 28px;
+          letter-spacing: 0.05em;
+        }
+        .vault-title span { color: var(--neon-purple); }
+        .vault-close {
+          width: 40px; height: 40px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.06);
+          border: none;
+          cursor: pointer;
+          color: rgba(255,255,255,0.5);
+          font-size: 18px;
+          font-weight: 800;
+          transition: all 0.2s;
+          display: flex; align-items: center; justify-content: center;
+        }
+        .vault-close:hover { background: rgba(239,68,68,0.25); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.4); }
+        .vault-search {
+          width: 100%;
+          background: rgba(15,10,30,0.7);
+          border: 1px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          padding: 14px 20px;
+          font-size: 15px;
+          color: #D0C8FF;
+          -webkit-text-fill-color: #D0C8FF;
+          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 600;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .vault-search:focus { 
+          border-color: rgba(124,58,237,0.4);
+          background: rgba(15,10,30,0.9);
+          box-shadow: 0 0 0 2px rgba(124,58,237,0.1);
+          color: #D0C8FF;
+          -webkit-text-fill-color: #D0C8FF;
+        }
+        .vault-search::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
+        .vault-word {
+          display: flex; align-items: center; justify-content: space-between;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 12px;
+          padding: 12px 16px;
+          transition: all 0.2s;
+        }
+        .vault-word:hover { border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.1); }
+        .vault-word-text {
+          font-family: 'JetBrains Mono', monospace;
+          font-size: 12px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.08em;
+          color: #C4B5FD;
+        }
+        .vault-remove-btn {
+          font-size: 10px;
+          font-weight: 800;
+          color: rgba(239,68,68,0.5);
+          background: none;
+          border: none;
+          cursor: pointer;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          transition: color 0.2s;
+          opacity: 0;
+          font-family: 'Space Grotesk', sans-serif;
+        }
+        .vault-word:hover .vault-remove-btn { opacity: 1; }
+        .vault-remove-btn:hover { color: #EF4444; }
+
+        /* LIBRARY */
+        .library-card {
+          background: var(--bg-card);
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 22px;
+          padding: 24px;
+        }
+        .library-item {
+          display: block;
+          padding: 12px 16px;
+          border-radius: 12px;
+          background: rgba(255,255,255,0.03);
+          border: 1px solid transparent;
+          text-decoration: none;
+          transition: all 0.2s;
+          margin-bottom: 8px;
+        }
+        .library-item:last-child { margin-bottom: 0; }
+        .library-item:hover { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.25); }
+        .library-title { font-size: 12px; font-weight: 800; color: rgba(220,215,255,0.85); text-transform: uppercase; letter-spacing: 0.05em; }
+        .library-item:hover .library-title { color: #C4B5FD; }
+        .library-type { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 3px; font-style: italic; }
+
+        /* TIP */
+        .tip-card {
+          background: rgba(245,158,11,0.06);
+          border: 1px solid rgba(245,158,11,0.2);
+          border-radius: 18px;
+          padding: 20px 24px;
+        }
+        .tip-label { font-size: 9px; font-weight: 800; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 8px; }
+        .tip-text { font-size: 13px; font-weight: 600; color: rgba(245,158,11,0.8); font-style: italic; line-height: 1.6; }
+
+        .link-card {
+          background: rgba(245,158,11,0.04);
+          border: 1px solid rgba(245,158,11,0.15);
+          border-radius: 16px;
+          padding: 16px 20px;
+          text-decoration: none;
+          display: block;
+          transition: all 0.2s;
+        }
+        .link-card:hover { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.45); transform: translateX(3px); }
+        .link-card:hover .link-card-label { color: rgba(251,191,36,0.8); }
+        .link-card:hover .link-card-text { color: #FCD34D; }
+        .link-card-label { font-size: 9px; font-weight: 800; color: rgba(245,158,11,0.5); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 6px; transition: color 0.2s; }
+        .link-card-text { font-size: 11px; font-weight: 800; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; }
+
+        /* SECTION LABELS */
+        .section-label {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 10px; font-weight: 800;
+          color: var(--text-muted);
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          margin-bottom: 24px;
+          font-family: 'JetBrains Mono', monospace;
+        }
+        .section-label-dot {
+          width: 6px; height: 6px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        /* DELETE CONFIRM */
+        .delete-confirm { display: flex; gap: 6px; align-items: center; }
+        .btn-danger { background: #EF4444; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
+        .btn-danger:hover { background: #DC2626; }
+        .btn-cancel { background: rgba(255,255,255,0.06); color: rgba(200,195,255,0.7); border: none; padding: 6px 14px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
+        .btn-cancel:hover { background: rgba(255,255,255,0.12); color: #E8E4FF; }
+        .btn-small-icon { background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; transition: all 0.2s; font-size: 16px; }
+        .btn-small-icon:hover { background: rgba(124,58,237,0.2); transform: scale(1.15); }
+
+        .btn-save { background: var(--neon-purple); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
+        .btn-save:hover { background: #6D28D9; }
+        .btn-cancel-text { background: none; border: none; padding: 10px 16px; color: rgba(180,170,255,0.5); font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; border-radius: 8px; }
+        .btn-cancel-text:hover { color: #C4B5FD; background: rgba(124,58,237,0.12); }
+        
+        .btn-correction { background: none; border: none; padding: 8px 12px; font-size: 10px; font-weight: 800; color: #EF4444; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; opacity: 0.7; transition: opacity 0.2s; }
+        .btn-correction:hover { opacity: 1; }
+        .btn-send { background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
+        .btn-send:hover { opacity: 0.9; transform: translateY(-1px); }
+
+        .edited-badge {
+          font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3);
+          text-transform: uppercase; letter-spacing: 0.1em;
+          background: rgba(255,255,255,0.04); padding: 2px 8px; border-radius: 6px;
+          margin-left: 8px;
+        }
+      `}</style>
+
+      {/* XP POP */}
+      {showXpPop && <div className="xp-pop">+{showXpPop} XP ⚡</div>}
+
+      {/* COMBO BANNER */}
+      {showCombo && (
+        <div className="combo-banner">
+          <div className="combo-banner-text">x{combo} COMBO!</div>
+        </div>
+      )}
+
+      {/* VOCABULARY VAULT */}
       {showVault && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-md" onClick={() => setShowVault(false)} />
-          <div className="relative bg-white w-full max-w-2xl max-h-[90vh] md:max-h-[80vh] rounded-[2rem] md:rounded-[3rem] shadow-2xl overflow-hidden flex flex-col animate-in fade-in zoom-in duration-300">
-            <div className="p-6 md:p-8 border-b border-slate-100 flex items-center justify-between bg-indigo-50/30">
+        <div className="vault-overlay" onClick={() => setShowVault(false)}>
+          <div className="vault-modal" onClick={e => e.stopPropagation()}>
+            <div className="vault-header">
               <div>
-                <h2 className="text-xl md:text-2xl font-black italic tracking-tighter">SŁOWNIK<span className="text-indigo-600">VAULT</span></h2>
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Twoje osobiste zasoby B1</p>
+                <div className="vault-title">SŁOWNIK<span>VAULT</span></div>
+                <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>Twoje zasoby językowe</div>
               </div>
-              <button onClick={() => setShowVault(false)} className="w-10 h-10 md:w-12 md:h-12 rounded-2xl hover:bg-white hover:shadow-md text-slate-400 transition-all font-black">✕</button>
+              <button className="vault-close" onClick={() => setShowVault(false)}>✕</button>
             </div>
-            
-            <div className="p-6 md:p-8 flex-1 overflow-y-auto">
-              <div className="relative mb-6">
-                <input 
-                  type="text" 
-                  placeholder="Szukaj słowa..." 
-                  className="w-full bg-slate-100 border-none rounded-2xl py-4 px-6 font-bold focus:ring-2 focus:ring-indigo-400 outline-none"
-                  value={vaultSearch}
-                  onChange={(e) => setVaultSearch(e.target.value)}
-                />
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div style={{ padding: '20px 28px', flex: 1, overflowY: 'auto' }}>
+              <input type="text" className="vault-search" placeholder="Szukaj słowa..." value={vaultSearch} onChange={(e) => setVaultSearch(e.target.value)} style={{ marginBottom: '16px' }} />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {profile?.vocabulary?.filter(w => w.toLowerCase().includes(vaultSearch.toLowerCase())).map((word, i) => (
-                  <div key={i} className="group flex items-center justify-between bg-slate-50 p-4 rounded-2xl border border-transparent hover:border-indigo-100 hover:bg-white transition-all">
-                    <span className="font-black text-slate-700 uppercase text-sm tracking-tight">{word}</span>
-                    <button onClick={() => handleRemoveVocab(word)} className="md:opacity-0 group-hover:opacity-100 text-[10px] font-black text-rose-400 uppercase">Usuń</button>
+                  <div key={i} className="vault-word">
+                    <span className="vault-word-text">{word}</span>
+                    <button className="vault-remove-btn" onClick={() => handleRemoveVocab(word)}>Usuń</button>
                   </div>
                 ))}
               </div>
@@ -197,142 +1258,168 @@ export default function LearningSpace() {
       )}
 
       {/* NAVBAR */}
-      <nav className="border-b border-slate-100 sticky top-0 bg-white/80 backdrop-blur-xl z-50 px-4 md:px-6">
-        <div className="max-w-6xl mx-auto h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3 md:gap-4">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-xl rotate-3 shrink-0">
-              <span className="font-black text-lg italic">P</span>
-            </div>
+      <nav className="ls-nav">
+        <div className="ls-nav-inner">
+          <div className="ls-logo">
+            <div className="ls-logo-icon">P</div>
             <div>
-              <h1 className="font-black text-md md:text-lg tracking-tight">POLISH<span className="text-indigo-600">SPACE</span></h1>
-              <p className="text-[8px] md:text-[10px] font-bold text-slate-400 uppercase tracking-widest italic">Feed Globalny</p>
+              <div className="ls-logo-text">POLISH<span>SPACE</span></div>
+              <div className="ls-logo-sub">Feed Globalny</div>
             </div>
           </div>
-          <div className="bg-slate-50 px-3 py-2 md:px-5 md:py-2.5 rounded-2xl border border-slate-100 shrink-0">
-            <p className="text-xs md:text-sm font-black text-rose-500 flex items-center gap-2">🔥 {profile?.streak || 0} DNI</p>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, justifyContent: 'flex-end', minWidth: 0 }}>
+            {/* XP BAR */}
+            <div className="ls-nav-xp">
+              <div className="ls-xp-level-badge" style={{ background: `${LEVEL_COLORS[currentLevel]}22`, color: LEVEL_COLORS[currentLevel], border: `1px solid ${LEVEL_COLORS[currentLevel]}44` }}>
+                {LEVEL_NAMES[currentLevel]}
+              </div>
+              <div className="ls-xp-bar-wrap" style={{ display: window.innerWidth < 480 ? 'none' : 'flex' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', fontFamily: "'JetBrains Mono', monospace" }}>
+                  <span>{totalXp} XP</span>
+                  <span>Lv.{currentLevel}</span>
+                </div>
+                <div className="ls-xp-bar-track">
+                  <div className="ls-xp-bar-fill" style={{ width: `${xpProgress}%`, background: `linear-gradient(90deg, ${LEVEL_COLORS[currentLevel]}, ${LEVEL_COLORS[Math.min(currentLevel + 1, LEVEL_NAMES.length - 1)]})` }} />
+                </div>
+              </div>
+            </div>
+
+            {/* STREAK */}
+            <div className={`ls-streak ${streakDays >= 3 ? 'hot' : ''}`}>
+              🔥 {streakDays} DNI
+            </div>
           </div>
         </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto px-4 py-6 md:py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-10">
-        
-        {/* LEFT COLUMN: Editor and Feed */}
-        <div className="lg:col-span-8 space-y-8 md:space-y-10">
-          
+      <main className="ls-main">
+
+        {/* LEFT: EDITOR + FEED */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
+
           {/* EDITOR CARD */}
-          <div className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-2xl shadow-indigo-100/50 border border-indigo-50 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none hidden md:block">
-                <span className="text-9xl font-black italic">B1</span>
-            </div>
+          <div className="ls-card ls-card-glow" style={{ position: 'relative', overflow: 'visible' }}>
+            {/* Decorative glow orb */}
+            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: `radial-gradient(circle, ${activeMission.color}22, transparent)`, borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'all 0.5s' }} />
 
-            <div className="relative z-10">
-                <div className="flex gap-2 mb-6 overflow-x-auto pb-2 scrollbar-hide no-scrollbar">
-                    {MISSIONS.map(m => (
-                        <button 
-                            key={m.id}
-                            onClick={() => setActiveMission(m)}
-                            className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all whitespace-nowrap ${activeMission.id === m.id ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-50 text-slate-400'}`}
-                        >
-                            {m.icon} {m.label}
-                        </button>
+            <div className="editor-card" style={{ position: 'relative', zIndex: 1 }}>
+              {/* MISSION TABS */}
+              <div className="mission-tabs">
+                {MISSIONS.map(m => (
+                  <button
+                    key={m.id}
+                    onClick={() => setActiveMission(m)}
+                    className={`mission-tab ${activeMission.id === m.id ? 'active' : ''}`}
+                    style={activeMission.id === m.id ? { color: m.color, borderColor: m.color + '88', boxShadow: `0 0 16px ${m.color}44` } : {}}
+                  >
+                    {m.icon} {m.label} <span className="mission-xp-badge">+{m.xp}xp</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* PROMPT */}
+              <div className="mission-prompt" style={{ borderLeftColor: activeMission.color, color: `${activeMission.color}dd` }}>
+                "{activeMission.prompt}"
+              </div>
+
+              <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* POLISH CHARS */}
+                <div className="polish-chars">
+                  {POLISH_CHARS.map(char => (
+                    <button key={char} type="button" className="polish-char-btn" onClick={() => insertChar(char, mainTextareaRef, text, setText)}>
+                      {char}
+                    </button>
+                  ))}
+                </div>
+
+                <textarea
+                  ref={mainTextareaRef}
+                  required value={text} onChange={(e) => setText(e.target.value)}
+                  placeholder="Napisz coś ambitnego..."
+                  className={`main-textarea ${pulseEditor ? 'pulse-success' : ''}`}
+                />
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div className="polish-chars">
+                    {POLISH_CHARS.map(char => (
+                      <button key={char} type="button" className="polish-char-btn small" onClick={() => insertChar(char, vocabInputRef, vocab, setVocab)}>
+                        {char}
+                      </button>
                     ))}
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                    <input ref={vocabInputRef} value={vocab} onChange={(e) => setVocab(e.target.value)} placeholder="Słówka (oddzielone przecinkiem)..." className="vocab-input" style={{ flex: 1 }} />
+                    <button disabled={!text.trim() || isSubmitting} className={`submit-btn ${slotSpin ? 'spinning' : ''}`}>
+                      {isSubmitting ? "🎰" : `OPUBLIKUJ ⚡`}
+                    </button>
+                  </div>
                 </div>
+              </form>
 
-                <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-6 italic leading-tight">"{activeMission.prompt}"</h2>
-
-                <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* PolishReadingEngine Toolbelt for Main Editor */}
-                    <div className="flex flex-wrap gap-1 mb-2">
-                      {POLISH_CHARS.map(char => (
-                        <button
-                          key={char}
-                          type="button"
-                          onClick={() => insertChar(char, mainTextareaRef, text, setText)}
-                          className="w-8 h-8 flex items-center justify-center bg-slate-100 hover:bg-indigo-600 hover:text-white rounded-lg text-xs font-black transition-colors"
-                        >
-                          {char}
-                        </button>
-                      ))}
-                    </div>
-
-                    <textarea 
-                        ref={mainTextareaRef}
-                        required value={text} onChange={(e) => setText(e.target.value)}
-                        placeholder="Napisz coś ambitnego..."
-                        className="w-full bg-slate-50/50 border-none text-lg md:text-xl focus:ring-2 focus:ring-indigo-100 rounded-3xl p-6 placeholder:text-slate-300 resize-none min-h-[160px] font-medium transition-all"
-                    />
-                    
-                    <div className="flex flex-col md:flex-row items-center gap-4">
-                        <div className="w-full space-y-2">
-                          {/* PolishReadingEngine Toolbelt for Vocab Input */}
-                          <div className="flex flex-wrap gap-1">
-                            {POLISH_CHARS.map(char => (
-                              <button
-                                key={char}
-                                type="button"
-                                onClick={() => insertChar(char, vocabInputRef, vocab, setVocab)}
-                                className="w-6 h-6 flex items-center justify-center bg-slate-50 hover:bg-indigo-400 hover:text-white rounded text-[10px] font-black transition-colors"
-                              >
-                                {char}
-                              </button>
-                            ))}
-                          </div>
-                          <input 
-                              ref={vocabInputRef}
-                              value={vocab} onChange={(e) => setVocab(e.target.value)}
-                              placeholder="Słówka (oddzielone przecinkiem)"
-                              className="w-full bg-white border border-slate-200 rounded-2xl py-4 px-6 text-sm font-bold focus:border-indigo-400 outline-none shadow-sm"
-                          />
-                        </div>
-                        <button disabled={!text.trim() || isSubmitting} className="w-full md:w-auto px-10 py-4 rounded-2xl font-black text-xs tracking-[0.2em] bg-indigo-600 text-white shadow-xl shadow-indigo-200 uppercase self-end">
-                            {isSubmitting ? "..." : "OPUBLIKUJ"}
-                        </button>
-                    </div>
-                </form>
-
-                <div className="mt-8 flex items-center justify-between border-t border-slate-50 pt-6">
-                    <div className="flex flex-col shrink-0">
-                        <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-widest ${milestone.color}`}>{milestone.label}</span>
-                        <div className="w-32 md:w-48 h-1.5 bg-slate-100 rounded-full mt-2 overflow-hidden">
-                            <div className="h-full bg-indigo-500 transition-all duration-1000" style={{ width: `${Math.min((wordCount / 40) * 100, 100)}%` }} />
-                        </div>
-                    </div>
-                    <p className="text-[10px] font-black text-slate-300 uppercase italic shrink-0">{wordCount} słów</p>
+              {/* WORD METER */}
+              <div className="word-meter">
+                <div>
+                  <div className="word-meter-label" style={{ color: milestone.color }}>{milestone.label}</div>
+                  <div className="star-rating" style={{ marginTop: '4px' }}>
+                    {[1, 2, 3, 4].map(i => (
+                      <span key={i} style={{ fontSize: '12px', opacity: i <= milestone.stars ? 1 : 0.15 }}>⭐</span>
+                    ))}
+                  </div>
                 </div>
+                <div className="word-meter-bar">
+                  <div className="word-meter-fill" style={{ width: `${Math.min((wordCount / 40) * 100, 100)}%`, background: `linear-gradient(90deg, ${milestone.color}88, ${milestone.color})` }} />
+                </div>
+                <div className="word-count-num">{wordCount} słów</div>
+              </div>
+
+              {/* COMBO BAR */}
+              {combo >= 2 && (
+                <div className="combo-bar" style={{ animation: 'newPostSlide 0.3s ease-out' }}>
+                  <div className="combo-flames">{combo >= 4 ? '🔥🔥🔥' : combo >= 3 ? '🔥🔥' : '🔥'}</div>
+                  <div>
+                    <div className="combo-text">COMBO AKTYWNY</div>
+                    <div className="combo-desc">Pisz częściej, zarabiaj więcej XP!</div>
+                  </div>
+                  <div className="combo-multiplier">x{combo}</div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* FEED */}
-          <div className="space-y-6 md:space-y-8">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {posts.map((p) => (
-              <article key={p.id} className="bg-white rounded-[1.5rem] md:rounded-[2rem] p-6 md:p-8 border border-slate-100 shadow-sm group transition-all">
-                <div className="flex justify-between items-start mb-6">
-                  <div className="flex items-center gap-3 md:gap-4">
-                    <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl flex items-center justify-center font-black text-white text-lg md:text-xl ${p.authorEmail === ADMIN_EMAIL ? 'bg-indigo-600 rotate-3' : 'bg-slate-900 -rotate-3'}`}>
+              <article key={p.id} className={`ls-card post-card ${newPostIds.has(p.id) ? 'new-post' : ''}`}>
+                {/* POST HEADER */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div className="post-avatar" style={{ background: p.authorEmail === ADMIN_EMAIL ? 'linear-gradient(135deg, #7C3AED, #EC4899)' : 'linear-gradient(135deg, #1E1E2E, #2A2A3E)', border: `1px solid ${p.authorEmail === ADMIN_EMAIL ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.08)'}` }}>
                       {p.author.charAt(0)}
                     </div>
                     <div>
-                      <h4 className="text-xs md:text-sm font-black text-slate-900 uppercase tracking-tight flex items-center gap-2">
-                        {p.author} 
-                        <span className="text-[8px] bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-full font-black">{p.authorLevel}</span>
-                      </h4>
-                      <p className="text-[9px] md:text-[10px] text-slate-400 font-bold uppercase tracking-widest">{p.missionType || 'Wolna Myśl'}</p>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span className="post-author">{p.author}</span>
+                        <span className="post-level" style={{ background: 'rgba(124,58,237,0.15)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>{p.authorLevel}</span>
+                        {p.edited && <span className="edited-badge">editado</span>}
+                      </div>
+                      <div className="post-mission">{p.missionType || 'Wolna Myśl'} · {p.wordCount || 0} słów</div>
                     </div>
                   </div>
-                  
+
                   {(p.uid === user.uid || isAdmin) && (
-                    <div className="flex items-center gap-1">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {deleteConfirmId === p.id ? (
-                        <div className="flex items-center gap-2">
-                          <button onClick={() => confirmDelete(p.id)} className="bg-rose-500 text-white px-2 py-1 rounded-lg text-[10px] font-bold uppercase">TAK</button>
-                          <button onClick={() => setDeleteConfirmId(null)} className="bg-slate-100 text-slate-400 px-2 py-1 rounded-lg text-[10px] font-bold uppercase">NIE</button>
+                        <div className="delete-confirm">
+                          <button onClick={() => confirmDelete(p.id)} className="btn-danger">TAK</button>
+                          <button onClick={() => setDeleteConfirmId(null)} className="btn-cancel">NIE</button>
                         </div>
                       ) : (
-                        <div className="flex gap-1 md:opacity-0 group-hover:opacity-100 transition-all">
+                        <div style={{ display: 'flex', gap: '2px' }}>
                           {p.uid === user.uid && (
-                            <button onClick={() => { setEditingId(p.id); setEditText(p.content); }} className="p-2">✍️</button>
+                            <button onClick={() => { setEditingId(p.id); setEditText(p.content); }} className="btn-small-icon" title="Edit">✍️</button>
                           )}
-                          <button onClick={() => setDeleteConfirmId(p.id)} className="p-2">🗑️</button>
+                          <button onClick={() => setDeleteConfirmId(p.id)} className="btn-small-icon" title="Delete">🗑️</button>
                         </div>
                       )}
                     </div>
@@ -340,92 +1427,65 @@ export default function LearningSpace() {
                 </div>
 
                 {editingId === p.id ? (
-                  <div className="space-y-3 bg-slate-50 p-4 md:p-6 rounded-2xl mb-4">
-                    <div className="flex flex-wrap gap-1 mb-2">
+                  <div className="edit-zone">
+                    <div className="polish-chars" style={{ marginBottom: '8px' }}>
                       {POLISH_CHARS.map(char => (
-                        <button
-                          key={char}
-                          type="button"
-                          onClick={() => insertChar(char, editPostRef, editText, setEditText)}
-                          className="w-6 h-6 flex items-center justify-center bg-white hover:bg-indigo-600 hover:text-white rounded text-[10px] font-black shadow-sm transition-colors"
-                        >
-                          {char}
-                        </button>
+                        <button key={char} type="button" className="polish-char-btn small" onClick={() => insertChar(char, editPostRef, editText, setEditText)}>{char}</button>
                       ))}
                     </div>
-                    <textarea 
-                      ref={editPostRef}
-                      value={editText} 
-                      onChange={(e) => setEditText(e.target.value)} 
-                      className="w-full bg-white border border-slate-200 rounded-xl p-4 text-slate-800 font-bold outline-none" 
-                    />
-                    <div className="flex gap-2">
-                      <button onClick={() => handleEditPost(p.id)} className="bg-indigo-600 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase">Zapisz</button>
-                      <button onClick={() => setEditingId(null)} className="text-slate-400 text-[10px] font-black uppercase px-4">Anuluj</button>
+                    <textarea ref={editPostRef} value={editText} onChange={(e) => setEditText(e.target.value)} className="edit-textarea" rows={4} />
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                      <button onClick={() => handleEditPost(p.id)} className="btn-save">Zapisz</button>
+                      <button onClick={() => setEditingId(null)} className="btn-cancel-text">Anuluj</button>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-slate-800 text-[16px] md:text-[18px] leading-relaxed mb-6 font-medium italic border-l-4 border-indigo-50 pl-4 md:pl-6">"{p.content}"</p>
+                  <p className="post-content">"{p.content}"</p>
                 )}
 
                 {p.vocabulary?.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mb-8">
-                    {p.vocabulary.map((v, i) => (
-                      <span key={i} className="text-[9px] font-black bg-slate-50 text-slate-500 px-3 py-1.5 rounded-xl border border-slate-100 uppercase tracking-tighter">{v}</span>
-                    ))}
+                  <div className="vocab-tags">
+                    {p.vocabulary.map((v, i) => <span key={i} className="vocab-tag">{v}</span>)}
                   </div>
                 )}
 
-                <div className="flex items-center gap-6 md:gap-8 border-t border-slate-50 pt-6">
-                  <button onClick={() => handleLike(p)} className={`flex items-center gap-2 transition-transform active:scale-125 ${p.likes?.includes(user.uid) ? 'text-rose-500' : 'text-slate-300'}`}>
-                    <span className="text-xl md:text-2xl">{p.likes?.includes(user.uid) ? '❤️' : '🤍'}</span>
-                    <span className="text-xs font-black">{p.likes?.length || 0}</span>
+                {/* ACTIONS */}
+                <div className="post-actions">
+                  <button onClick={() => handleLike(p)} className={`action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
+                    <span className="icon">{p.likes?.includes(user.uid) ? '❤️' : '🤍'}</span>
+                    <span>{p.likes?.length || 0}</span>
                   </button>
-                  <button onClick={() => toggleComments(p.id)} className="flex items-center gap-2 text-slate-300 hover:text-indigo-500 transition-colors group">
-                    <span className="text-xl md:text-2xl group-hover:rotate-12 transition-transform">💬</span>
-                    <span className="text-[10px] font-black uppercase tracking-widest">Komentarze</span>
+                  <button onClick={() => toggleComments(p.id)} className="action-btn">
+                    <span className="icon">💬</span>
+                    <span>Komentarze</span>
                   </button>
                 </div>
 
+                {/* COMMENTS */}
                 {activeCommentBox === p.id && (
-                  <div className="mt-8 space-y-4">
-                    <div className="bg-slate-50 rounded-[1.5rem] p-4 md:p-6 space-y-4">
-                      {comments[p.id]?.map(c => (
-                        <div key={c.id} className="flex gap-3 md:gap-4 text-sm bg-white/50 p-3 rounded-xl">
-                          <div className={`w-1 shrink-0 rounded-full ${c.isCorrection ? 'bg-rose-500' : 'bg-indigo-300'}`} />
-                          <div className="flex-1">
-                            <span className="font-black text-slate-900 text-[9px] uppercase tracking-tighter">{c.author}</span>
-                            <p className="text-slate-600 mt-1 font-medium">{c.content}</p>
-                          </div>
+                  <div className="comment-zone">
+                    {comments[p.id]?.map(c => (
+                      <div key={c.id} className="comment-item">
+                        <div className="comment-stripe" style={{ background: c.isCorrection ? '#EF4444' : '#7C3AED' }} />
+                        <div>
+                          <div className="comment-author">{c.author} {c.isCorrection && <span style={{ color: '#EF4444', fontSize: '9px' }}>✍️ POPRAWKA</span>}</div>
+                          <div className="comment-text">{c.content}</div>
                         </div>
-                      ))}
-                      <div className="pt-2">
-                        <div className="flex flex-wrap gap-1 mb-2">
-                          {POLISH_CHARS.map(char => (
-                            <button
-                              key={char}
-                              type="button"
-                              onClick={() => {
-                                const currentRef = { current: document.getElementById(`comment-${p.id}`) };
-                                insertChar(char, currentRef, commentText, setCommentText);
-                              }}
-                              className="w-6 h-6 flex items-center justify-center bg-white hover:bg-indigo-600 hover:text-white rounded text-[10px] font-black shadow-sm transition-colors"
-                            >
-                              {char}
-                            </button>
-                          ))}
-                        </div>
-                        <textarea 
-                          id={`comment-${p.id}`}
-                          value={commentText} 
-                          onChange={(e) => setCommentText(e.target.value)} 
-                          placeholder="Napisz feedback..." 
-                          className="w-full bg-white border border-slate-200 rounded-xl p-4 text-sm outline-none font-medium" 
-                        />
-                        <div className="flex flex-wrap justify-end gap-3 mt-3">
-                          <button onClick={() => handlePostComment(p.id, true)} className="text-[10px] font-black text-rose-500 uppercase px-3 py-1">Poprawka✍️</button>
-                          <button onClick={() => handlePostComment(p.id, false)} className="bg-indigo-600 text-white px-5 py-2 rounded-xl text-[10px] font-black uppercase">Wyślij</button>
-                        </div>
+                      </div>
+                    ))}
+                    <div>
+                      <div className="polish-chars" style={{ marginBottom: '6px' }}>
+                        {POLISH_CHARS.map(char => (
+                          <button key={char} type="button" className="polish-char-btn small"
+                            onClick={() => { const ref = { current: document.getElementById(`comment-${p.id}`) }; insertChar(char, ref, commentText, setCommentText); }}>
+                            {char}
+                          </button>
+                        ))}
+                      </div>
+                      <textarea id={`comment-${p.id}`} value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Napisz feedback..." className="comment-input" rows={3} />
+                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
+                        <button onClick={() => handlePostComment(p.id, true)} className="btn-correction">✍️ Poprawka</button>
+                        <button onClick={() => handlePostComment(p.id, false)} className="btn-send">Wyślij</button>
                       </div>
                     </div>
                   </div>
@@ -435,142 +1495,82 @@ export default function LearningSpace() {
           </div>
         </div>
 
-        {/* SIDEBAR - PRESERVED ALL ELEMENTS */}
-        <aside className="lg:col-span-4 space-y-8">
-          <div className="lg:sticky lg:top-24 space-y-8">
-            
-            {/* SHADOW PROTOCOL TACTICAL ENTRY */}
-            <Link to="/shadow-protocol" className="block group">
-              <div className="relative overflow-hidden bg-slate-950 rounded-[2rem] md:rounded-[2.5rem] p-1 shadow-[0_20px_50px_rgba(16,185,129,0.1)] transition-all hover:scale-[1.02] active:scale-95 border border-emerald-500/20">
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(16,185,129,0.1),transparent)] group-hover:opacity-100 opacity-50 transition-opacity" />
-                <div className="relative bg-slate-900 rounded-[1.8rem] p-6 md:p-8 overflow-hidden">
-                  <div className="flex justify-between items-center mb-6">
-                    <div className="flex items-center gap-2">
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                      </span>
-                      <span className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em]">System: Active</span>
-                    </div>
-                    <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest border border-slate-800 px-2 py-1 rounded">B1 Protocol</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <h3 className="text-xl md:text-2xl font-black text-white italic tracking-tighter uppercase mb-1">
-                        Shadow<span className="text-emerald-500">Protocol</span>
-                      </h3>
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight leading-relaxed">
-                        Inicjuj symulację wysokiego napięcia. <br/>
-                        <span className="text-emerald-900 group-hover:text-emerald-500 transition-colors"> ... Autoryzacja wymagana</span>
-                      </p>
-                    </div>
-                    <div className="w-12 h-12 md:w-14 md:h-14 bg-emerald-500/10 rounded-2xl flex items-center justify-center border border-emerald-500/30 group-hover:bg-emerald-500 group-hover:text-black transition-all duration-500">
-                       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-                       </svg>
-                    </div>
-                  </div>
-                  <div className="mt-6 flex gap-1">
-                    {[1, 2, 3, 4, 5, 6].map((i) => (
-                      <div key={i} className={`h-1 flex-1 rounded-full ${i < 4 ? 'bg-emerald-500' : 'bg-slate-800'}`} />
-                    ))}
-                  </div>
+        {/* SIDEBAR */}
+        <aside className="sidebar">
+          <div style={{ position: 'sticky', top: '90px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+            {/* SHADOW PROTOCOL */}
+            <Link to="/shadow-protocol" className="shadow-card">
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div className="shadow-live-dot" />
+                  <span style={{ fontSize: '10px', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.25em' }}>System: Active</span>
                 </div>
+                <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(16,185,129,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', border: '1px solid rgba(16,185,129,0.2)', padding: '3px 8px', borderRadius: '6px' }}>B1 Protocol</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+                <div>
+                  <div className="shadow-title">Shadow<span>Protocol</span></div>
+                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', marginTop: '4px', lineHeight: 1.5 }}>Inicjuj symulację<br/><span style={{ color: 'rgba(16,185,129,0.5)' }}>Autoryzacja wymagana...</span></div>
+                </div>
+                <div className="shadow-arrow">⚡</div>
+              </div>
+              <div className="shadow-progress-bars">
+                {[1,2,3,4,5,6].map(i => <div key={i} className="shadow-bar" style={{ background: i < 4 ? '#10B981' : 'rgba(255,255,255,0.06)' }} />)}
               </div>
             </Link>
 
-            {/* CLICKABLE VOCABULARY CARD */}
-            <button 
-              onClick={() => setShowVault(true)}
-              className="w-full text-left group bg-indigo-600 rounded-[2rem] md:rounded-[2.5rem] p-8 text-white shadow-2xl relative overflow-hidden transition-all hover:scale-[1.02] active:scale-95"
-            >
-                <div className="absolute -right-4 -bottom-4 w-24 h-24 bg-indigo-400 rounded-full blur-3xl opacity-40 group-hover:scale-150 transition-transform duration-700" />
-                <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-200 mb-6">Mój Słownik</h3>
-                <div className="flex items-end justify-between relative z-10">
-                  <div>
-                    <p className="text-4xl md:text-5xl font-black italic tracking-tighter">{profile?.vocabulary?.length || 0}</p>
-                    <p className="text-[10px] font-bold text-indigo-100 uppercase mt-2 tracking-widest italic opacity-80">Poznane słowa</p>
-                  </div>
-                  <div className="text-4xl group-hover:rotate-12 transition-transform duration-300">📚</div>
+            {/* VOCAB CARD */}
+            <button onClick={() => setShowVault(true)} className="vocab-card">
+              <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(124,58,237,0.6)', marginBottom: '12px' }}>Mój Słownik</div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
+                <div>
+                  <div className="vocab-count">{profile?.vocabulary?.length || 0}</div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '4px' }}>Poznane słowa</div>
                 </div>
+                <div style={{ fontSize: '40px', transition: 'transform 0.3s' }}>📚</div>
+              </div>
             </button>
 
             {/* LIBRARY */}
-            <div className="bg-white rounded-[2rem] p-6 md:p-8 border border-slate-100">
-              <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-400 mb-6 flex items-center gap-2">
-                <span className="w-2 h-2 bg-indigo-500 rounded-full" /> Biblioteka B1
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
+            <div className="library-card">
+              <div className="section-label">
+                <div className="section-label-dot" style={{ background: 'var(--neon-purple)' }} />
+                Biblioteka B1
+              </div>
+              <div>
                 {resources.map(res => (
-                  <a key={res.id} href={res.url} target="_blank" rel="noreferrer" className="block p-4 rounded-2xl bg-slate-50 hover:bg-indigo-50 border border-transparent transition-all group">
-                    <p className="text-xs font-black text-slate-800 uppercase tracking-tighter group-hover:text-indigo-600">{res.title}</p>
-                    <p className="text-[9px] text-slate-400 font-bold uppercase mt-1 italic tracking-widest">{res.type}</p>
+                  <a key={res.id} href={res.url} target="_blank" rel="noreferrer" className="library-item">
+                    <div className="library-title">{res.title}</div>
+                    <div className="library-type">{res.type}</div>
                   </a>
                 ))}
               </div>
             </div>
 
-            {/* TIP OF THE DAY */}
-            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100">
-                <p className="text-[10px] font-black text-amber-600 uppercase mb-2">Wskazówka Dnia:</p>
-                <p className="text-xs font-bold text-amber-800 italic leading-relaxed">
-                    "Używaj spójników takich jak 'ponieważ', 'chociaż' oraz 'dlatego', aby Twoje zdania brzmiały bardziej naturalnie."
-                </p>
+            {/* TIP */}
+            <div className="tip-card">
+              <div className="tip-label">Wskazówka Dnia</div>
+              <div className="tip-text">"Używaj spójników takich jak 'ponieważ', 'chociaż' oraz 'dlatego', aby Twoje zdania brzmiały bardziej naturalnie."</div>
             </div>
 
-            {/* VAULT LINK CARD */}
-            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Vocabulary Vault</p>
-                <Link to="/vocabularyvault" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
-                  Otwórz pełny skarbiec słówek 🔑
-                </Link>
-              </div>
-            </div>
-
-            {/* Polish Simplified LINK CARD */}
-            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest mb-2">Play and learn Polish</p>
-                <Link to="/polish-simplified" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
-                  Polish simplified
-                </Link>
-              </div>
-            </div>
-
-            {/* Polish Music LINK CARD */}
-            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2">Music and learning Polish</p>
-                <Link to="/polish-music" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
-                  Listen to Polish vibe
-                </Link>
-              </div>
-            </div>
-
-            {/* reading-practice LINK CARD */}
-            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2">Practice reading Polish</p>
-                <Link to="/reading-practice" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
-                  Practice  Reading
-                </Link>
-              </div>
-            </div>
-
-             {/* Conjugation-practice LINK CARD */}
-            <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 group transition-all">
-              <div className="relative z-10">
-                <p className="text-[10px] font-black text-amber-700 uppercase tracking-widest mb-2">Practice Polish Conjugations</p>
-                <Link to="/conjugation-practice" className="inline-flex items-center text-[10px] font-black text-amber-600 uppercase tracking-tighter border-b-2 border-amber-200 hover:border-amber-500 pb-0.5">
-                  Practice  Conjugations
-                </Link>
-              </div>
-            </div>
+            {/* LINK CARDS */}
+            {[
+              { to: "/vocabularyvault", label: "Vocabulary Vault", text: "Otwórz pełny skarbiec słówek 🔑" },
+              { to: "/polish-simplified", label: "Play and learn Polish", text: "Polish Simplified 🎮" },
+              { to: "/polish-music", label: "Music & Polish", text: "Listen to Polish vibe 🎵" },
+              { to: "/reading-practice", label: "Reading Practice", text: "Practice Reading 📖" },
+              { to: "/conjugation-practice", label: "Conjugations", text: "Practice Conjugations 🧠" },
+            ].map(({ to, label, text }) => (
+              <Link key={to} to={to} className="link-card">
+                <div className="link-card-label">{label}</div>
+                <div className="link-card-text">{text}</div>
+              </Link>
+            ))}
 
           </div>
         </aside>
       </main>
-    </div>
+    </>
   );
 }
