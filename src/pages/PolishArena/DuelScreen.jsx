@@ -6,7 +6,7 @@ export default function DuelScreen({ onBack, onXpGain, onWin, toast }) {
   const [qIdx, setQIdx] = useState(0);
   const [playerScore, setPlayerScore] = useState(0);
   const [rivalScore, setRivalScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(8);
+  const [timeLeft, setTimeLeft] = useState(15);
   const [answered, setAnswered] = useState(false);
   const [selected, setSelected] = useState(null);
   const [feedback, setFeedback] = useState(null);
