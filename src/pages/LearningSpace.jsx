@@ -335,123 +335,14 @@ export default function LearningSpace() {
           30% { transform: translate(-50%,-50%) scale(1.2) rotate(2deg); opacity: 1; }
           60% { transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 1; }
           100% { transform: translate(-50%,-50%) scale(1.3) rotate(0deg); opacity: 0; }
-        }
+        }  
+             
 
-        /* NAVBAR */
-        .ls-nav {
-          position: sticky; top: 0; z-index: 50;
-          background: rgba(10,10,15,0.9);
-          backdrop-filter: blur(20px);
-          border-bottom: 1px solid rgba(124,58,237,0.2);
-          padding: 0 16px;
-        }
-        .ls-nav-inner {
-          max-width: 1280px;
-          margin: 0 auto;
-          height: 70px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 16px;
-        }
-        .ls-logo {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-        .ls-logo-icon {
-          width: 44px; height: 44px;
-          background: linear-gradient(135deg, #7C3AED, #EC4899);
-          border-radius: 12px;
-          display: flex; align-items: center; justify-content: center;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 22px;
-          color: white;
-          box-shadow: 0 0 20px rgba(124,58,237,0.5);
-          transform: rotate(3deg);
-          flex-shrink: 0;
-        }
-        .ls-logo-text {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 22px;
-          letter-spacing: 0.05em;
-          color: white;
-        }
-        .ls-logo-text span { color: var(--neon-purple); }
-        .ls-logo-sub {
-          font-size: 9px;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.2em;
-        }
-
-        /* XP BAR IN NAV */
-        .ls-nav-xp {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          flex-shrink: 0;
-        }
-        .ls-xp-level-badge {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 11px;
-          letter-spacing: 0.1em;
-          padding: 4px 10px;
-          border-radius: 8px;
-          white-space: nowrap;
-        }
-        .ls-xp-bar-wrap {
-          display: flex; flex-direction: column; gap: 3px; min-width: 80px;
-        }
-        .ls-xp-bar-track {
-          height: 6px;
-          background: rgba(255,255,255,0.06);
-          border-radius: 99px;
-          overflow: hidden;
-        }
-        .ls-xp-bar-fill {
-          height: 100%;
-          border-radius: 99px;
-          transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-          position: relative;
-        }
-        .ls-xp-bar-fill::after {
-          content: '';
-          position: absolute;
-          top: 0; right: 0; bottom: 0;
-          width: 20px;
-          background: rgba(255,255,255,0.4);
-          border-radius: 99px;
-          filter: blur(4px);
-        }
-
-        /* STREAK */
-        .ls-streak {
-          display: flex; align-items: center; gap: 6px;
-          background: rgba(239,68,68,0.1);
-          border: 1px solid rgba(239,68,68,0.2);
-          padding: 6px 12px;
-          border-radius: 10px;
-          font-weight: 800;
-          font-size: 13px;
-          color: #EF4444;
-          white-space: nowrap;
-          flex-shrink: 0;
-        }
-        .ls-streak.hot {
-          animation: streakPulse 2s ease-in-out infinite;
-          box-shadow: 0 0 20px rgba(239,68,68,0.3);
-        }
-        @keyframes streakPulse {
-          0%,100% { box-shadow: 0 0 10px rgba(239,68,68,0.2); }
-          50% { box-shadow: 0 0 25px rgba(239,68,68,0.5); }
-        }
 
         /* MAIN LAYOUT */
         .ls-main {
           max-width: 1280px;
-          margin: 0 auto;
+          margin: auto auto;
           padding: 32px 16px;
           display: grid;
           grid-template-columns: 1fr;
@@ -1257,41 +1148,7 @@ export default function LearningSpace() {
         </div>
       )}
 
-      {/* NAVBAR */}
-      <nav className="ls-nav">
-        <div className="ls-nav-inner">
-          <div className="ls-logo">
-            <div className="ls-logo-icon">P</div>
-            <div>
-              <div className="ls-logo-text">POLISH<span>SPACE</span></div>
-              <div className="ls-logo-sub">Feed Globalny</div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, justifyContent: 'flex-end', minWidth: 0 }}>
-            {/* XP BAR */}
-            <div className="ls-nav-xp">
-              <div className="ls-xp-level-badge" style={{ background: `${LEVEL_COLORS[currentLevel]}22`, color: LEVEL_COLORS[currentLevel], border: `1px solid ${LEVEL_COLORS[currentLevel]}44` }}>
-                {LEVEL_NAMES[currentLevel]}
-              </div>
-              <div className="ls-xp-bar-wrap" style={{ display: window.innerWidth < 480 ? 'none' : 'flex' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', fontFamily: "'JetBrains Mono', monospace" }}>
-                  <span>{totalXp} XP</span>
-                  <span>Lv.{currentLevel}</span>
-                </div>
-                <div className="ls-xp-bar-track">
-                  <div className="ls-xp-bar-fill" style={{ width: `${xpProgress}%`, background: `linear-gradient(90deg, ${LEVEL_COLORS[currentLevel]}, ${LEVEL_COLORS[Math.min(currentLevel + 1, LEVEL_NAMES.length - 1)]})` }} />
-                </div>
-              </div>
-            </div>
-
-            {/* STREAK */}
-            <div className={`ls-streak ${streakDays >= 3 ? 'hot' : ''}`}>
-              🔥 {streakDays} DNI
-            </div>
-          </div>
-        </div>
-      </nav>
+    
 
       <main className="ls-main">
 
@@ -1557,10 +1414,11 @@ export default function LearningSpace() {
             {/* LINK CARDS */}
             {[
               { to: "/vocabularyvault", label: "Vocabulary Vault", text: "Otwórz pełny skarbiec słówek 🔑" },
-              { to: "/polish-simplified", label: "Play and learn Polish", text: "Polish Simplified 🎮" },
+              { to: "/polish-simplified", label: "learn Polish vocabulary", text: "Polish Simplified 🎮" },
               { to: "/polish-music", label: "Music & Polish", text: "Listen to Polish vibe 🎵" },
               { to: "/reading-practice", label: "Reading Practice", text: "Practice Reading 📖" },
               { to: "/conjugation-practice", label: "Conjugations", text: "Practice Conjugations 🧠" },
+              { to: "/play", label: "Learn Polish via Play", text: "Practice grammar rules, build vocabulary with games logics" },
             ].map(({ to, label, text }) => (
               <Link key={to} to={to} className="link-card">
                 <div className="link-card-label">{label}</div>

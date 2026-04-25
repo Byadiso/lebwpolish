@@ -1,24 +1,106 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
+const ACCENT = "#6366f1";
+const NAVBAR_H = 30;   // your existing navbar height in px — adjust if needed
+const PLAYER_H = 62;   // the player bar height
+const TOP_OFFSET = NAVBAR_H + PLAYER_H; // 118px total before content starts
+
+// ── Animated bars ─────────────────────────────────────────────────────────────
+function NowPlayingBars({ active }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "flex-end", gap: 2, height: 13 }}>
+      {[0.6, 1, 0.4].map((h, i) => (
+        <motion.span
+          key={i}
+          animate={active ? { scaleY: [h, 1, 0.3, 0.9, h] } : { scaleY: 0.3 }}
+          transition={active ? { duration: 0.8, repeat: Infinity, delay: i * 0.18, ease: "easeInOut" } : { duration: 0.3 }}
+          style={{ display: "block", width: 3, height: "100%", borderRadius: 2, background: ACCENT, transformOrigin: "bottom" }}
+        />
+      ))}
+    </span>
+  );
+}
+
+// ── Seekable progress bar ─────────────────────────────────────────────────────
+function AudioProgress({ audioRef }) {
+  const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const barRef = useRef(null);
+
+  useEffect(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    const onTime = () => setProgress(el.currentTime);
+    const onMeta = () => setDuration(el.duration || 0);
+    el.addEventListener("timeupdate", onTime);
+    el.addEventListener("loadedmetadata", onMeta);
+    return () => { el.removeEventListener("timeupdate", onTime); el.removeEventListener("loadedmetadata", onMeta); };
+  }, [audioRef]);
+
+  const seek = (e) => {
+    if (!barRef.current || !audioRef.current || !duration) return;
+    const rect = barRef.current.getBoundingClientRect();
+    audioRef.current.currentTime = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width)) * duration;
+  };
+
+  const fmt = (s) => !s || isNaN(s) ? "0:00" : `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, "0")}`;
+  const pct = duration ? (progress / duration) * 100 : 0;
+
+  return (
+    <div style={{ flex: 1, minWidth: 0 }}>
+      <div ref={barRef} onClick={seek}
+        style={{ height: 3, background: "rgba(255,255,255,0.08)", borderRadius: 9999, cursor: "pointer", position: "relative" }}>
+        <motion.div
+          animate={{ width: `${pct}%` }}
+          transition={{ duration: 0.25, ease: "linear" }}
+          style={{ position: "absolute", top: 0, left: 0, height: "100%", background: ACCENT, borderRadius: 9999 }}
+        />
+      </div>
+      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
+        <span style={{ fontSize: 10, color: "rgba(148,163,184,0.4)", fontVariantNumeric: "tabular-nums" }}>{fmt(progress)}</span>
+        <span style={{ fontSize: 10, color: "rgba(148,163,184,0.4)", fontVariantNumeric: "tabular-nums" }}>{fmt(duration)}</span>
+      </div>
+    </div>
+  );
+}
+
+// ── Word tap ripple ───────────────────────────────────────────────────────────
+function WordRipple({ trigger }) {
+  return (
+    <AnimatePresence>
+      {trigger && (
+        <motion.span key={trigger}
+          initial={{ scale: 0.5, opacity: 0.5 }} animate={{ scale: 2.2, opacity: 0 }} exit={{}}
+          transition={{ duration: 0.45, ease: "easeOut" }}
+          style={{ position: "absolute", inset: 0, borderRadius: 6, background: "rgba(99,102,241,0.22)", pointerEvents: "none" }}
+        />
+      )}
+    </AnimatePresence>
+  );
+}
+
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function LirycznaSymfonia() {
-  const playlist = ["sanah_01.json", "sanah_02.json", "sanah_03.json"]; 
-  
+  const playlist = ["sanah_01.json", "sanah_02.json", "sanah_03.json"];
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [song, setSong] = useState(null);
   const [selectedWord, setSelectedWord] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [wordsLearned, setWordsLearned] = useState(new Set());
+  const [lastTapped, setLastTapped] = useState(null);
+  const [savedFlash, setSavedFlash] = useState(false);
   const audioRef = useRef(null);
 
   useEffect(() => {
     setSong(null);
     setSelectedWord(null);
-    
-    fetch(`/songs/${playlist[currentIndex]}`) 
-      .then((res) => res.json())
-      .then((data) => setSong(data))
-      .catch((err) => console.error("Playlist Load Error:", err));
+    fetch(`/songs/${playlist[currentIndex]}`)
+      .then(r => r.json())
+      .then(setSong)
+      .catch(console.error);
   }, [currentIndex]);
 
   useEffect(() => {
@@ -28,226 +110,459 @@ export default function LirycznaSymfonia() {
     }
   }, [song]);
 
-  const togglePlay = () => {
-    if (!audioRef.current) return;
-    if (audioRef.current.paused) {
-      audioRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-    } else {
-      audioRef.current.pause();
-      setIsPlaying(false);
-    }
+  const togglePlay = useCallback(() => {
+    const el = audioRef.current;
+    if (!el) return;
+    el.paused ? el.play().then(() => setIsPlaying(true)).catch(() => {}) : (el.pause(), setIsPlaying(false));
+  }, []);
+
+  const handleNext = useCallback(() => setCurrentIndex(p => (p + 1) % playlist.length), []);
+  const handlePrev = useCallback(() => setCurrentIndex(p => (p - 1 + playlist.length) % playlist.length), []);
+  const selectSong = (idx) => { setCurrentIndex(idx); setIsMenuOpen(false); setIsPlaying(true); };
+
+  const tapWord = (word) => {
+    setSelectedWord(prev => prev?.pl === word.pl ? null : word);
+    setLastTapped(word.pl + Date.now());
   };
 
-  const handleNext = () => setCurrentIndex((prev) => (prev + 1) % playlist.length);
-  const handlePrev = () => setCurrentIndex((prev) => (prev - 1 + playlist.length) % playlist.length);
-
-  const selectSong = (index) => {
-    setCurrentIndex(index);
-    setIsMenuOpen(false);
-    setIsPlaying(true);
+  const saveWord = () => {
+    if (!selectedWord) return;
+    setWordsLearned(prev => new Set([...prev, selectedWord.pl]));
+    setSavedFlash(true);
+    setTimeout(() => setSavedFlash(false), 1800);
   };
 
   if (!song) return (
-    <div className="min-h-screen bg-[#020617] flex items-center justify-center">
-      <div className="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin" />
+    <div style={{ minHeight: "100vh", background: "#020617", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <motion.div animate={{ rotate: 360 }} transition={{ duration: 0.9, repeat: Infinity, ease: "linear" }}
+        style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(99,102,241,0.15)", borderTopColor: ACCENT }} />
     </div>
   );
 
+  const learnedCount = wordsLearned.size;
+
   return (
-    <div className="min-h-screen bg-[#020617] text-white selection:bg-indigo-500/30 font-sans antialiased">
+    <div style={{ minHeight: "100vh", background: "#020617", color: "#fff", fontFamily: "'Space Grotesk', sans-serif", overflowX: "hidden" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        ::selection { background: rgba(99,102,241,0.35); }
+        .word-btn {
+          position: relative; display: inline-block;
+          background: none; border: none; cursor: pointer;
+          padding: 2px 3px; border-radius: 5px;
+          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;
+          transition: color 0.15s;
+        }
+        .word-btn:hover { color: #a5b4fc !important; }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 9999px; }
+      `}</style>
+
       <audio ref={audioRef} onEnded={handleNext} preload="auto">
         <source src={song.audioUrl} type="audio/mpeg" />
       </audio>
 
-      {/* 📂 SONG LIBRARY MENU - FULL WIDTH ON MOBILE */}
+      {/* ── LIBRARY DRAWER ─────────────────────────────────────────────────── */}
       <AnimatePresence>
         {isMenuOpen && (
           <>
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
               onClick={() => setIsMenuOpen(false)}
-              className="fixed inset-0 bg-black/95 backdrop-blur-xl z-[200]"
+              style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", backdropFilter: "blur(8px)", zIndex: 400 }}
             />
-            <motion.div 
+            <motion.div
               initial={{ x: "-100%" }} animate={{ x: 0 }} exit={{ x: "-100%" }}
-              transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed left-0 top-0 bottom-0 w-full sm:w-[85%] max-w-sm bg-slate-900 border-r border-white/10 z-[201] p-6 sm:p-8 shadow-2xl overflow-y-auto"
+              transition={{ type: "spring", damping: 28, stiffness: 280 }}
+              style={{
+                position: "fixed", left: 0, top: 0, bottom: 0,
+                width: "min(320px, 88vw)",
+                background: "#090f1e",
+                borderRight: "1px solid rgba(99,102,241,0.14)",
+                zIndex: 401, padding: "2rem 1.5rem",
+                overflowY: "auto", display: "flex", flexDirection: "column", gap: "1.5rem",
+              }}
             >
-              <div className="flex justify-between items-center mb-10">
-                <h2 className="text-xl font-black italic tracking-tighter uppercase">Library</h2>
-                <button onClick={() => setIsMenuOpen(false)} className="bg-white/5 px-4 py-2 rounded-lg text-slate-400 font-bold text-xs uppercase tracking-widest">Close</button>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.5)", marginBottom: 4 }}>Song library</div>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1.5rem", color: "#e2e8f0" }}>Playlist</h2>
+                </div>
+                <button onClick={() => setIsMenuOpen(false)} style={{ width: 32, height: 32, borderRadius: 8, border: "1px solid rgba(255,255,255,0.08)", background: "rgba(255,255,255,0.04)", color: "rgba(148,163,184,0.6)", cursor: "pointer", fontSize: 13 }}>✕</button>
               </div>
-              <div className="space-y-3">
-                {playlist.map((fileName, idx) => (
-                  <button
-                    key={idx}
-                    onClick={() => selectSong(idx)}
-                    className={`w-full text-left p-5 rounded-2xl transition-all border ${
-                      currentIndex === idx 
-                        ? "bg-indigo-600 border-indigo-400 shadow-lg shadow-indigo-500/20" 
-                        : "bg-white/5 border-transparent active:bg-white/10"
-                    }`}
-                  >
-                    <p className={`text-[9px] font-black uppercase tracking-[0.2em] mb-1 ${currentIndex === idx ? "text-indigo-200" : "text-indigo-500"}`}>
-                      Track 0{idx + 1}
-                    </p>
-                    <p className="font-bold text-base truncate capitalize">
-                      {fileName.replace('.json', '').replace('_', ' ')}
-                    </p>
-                  </button>
-                ))}
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {playlist.map((fileName, idx) => {
+                  const active = currentIndex === idx;
+                  return (
+                    <button key={idx} onClick={() => selectSong(idx)} style={{
+                      display: "flex", alignItems: "center", gap: 12, width: "100%",
+                      padding: "12px 14px", borderRadius: 12, cursor: "pointer", textAlign: "left",
+                      background: active ? "rgba(99,102,241,0.1)" : "rgba(255,255,255,0.02)",
+                      border: `1px solid ${active ? "rgba(99,102,241,0.28)" : "rgba(255,255,255,0.05)"}`,
+                      transition: "background 0.18s",
+                    }}>
+                      <div style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0, background: active ? "rgba(99,102,241,0.18)" : "rgba(255,255,255,0.04)", border: `1px solid ${active ? "rgba(99,102,241,0.3)" : "rgba(255,255,255,0.06)"}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        {active ? <NowPlayingBars active={isPlaying} /> : <span style={{ fontFamily: "monospace", fontSize: 11, color: "rgba(148,163,184,0.35)", fontWeight: 700 }}>0{idx + 1}</span>}
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: active ? "rgba(99,102,241,0.65)" : "rgba(148,163,184,0.3)", marginBottom: 3 }}>Track 0{idx + 1}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: active ? "#c7d2fe" : "rgba(226,232,240,0.6)", textTransform: "capitalize", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {fileName.replace(".json", "").replace(/_/g, " ")}
+                        </div>
+                      </div>
+                      {active && <span style={{ width: 7, height: 7, borderRadius: "50%", background: ACCENT, flexShrink: 0, boxShadow: `0 0 8px ${ACCENT}` }} />}
+                    </button>
+                  );
+                })}
               </div>
+
+              {learnedCount > 0 && (
+                <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
+                  style={{ marginTop: "auto", padding: "12px 14px", borderRadius: 12, background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.18)", display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: "1.2rem" }}>🏆</span>
+                  <div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: "#6ee7b7" }}>{learnedCount} word{learnedCount > 1 ? "s" : ""} saved</div>
+                    <div style={{ fontSize: 10, color: "rgba(110,231,183,0.45)", marginTop: 1 }}>Keep exploring!</div>
+                  </div>
+                </motion.div>
+              )}
             </motion.div>
           </>
         )}
       </AnimatePresence>
 
-      {/* 🎵 PLAYER HEADER - MOBILE OPTIMIZED */}
-      <header className="fixed top-14 left-0 right-0 z-[90] bg-[#020617]/90 backdrop-blur-xl border-b border-white/5 px-3 py-3 md:px-8">
-        <div className="max-w-7xl mx-auto flex flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <button 
-              onClick={() => setIsMenuOpen(true)}
-              className="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex flex-col items-center justify-center gap-1 hover:bg-indigo-500/20 active:scale-90 transition-all"
-            >
-              <div className="w-4 h-0.5 bg-indigo-500 rounded-full" />
-              <div className="w-4 h-0.5 bg-indigo-500 rounded-full" />
-            </button>
-            <h1 className="text-lg font-black italic tracking-tighter uppercase hidden md:block">
-              Liryczna <span className="text-slate-500">Symfonia</span>
-            </h1>
+      {/* ── PLAYER BAR — sits directly under the existing navbar ─────────────
+           top: NAVBAR_H = 56px  →  matches your app's top-14 (3.5rem = 56px)  */}
+      <header style={{
+        position: "fixed",
+        top: NAVBAR_H,
+        left: 0, right: 0,
+        zIndex: 90,                           // below your navbar (assumed z-[90]+)
+        height: PLAYER_H,
+        background: "rgba(2,6,23,0.97)",
+        backdropFilter: "blur(20px)",
+        borderBottom: "1px solid rgba(255,255,255,0.05)",
+        display: "flex", alignItems: "center",
+        padding: "0 16px",
+      }}>
+        <div style={{ maxWidth: 1280, width: "100%", margin: "0 auto", display: "flex", alignItems: "center", gap: 12 }}>
+
+          {/* Menu toggle */}
+          <button onClick={() => setIsMenuOpen(true)} style={{
+            width: 38, height: 38, borderRadius: 9, flexShrink: 0,
+            background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)",
+            color: ACCENT, cursor: "pointer",
+            display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 4,
+          }}>
+            <span style={{ display: "block", width: 15, height: 2, background: "currentColor", borderRadius: 2 }} />
+            <span style={{ display: "block", width: 15, height: 2, background: "currentColor", borderRadius: 2 }} />
+          </button>
+
+          {/* App name — hidden on small screens */}
+          <div style={{ display: "flex", alignItems: "baseline", gap: 5, flexShrink: 0 }} className="ls-title">
+            <style>{`.ls-title{display:none!important}@media(min-width:640px){.ls-title{display:flex!important}}`}</style>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1rem", fontWeight: 700, color: "#e2e8f0", whiteSpace: "nowrap" }}>Liryczna</span>
+            <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1rem", color: "rgba(148,163,184,0.28)", whiteSpace: "nowrap" }}>Symfonia</span>
           </div>
-          
-          <div className="flex items-center gap-1 sm:gap-4 flex-1 justify-end">
-            <button onClick={handlePrev} className="p-2 text-slate-400 active:text-white active:scale-75">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+
+          {/* Controls pill */}
+          <div style={{
+            flex: 1, display: "flex", alignItems: "center", gap: 10,
+            background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
+            borderRadius: 13, padding: "7px 14px", minWidth: 0,
+          }}>
+            <button onClick={handlePrev} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(148,163,184,0.4)", padding: "2px 4px", flexShrink: 0, display: "flex" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z" /></svg>
             </button>
 
-            <div className="bg-slate-900/50 border border-white/10 p-1 rounded-xl sm:rounded-2xl flex items-center gap-2 sm:gap-3">
-              <button 
-                onClick={togglePlay}
-                className="w-9 h-9 sm:w-12 sm:h-12 rounded-lg sm:rounded-xl bg-indigo-600 flex items-center justify-center active:scale-95 shadow-lg shadow-indigo-500/20"
-              >
-                {isPlaying ? <span className="text-sm sm:text-lg font-black italic">II</span> : <div className="ml-1 w-0 h-0 border-t-[5px] border-t-transparent border-l-[10px] border-l-white border-b-[5px] border-b-transparent" />}
-              </button>
-              <div className="pr-3 max-w-[120px] sm:max-w-[180px]">
-                <p className="text-[7px] font-black uppercase tracking-widest text-indigo-400 truncate hidden sm:block mb-1">{song.artist}</p>
-                <p className="text-[10px] sm:text-xs font-bold text-slate-100 truncate">{song.title}</p>
+            <motion.button whileTap={{ scale: 0.9 }} onClick={togglePlay} style={{
+              width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+              background: ACCENT, border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", justifyContent: "center", color: "#fff",
+              boxShadow: isPlaying ? "0 0 18px rgba(99,102,241,0.45)" : "none",
+              transition: "box-shadow 0.3s",
+            }}>
+              {isPlaying
+                ? <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" /></svg>
+                : <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+              }
+            </motion.button>
+
+            <button onClick={handleNext} style={{ background: "none", border: "none", cursor: "pointer", color: "rgba(148,163,184,0.4)", padding: "2px 4px", flexShrink: 0, display: "flex" }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18 14.5 12 6 6v12zm10-12v12h2V6h-2z" /></svg>
+            </button>
+
+            {/* Track info + progress */}
+            <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, minWidth: 0 }}>
+              {isPlaying && <span style={{ flexShrink: 0 }}><NowPlayingBars active={true} /></span>}
+              <div style={{ flexShrink: 0, minWidth: 0, maxWidth: 160 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: "#e2e8f0", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{song.title}</div>
+                <div style={{ fontSize: 10, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.12em", color: "rgba(99,102,241,0.55)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{song.artist}</div>
               </div>
+              <AudioProgress audioRef={audioRef} />
             </div>
-
-            <button onClick={handleNext} className="p-2 text-slate-400 active:text-white active:scale-75">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
-            </button>
           </div>
+
+          {/* Words saved badge */}
+          <AnimatePresence>
+            {learnedCount > 0 && (
+              <motion.div initial={{ scale: 0.7, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.7, opacity: 0 }}
+                style={{ flexShrink: 0, padding: "5px 11px", borderRadius: 9, background: "rgba(52,211,153,0.08)", border: "1px solid rgba(52,211,153,0.2)", display: "flex", alignItems: "center", gap: 5 }}>
+                <span style={{ fontSize: 10 }}>✦</span>
+                <span style={{ fontSize: 11, fontWeight: 800, color: "#6ee7b7" }}>{learnedCount}</span>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </header>
 
-      {/* 📖 MAIN CONTENT */}
-      <main className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12 p-4 md:p-8 pt-36 pb-32 items-start">
-        
-        {/* LYRICS COLUMN */}
-        <div className="lg:col-span-7 space-y-12 sm:space-y-20">
-          {song.fullLyrics.map((line, lineIdx) => (
-            <motion.div 
-              key={`${currentIndex}-${lineIdx}`}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-10%" }}
-              className="relative pl-4 sm:pl-6 border-l-2 border-white/5"
-            >
-              <div className="flex flex-wrap gap-x-2 gap-y-1 sm:gap-x-3 sm:gap-y-2 mb-4">
-                {line.words.map((word, wIdx) => (
-                  <button
-                    key={wIdx}
-                    onClick={() => setSelectedWord(word)}
-                    className={`text-2xl xs:text-3xl sm:text-5xl lg:text-6xl font-black transition-all duration-200 uppercase tracking-tighter ${
-                      selectedWord?.pl === word.pl 
-                        ? "text-indigo-500 scale-105" 
-                        : "text-slate-200/90 hover:text-indigo-400"
-                    }`}
-                  >
-                    {word.pl}
-                  </button>
-                ))}
-              </div>
-              <p className="text-sm sm:text-lg font-medium text-slate-500 italic">
-                {line.translation}
-              </p>
-            </motion.div>
-          ))}
+      {/* ── MAIN LAYOUT ──────────────────────────────────────────────────────── */}
+      {/*  paddingTop = NAVBAR_H + PLAYER_H + 24px breathing room = 142px        */}
+      <div style={{
+        maxWidth: 1280, margin: "0 auto",
+        paddingTop: TOP_OFFSET + 24,
+        paddingBottom: "6rem",
+        paddingLeft: 24, paddingRight: 24,
+        display: "grid",
+        /* 
+          Two columns on ≥1024px: lyrics left, vocab right.
+          minmax(0,…) prevents lyrics from overflowing into the vocab column.
+        */
+        gridTemplateColumns: "minmax(0, 1fr)",
+        gap: 32,
+      }}
+        className="ls-main"
+      >
+        <style>{`
+          @media(min-width:1024px){
+            .ls-main {
+              grid-template-columns: minmax(0, 1fr) 380px !important;
+              align-items: start;
+            }
+          }
+          @media(max-width:1023px){
+            .ls-vocab-desktop { display: none !important; }
+          }
+        `}</style>
+
+        {/* ── LEFT: LYRICS ─────────────────────────────────────────────────── */}
+        <div style={{ minWidth: 0 }}>  {/* minWidth:0 is critical — forces the column to respect its grid lane */}
+
+          {/* Song title */}
+          <div style={{ marginBottom: "2.5rem", paddingBottom: "1.25rem", borderBottom: "1px solid rgba(255,255,255,0.04)" }}>
+            <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(99,102,241,0.5)", marginBottom: 8 }}>Now reading</div>
+            <h1 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontSize: "clamp(1.8rem, 4vw, 2.8rem)", lineHeight: 1.05, color: "#f1f5f9", letterSpacing: "-0.01em", marginBottom: 6 }}>
+              {song.title}
+            </h1>
+            <p style={{ fontSize: 12, fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(148,163,184,0.35)" }}>{song.artist}</p>
+          </div>
+
+          {/* Lyric lines */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "2.5rem" }}>
+            {song.fullLyrics.map((line, lineIdx) => (
+              <motion.div
+                key={`${currentIndex}-${lineIdx}`}
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-6%" }}
+                transition={{ duration: 0.4, delay: Math.min(lineIdx * 0.04, 0.25) }}
+                style={{ paddingLeft: "1rem", borderLeft: "2px solid rgba(255,255,255,0.04)" }}
+              >
+                {/* Words — flex-wrap so they stay within column */}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "3px 6px", marginBottom: 10 }}>
+                  {line.words.map((word, wIdx) => {
+                    const isSelected = selectedWord?.pl === word.pl;
+                    const isLearned = wordsLearned.has(word.pl);
+                    return (
+                      <span key={wIdx} style={{ position: "relative", display: "inline-block" }}>
+                        {isSelected && <WordRipple trigger={lastTapped} />}
+                        <button
+                          className="word-btn"
+                          onClick={() => tapWord(word)}
+                          style={{
+                            fontSize: "clamp(1.3rem, 3.5vw, 2rem)",
+                            color: isLearned ? "#6ee7b7" : isSelected ? "#818cf8" : "rgba(226,232,240,0.85)",
+                          }}
+                        >
+                          {word.pl}
+                          {/* Green dot for saved words */}
+                          {isLearned && (
+                            <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }}
+                              style={{ position: "absolute", top: 0, right: -2, width: 7, height: 7, borderRadius: "50%", background: "#6ee7b7", boxShadow: "0 0 5px #6ee7b7" }} />
+                          )}
+                        </button>
+                      </span>
+                    );
+                  })}
+                </div>
+
+                {/* Translation — italic, muted */}
+                <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "clamp(0.78rem, 1.8vw, 0.95rem)", color: "rgba(148,163,184,0.38)", lineHeight: 1.65 }}>
+                  {line.translation}
+                </p>
+              </motion.div>
+            ))}
+          </div>
         </div>
 
-        {/* 📚 DESKTOP VOCABULARY BOX */}
-        <aside className="lg:col-span-5 hidden lg:block h-full relative min-h-[500px]">
-          <div className="sticky top-40">
+        {/* ── RIGHT: VOCAB — fixed so it doesn't scroll away ───────────────── */}
+        {/*
+          The <aside> in the grid reserves the 380px column.
+          The inner div is position:fixed so it stays on screen while scrolling,
+          but is sized to match the reserved column.
+        */}
+        <aside className="ls-vocab-desktop" style={{ position: "relative", height: 1 }}>
+          <div style={{
+            position: "fixed",
+            top: TOP_OFFSET + 24,
+            right: 0,
+            width: 380,
+            padding: "0 24px 0 0",
+            maxHeight: `calc(100vh - ${TOP_OFFSET + 40}px)`,
+            overflowY: "auto",
+          }}
+            className="ls-vocab-inner"
+          >
+            <style>{`
+              @media(min-width:1280px){
+                .ls-vocab-inner {
+                  right: calc(50vw - 640px) !important;
+                }
+              }
+              .ls-vocab-inner::-webkit-scrollbar { width: 3px; }
+              .ls-vocab-inner::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.15); border-radius: 9999px; }
+            `}</style>
+
+            <div style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.45)", marginBottom: 12 }}>Vocabulary</div>
+
             <AnimatePresence mode="wait">
               {selectedWord ? (
                 <motion.div
                   key={selectedWord.pl}
-                  initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: -20, opacity: 0 }}
-                  className="bg-indigo-600 rounded-[2.5rem] p-10 shadow-2xl border border-white/10"
+                  initial={{ y: 10, opacity: 0, scale: 0.98 }}
+                  animate={{ y: 0, opacity: 1, scale: 1 }}
+                  exit={{ y: -8, opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.2, ease: "easeOut" }}
+                  style={{
+                    background: "#0c1427",
+                    border: "1px solid rgba(99,102,241,0.24)",
+                    borderRadius: 20, padding: "1.5rem",
+                  }}
                 >
-                  <span className="text-[10px] font-black uppercase tracking-[0.4em] text-white/50 mb-4 block">Definition</span>
-                  <h2 className="text-5xl font-black italic text-white uppercase tracking-tighter mb-2 break-words leading-none">{selectedWord.pl}</h2>
-                  <p className="text-2xl font-bold text-indigo-100 mb-8 border-b border-white/10 pb-6">{selectedWord.en}</p>
-                  <div className="space-y-6">
-                    <p className="font-bold text-white text-lg bg-black/20 px-4 py-1 rounded-full inline-block">{selectedWord.type}</p>
-                    <button className="w-full py-5 bg-white text-indigo-900 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-black hover:text-white transition-all">Forge into Memory</button>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+                    <span style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(99,102,241,0.55)" }}>Polish</span>
+                    <button onClick={() => setSelectedWord(null)}
+                      style={{ width: 26, height: 26, borderRadius: 7, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(148,163,184,0.4)", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                      ✕
+                    </button>
                   </div>
+
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700, fontStyle: "italic", fontSize: "clamp(1.8rem, 2.5vw, 2.4rem)", color: "#f1f5f9", lineHeight: 1.05, marginBottom: "0.5rem", wordBreak: "break-word" }}>
+                    {selectedWord.pl}
+                  </h2>
+
+                  <p style={{ fontSize: "1.1rem", fontWeight: 600, color: "#a5b4fc", paddingBottom: "1rem", marginBottom: "1rem", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                    {selectedWord.en}
+                  </p>
+
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+                    <span style={{ padding: "4px 11px", borderRadius: 9999, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.18em", color: "rgba(165,180,252,0.6)" }}>
+                      {selectedWord.type}
+                    </span>
+                    <motion.button whileTap={{ scale: 0.94 }} onClick={saveWord} style={{
+                      padding: "7px 16px", borderRadius: 10, cursor: "pointer",
+                      background: wordsLearned.has(selectedWord.pl) ? "rgba(52,211,153,0.1)" : "rgba(99,102,241,0.12)",
+                      border: `1px solid ${wordsLearned.has(selectedWord.pl) ? "rgba(52,211,153,0.28)" : "rgba(99,102,241,0.28)"}`,
+                      color: wordsLearned.has(selectedWord.pl) ? "#6ee7b7" : "#a5b4fc",
+                      fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em",
+                      transition: "all 0.2s",
+                    }}>
+                      {wordsLearned.has(selectedWord.pl) ? "✓ Saved" : "Save word"}
+                    </motion.button>
+                  </div>
+
+                  <AnimatePresence>
+                    {savedFlash && (
+                      <motion.div initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                        style={{ marginTop: 12, padding: "9px 14px", borderRadius: 10, background: "rgba(52,211,153,0.07)", border: "1px solid rgba(52,211,153,0.18)", fontSize: 11, fontWeight: 700, color: "#6ee7b7", textAlign: "center", letterSpacing: "0.04em" }}>
+                        🌟 Added to your vocab list!
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ) : (
-                <div className="p-10 border-2 border-dashed border-white/5 rounded-[2.5rem] text-center">
-                  <p className="text-slate-600 font-bold uppercase tracking-widest text-xs">Select a word</p>
-                </div>
+                <motion.div key="empty" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  style={{ border: "1.5px dashed rgba(255,255,255,0.05)", borderRadius: 20, padding: "2.5rem 1.5rem", textAlign: "center" }}>
+                  <div style={{ width: 42, height: 42, borderRadius: "50%", margin: "0 auto 12px", background: "rgba(99,102,241,0.07)", border: "1px solid rgba(99,102,241,0.13)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="rgba(99,102,241,0.45)">
+                      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z" />
+                    </svg>
+                  </div>
+                  <p style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(148,163,184,0.22)", marginBottom: 4 }}>Tap any word</p>
+                  <p style={{ fontSize: 11, color: "rgba(148,163,184,0.16)" }}>to explore its meaning</p>
+                </motion.div>
               )}
             </AnimatePresence>
           </div>
         </aside>
+      </div>
 
-        {/* 📱 MOBILE BOTTOM SHEET - UX OPTIMIZED */}
-        <AnimatePresence>
-          {selectedWord && (
-            <>
-              {/* Tap backdrop to close */}
-              <motion.div 
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                onClick={() => setSelectedWord(null)}
-                className="lg:hidden fixed inset-0 bg-black/40 z-[140] backdrop-blur-sm"
-              />
-              <motion.div
-                initial={{ y: "100%" }}
-                animate={{ y: 0 }}
-                exit={{ y: "100%" }}
-                transition={{ type: "spring", damping: 25, stiffness: 200 }}
-                className="lg:hidden fixed inset-x-0 bottom-0 z-[150] bg-slate-900 rounded-t-[2.5rem] p-6 pb-10 shadow-[0_-20px_40px_rgba(0,0,0,0.5)] border-t border-white/10"
-              >
-                <div className="w-12 h-1.5 bg-white/10 rounded-full mx-auto mb-6" onClick={() => setSelectedWord(null)} />
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500">Polish</span>
-                    <h2 className="text-3xl font-black italic text-white uppercase">{selectedWord.pl}</h2>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500">Type</span>
-                    <p className="text-xs font-bold text-slate-300 uppercase">{selectedWord.type}</p>
-                  </div>
+      {/* ── MOBILE BOTTOM SHEET ──────────────────────────────────────────────── */}
+      <AnimatePresence>
+        {selectedWord && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setSelectedWord(null)}
+              style={{ position: "fixed", inset: 0, zIndex: 140, background: "rgba(0,0,0,0.5)", backdropFilter: "blur(4px)" }}
+              className="ls-mobile-only"
+            />
+            <motion.div
+              initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 26, stiffness: 220 }}
+              style={{ position: "fixed", left: 0, right: 0, bottom: 0, zIndex: 150, background: "#0d1526", borderTop: "1px solid rgba(255,255,255,0.07)", borderRadius: "20px 20px 0 0", padding: "0 1.25rem 2.5rem" }}
+              className="ls-mobile-only"
+            >
+              <style>{`@media(min-width:1024px){.ls-mobile-only{display:none!important}}`}</style>
+
+              <div onClick={() => setSelectedWord(null)} style={{ width: 34, height: 4, borderRadius: 9999, background: "rgba(255,255,255,0.1)", margin: "13px auto 18px", cursor: "pointer" }} />
+
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 14 }}>
+                <div>
+                  <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.55)", marginBottom: 4 }}>Polish</div>
+                  <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "clamp(1.7rem, 7vw, 2.3rem)", color: "#f1f5f9", lineHeight: 1 }}>
+                    {selectedWord.pl}
+                  </h2>
                 </div>
-                <div className="mb-8">
-                  <span className="text-[8px] font-black uppercase tracking-widest text-indigo-500">English</span>
-                  <p className="text-xl font-bold text-indigo-100">{selectedWord.en}</p>
-                </div>
-                <button 
-                  onClick={() => setSelectedWord(null)}
-                  className="w-full py-4 bg-indigo-600 text-white rounded-xl font-black uppercase text-xs tracking-[0.2em] shadow-lg active:scale-95 transition-transform"
-                >
-                  Got it
+                <span style={{ marginTop: 4, padding: "4px 10px", borderRadius: 9999, background: "rgba(99,102,241,0.1)", border: "1px solid rgba(99,102,241,0.2)", fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "rgba(165,180,252,0.6)" }}>
+                  {selectedWord.type}
+                </span>
+              </div>
+
+              <div style={{ marginBottom: 20, paddingBottom: 18, borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+                <div style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.55)", marginBottom: 4 }}>English</div>
+                <p style={{ fontSize: "1.2rem", fontWeight: 600, color: "#a5b4fc" }}>{selectedWord.en}</p>
+              </div>
+
+              <div style={{ display: "flex", gap: 10 }}>
+                <button onClick={() => setSelectedWord(null)} style={{ flex: 1, padding: 13, borderRadius: 12, background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(148,163,184,0.5)", fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer" }}>
+                  Dismiss
                 </button>
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
-      </main>
+                <button onClick={() => { saveWord(); setSelectedWord(null); }} style={{
+                  flex: 2, padding: 13, borderRadius: 12,
+                  background: wordsLearned.has(selectedWord.pl) ? "rgba(52,211,153,0.1)" : "rgba(99,102,241,0.12)",
+                  border: `1px solid ${wordsLearned.has(selectedWord.pl) ? "rgba(52,211,153,0.28)" : "rgba(99,102,241,0.28)"}`,
+                  color: wordsLearned.has(selectedWord.pl) ? "#6ee7b7" : "#a5b4fc",
+                  fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.14em", cursor: "pointer",
+                }}>
+                  {wordsLearned.has(selectedWord.pl) ? "✓ Saved" : "Save word"}
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

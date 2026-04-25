@@ -45,9 +45,7 @@ function App() {
             <Route path="/signup" element={<Signup />} />
             <Route path="/guest" element={<EnrollmentGuard />} />
             
-            {/* These paths are now open for immediate use. 
-                They match the grid cards on the Home page.
-            */}
+           
             <Route path="/grammar" element={<GrammarGauntlet />} />
             <Route path="/shadow-protocol" element={<ScenarioEngine />} />
             <Route path="/vocabularyvault" element={<VocabularyVault />} />
@@ -58,6 +56,8 @@ function App() {
             <Route path="/conjugation-practice" element={<KoniugacjaMaster />} />
              <Route path="/B1-ready" element={<B1ShadowBoxer />} />
              <Route path="/play" element={<PolishArena />} />
+             <Route path="/polish-music" element={<LirycznaSymfonia />} />
+            
 
             {/* --- PROTECTED STUDENT ROUTES: PERSONAL PROGRESS --- */}
             {/* These routes require an active Fluency Profile (Login) */}
@@ -73,9 +73,9 @@ function App() {
               <ProtectedRoute><PracticeLab /></ProtectedRoute>
             } />
 
-            <Route path="/polish-music" element={
+            {/* <Route path="/polish-music" element={
               <ProtectedRoute><LirycznaSymfonia /></ProtectedRoute>
-            } />
+            } /> */}
 
             {/* --- ADMIN ONLY --- */}
             <Route path="/admin" element={

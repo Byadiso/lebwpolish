@@ -830,7 +830,74 @@ export default function PracticeLab() {
               }}
             />
           </motion.button>
+
+          
         </div>
+        {/* ── POLISH MUSIC BANNER ── */}
+<motion.a
+  href="/polish-music"
+  initial={{ opacity: 0, y: 8 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ delay: 0.2, duration: 0.4 }}
+  style={{
+    display: "block",
+    textDecoration: "none",
+    marginTop: 12,
+  }}
+>
+  <motion.div
+    whileHover={{ borderColor: "rgba(168,85,247,0.5)", background: "linear-gradient(135deg,rgba(168,85,247,0.12),rgba(239,68,68,0.08))" }}
+    whileTap={{ scale: 0.98 }}
+    style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: 12,
+      padding: "0.85rem 1.25rem",
+      background: "linear-gradient(135deg,rgba(168,85,247,0.07),rgba(239,68,68,0.05))",
+      border: "1px solid rgba(168,85,247,0.22)",
+      borderRadius: 16,
+      cursor: "pointer",
+      transition: "all 0.25s",
+    }}
+  >
+    <div style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, minWidth: 0 }}>
+      <div style={{
+        width: 40, height: 40, borderRadius: 12, flexShrink: 0,
+        background: "rgba(168,85,247,0.14)",
+        border: "1px solid rgba(168,85,247,0.28)",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: "1.2rem",
+      }}>🎵</div>
+      <div>
+        <div style={{
+          fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase",
+          letterSpacing: "0.18em", color: "rgba(168,85,247,0.7)", marginBottom: 2,
+        }}>
+          Tip — Boost your Polish
+        </div>
+        <div style={{ fontSize: "0.88rem", fontWeight: 600, color: "rgba(255,255,255,0.85)" }}>
+          Listen to Polish music →
+        </div>
+      </div>
+    </div>
+
+    <div style={{
+      flexShrink: 0,
+      padding: "4px 10px", borderRadius: 9999,
+      background: "rgba(168,85,247,0.1)",
+      border: "1px solid rgba(168,85,247,0.22)",
+      fontSize: "0.6rem", fontWeight: 800, textTransform: "uppercase",
+      letterSpacing: "0.12em", color: "rgba(168,85,247,0.75)",
+      display: "flex", alignItems: "center", gap: 4,
+    }}>
+      Explore
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+        <path d="M2 5h6M5.5 2.5L8 5l-2.5 2.5" stroke="rgba(168,85,247,0.85)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+      </svg>
+    </div>
+  </motion.div>
+</motion.a>
 
       </div>
     </div>
