@@ -6,7 +6,7 @@ export default function DuelScreen({ onBack, onXpGain, onWin, toast }) {
   const [qIdx, setQIdx] = useState(0);
   const [playerScore, setPlayerScore] = useState(0);
   const [rivalScore, setRivalScore] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(15);
+  const [timeLeft, setTimeLeft] = useState(30);
   const [answered, setAnswered] = useState(false);
   const [selected, setSelected] = useState(null);
   const [feedback, setFeedback] = useState(null);
@@ -30,7 +30,7 @@ export default function DuelScreen({ onBack, onXpGain, onWin, toast }) {
         setAnswered(false);
         setSelected(null);
         setFeedback(null);
-        setTimeLeft(8);
+        setTimeLeft(30);
         setRivalMsg('Rywal pisze...');
       }, 1600);
     },
@@ -101,7 +101,7 @@ export default function DuelScreen({ onBack, onXpGain, onWin, toast }) {
     setQIdx(0);
     setPlayerScore(0);
     setRivalScore(0);
-    setTimeLeft(8);
+    setTimeLeft(30);
     setAnswered(false);
     setSelected(null);
     setFeedback(null);
