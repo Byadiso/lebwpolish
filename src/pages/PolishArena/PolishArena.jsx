@@ -29,7 +29,7 @@ const LEADERBOARD = [
   { rank: 1, initials: 'AK', name: 'anna_k',   xp: 1240, you: false },
   { rank: 2, initials: 'MP', name: 'marek_pl', xp: 980,  you: false },
   { rank: 3, initials: 'ZW', name: 'zia_w',    xp: 870,  you: false },
-  { rank: 5, initials: 'KR', name: 'you',      xp: 640,  you: true  },
+  { rank: 5, initials: 'YO', name: 'you',      xp: 640,  you: true  },
 ];
 
 const RECENT_ACTIVITY = [
@@ -101,9 +101,9 @@ export default function PolishArena() {
   /* ── Top Bar ─────────────────────────────────────────────── */
   const TopBar = () => (
     <header className="pa-topbar">
-      <div className="pa-topbar-title">
+      {/* <div className="pa-topbar-title">
         Polish <span>Arena</span>
-      </div>
+      </div> */}
       <div className="pa-topbar-stats">
         {[
           { icon: '🔥', val: stats.streak, lbl: 'Streak',  cls: 'fire'   },
@@ -119,7 +119,7 @@ export default function PolishArena() {
             </div>
           </div>
         ))}
-        <div className="pa-avatar">KR</div>
+        {/* <div className="pa-avatar">KR</div> */}
       </div>
     </header>
   );
