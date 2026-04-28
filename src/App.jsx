@@ -57,6 +57,8 @@ function App() {
              <Route path="/B1-ready" element={<B1ShadowBoxer />} />
              <Route path="/play" element={<PolishArena />} />
              <Route path="/polish-music" element={<LirycznaSymfonia />} />
+             <Route path="/practice" element={<PracticeLab />} />
+             
             
 
             {/* --- PROTECTED STUDENT ROUTES: PERSONAL PROGRESS --- */}
@@ -69,9 +71,9 @@ function App() {
               <ProtectedRoute><Profile /></ProtectedRoute>
             } />
 
-            <Route path="/practice" element={
+            {/* <Route path="/practice" element={
               <ProtectedRoute><PracticeLab /></ProtectedRoute>
-            } />
+            } /> */}
 
             {/* <Route path="/polish-music" element={
               <ProtectedRoute><LirycznaSymfonia /></ProtectedRoute>
