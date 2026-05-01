@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
-import { 
-  collection, query, onSnapshot, addDoc, serverTimestamp, 
-  orderBy, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, limit 
+import {
+  collection, query, onSnapshot, addDoc, serverTimestamp,
+  orderBy, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, limit
 } from 'firebase/firestore';
 import { Link } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext";
@@ -12,15 +12,14 @@ const ADMIN_EMAIL = "byadiso@gmail.com";
 const POLISH_CHARS = ['ą', 'ć', 'ę', 'ł', 'ń', 'ó', 'ś', 'ź', 'ż'];
 
 const MISSIONS = [
-  { id: 1, label: "Hipoteza", prompt: "Co byś zrobił/a, gdybyś wygrał/a milion złotych?", icon: "💰", xp: 50, color: "#FFD700" },
-  { id: 2, label: "Wspomnienie", prompt: "Opisz swoje ulubione miejsce z dzieciństwa.", icon: "🏠", xp: 40, color: "#FF6B9D" },
-  { id: 3, label: "Opinia", prompt: "Czy lepiej mieszkać w mieście czy na wsi? Dlaczego?", icon: "🏙️", xp: 60, color: "#00E5FF" },
-  { id: 4, label: "Plany", prompt: "Gdzie pojedziesz na następne wakacje? Użyj czasu przyszłego.", icon: "🏖️", xp: 70, color: "#7C3AED" }
+  { id: 1, label: "Hipoteza",    prompt: "Co byś zrobił/a, gdybyś wygrał/a milion złotych?",          icon: "💰", xp: 50, color: "#FFD700" },
+  { id: 2, label: "Wspomnienie", prompt: "Opisz swoje ulubione miejsce z dzieciństwa.",                icon: "🏠", xp: 40, color: "#FF6B9D" },
+  { id: 3, label: "Opinia",      prompt: "Czy lepiej mieszkać w mieście czy na wsi? Dlaczego?",        icon: "🏙️", xp: 60, color: "#818cf8" },
+  { id: 4, label: "Plany",       prompt: "Gdzie pojedziesz na następne wakacje? Użyj czasu przyszłego.", icon: "🏖️", xp: 70, color: "#34d399" }
 ];
 
 const LEVEL_THRESHOLDS = [0, 100, 250, 500, 900, 1500, 2500];
-const LEVEL_NAMES = ["Nowicjusz", "Uczeń", "Praktykant", "Adept", "Mistrz", "Ekspert", "Legenda"];
-const LEVEL_COLORS = ["#6B7280", "#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#EC4899"];
+const LEVEL_NAMES  = ["Nowicjusz","Uczeń","Praktykant","Adept","Mistrz","Ekspert","Legenda"];
 
 const getLevel = (xp) => {
   let level = 0;
@@ -29,86 +28,80 @@ const getLevel = (xp) => {
   }
   return level;
 };
-
 const getXpProgress = (xp) => {
   const level = getLevel(xp);
   if (level >= LEVEL_NAMES.length - 1) return 100;
   const current = xp - LEVEL_THRESHOLDS[level];
-  const needed = LEVEL_THRESHOLDS[level + 1] - LEVEL_THRESHOLDS[level];
+  const needed  = LEVEL_THRESHOLDS[level + 1] - LEVEL_THRESHOLDS[level];
   return Math.min((current / needed) * 100, 100);
 };
 
-const COMBO_MESSAGES = ["NIEŹLE! +5 COMBO", "ŚWIETNIE! +10 COMBO", "OGIEŃ! +20 COMBO", "LEGENDARNY! +50 COMBO"];
-
 export default function LearningSpace() {
   const { profile, user, loading: authLoading } = useAuth();
-  const [posts, setPosts] = useState([]);
-  const [resources, setResources] = useState([]);
-  const [text, setText] = useState("");
-  const [vocab, setVocab] = useState("");
+
+  const [posts, setPosts]             = useState([]);
+  const [resources, setResources]     = useState([]);
+  const [text, setText]               = useState("");
+  const [vocab, setVocab]             = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [activeMission, setActiveMission] = useState(MISSIONS[0]);
-  
-  const [showVault, setShowVault] = useState(false);
-  const [vaultSearch, setVaultSearch] = useState("");
-  const [editingId, setEditingId] = useState(null);
-  const [editText, setEditText] = useState("");
-  const [deleteConfirmId, setDeleteConfirmId] = useState(null); 
-  const [activeCommentBox, setActiveCommentBox] = useState(null); 
-  const [commentText, setCommentText] = useState("");
-  const [comments, setComments] = useState({});
+
+  const [showVault, setShowVault]         = useState(false);
+  const [vaultSearch, setVaultSearch]     = useState("");
+  const [editingId, setEditingId]         = useState(null);
+  const [editText, setEditText]           = useState("");
+  const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [activeCommentBox, setActiveCommentBox] = useState(null);
+  const [commentText, setCommentText]     = useState("");
+  const [comments, setComments]           = useState({});
 
   // Game state
-  const [xp, setXp] = useState(0);
-  const [combo, setCombo] = useState(0);
-  const [showXpPop, setShowXpPop] = useState(null);
-  const [showCombo, setShowCombo] = useState(false);
+  const [xp, setXp]                     = useState(0);
+  const [combo, setCombo]               = useState(0);
+  const [showXpPop, setShowXpPop]       = useState(null);
+  const [showCombo, setShowCombo]       = useState(false);
   const [lastPostTime, setLastPostTime] = useState(null);
-  const [pulseEditor, setPulseEditor] = useState(false);
-  const [slotSpin, setSlotSpin] = useState(false);
-  const [newPostIds, setNewPostIds] = useState(new Set());
+  const [pulseEditor, setPulseEditor]   = useState(false);
+  const [slotSpin, setSlotSpin]         = useState(false);
+  const [newPostIds, setNewPostIds]     = useState(new Set());
 
   const mainTextareaRef = useRef(null);
-  const vocabInputRef = useRef(null);
-  const editPostRef = useRef(null);
+  const vocabInputRef   = useRef(null);
+  const editPostRef     = useRef(null);
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin        = user?.email === ADMIN_EMAIL;
   const effectiveLevel = profile?.level || (isAdmin ? "C1" : "A1");
-
-  const totalXp = (profile?.xp || 0) + xp;
-  const currentLevel = getLevel(totalXp);
-  const xpProgress = getXpProgress(totalXp);
+  const totalXp        = (profile?.xp || 0) + xp;
+  const currentLevel   = getLevel(totalXp);
+  const xpProgress     = getXpProgress(totalXp);
 
   const getWordCount = (str) => str.trim() ? str.trim().split(/\s+/).length : 0;
   const wordCount = getWordCount(text);
 
   const getMilestone = (count) => {
-    if (count === 0) return { label: "Gotowy do walki?", color: "#6B7280", stars: 0 };
-    if (count < 10) return { label: "ROZGRZEWKA", color: "#3B82F6", stars: 1 };
-    if (count < 25) return { label: "PŁYNNA MYŚL", color: "#10B981", stars: 2 };
-    if (count < 40) return { label: "MISTRZ SŁOWA", color: "#F59E0B", stars: 3 };
-    return { label: "LEGENDARNY!", color: "#EC4899", stars: 4 };
+    if (count === 0)   return { label: "Gotowy do walki?", color: "#64748b", stars: 0 };
+    if (count < 10)    return { label: "ROZGRZEWKA",       color: "#818cf8", stars: 1 };
+    if (count < 25)    return { label: "PŁYNNA MYŚL",      color: "#34d399", stars: 2 };
+    if (count < 40)    return { label: "MISTRZ SŁOWA",     color: "#f59e0b", stars: 3 };
+    return              { label: "LEGENDARNY!",            color: "#ef4444", stars: 4 };
   };
-
   const milestone = getMilestone(wordCount);
 
   const insertChar = (char, ref, currentText, setter) => {
     const input = ref.current;
     if (!input) return;
-    const start = input.selectionStart;
-    const end = input.selectionEnd;
-    const newText = currentText.substring(0, start) + char + currentText.substring(end);
-    setter(newText);
+    const start = input.selectionStart, end = input.selectionEnd;
+    setter(currentText.substring(0, start) + char + currentText.substring(end));
     setTimeout(() => { input.focus(); input.setSelectionRange(start + 1, start + 1); }, 0);
   };
 
   useEffect(() => {
     const q = query(collection(db, "global_posts"), orderBy('timestamp', 'desc'), limit(50));
     return onSnapshot(q, (snap) => {
-      const newPosts = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const newPosts = snap.docs.map(d => ({ id: d.id, ...d.data() }));
       setPosts(prev => {
         const prevIds = new Set(prev.map(p => p.id));
-        const fresh = newPosts.filter(p => !prevIds.has(p.id)).map(p => p.id);
+        const fresh   = newPosts.filter(p => !prevIds.has(p.id)).map(p => p.id);
         if (fresh.length > 0) {
           setNewPostIds(s => new Set([...s, ...fresh]));
           setTimeout(() => setNewPostIds(s => { const n = new Set(s); fresh.forEach(id => n.delete(id)); return n; }), 2000);
@@ -127,32 +120,23 @@ export default function LearningSpace() {
     });
   }, []);
 
-  // Combo timer
   useEffect(() => {
-    if (combo > 0) {
-      const timer = setTimeout(() => setCombo(0), 30000);
-      return () => clearTimeout(timer);
-    }
+    if (combo > 0) { const t = setTimeout(() => setCombo(0), 30000); return () => clearTimeout(t); }
   }, [combo]);
 
-  const triggerXpPop = (amount) => {
-    setShowXpPop(amount);
-    setTimeout(() => setShowXpPop(null), 1500);
-  };
+  const triggerXpPop = (amount) => { setShowXpPop(amount); setTimeout(() => setShowXpPop(null), 1500); };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!text.trim() || isSubmitting) return;
-    setIsSubmitting(true);
-    setSlotSpin(true);
-
+    setIsSubmitting(true); setSlotSpin(true);
     try {
       const vocabList = vocab.split(',').map(v => v.trim().toLowerCase()).filter(v => v !== "");
       const now = Date.now();
-      const isHotStreak = lastPostTime && (now - lastPostTime) < 600000; // 10min
-      const newCombo = isHotStreak ? combo + 1 : 1;
-      const baseXp = activeMission.xp + Math.min(wordCount * 2, 100);
-      const comboBonus = Math.min(newCombo * 10, 100);
+      const isHotStreak = lastPostTime && (now - lastPostTime) < 600000;
+      const newCombo    = isHotStreak ? combo + 1 : 1;
+      const baseXp      = activeMission.xp + Math.min(wordCount * 2, 100);
+      const comboBonus  = Math.min(newCombo * 10, 100);
       const totalEarned = baseXp + comboBonus;
 
       await addDoc(collection(db, "global_posts"), {
@@ -173,25 +157,19 @@ export default function LearningSpace() {
       setLastPostTime(now);
       triggerXpPop(totalEarned);
 
-      if (newCombo >= 2) {
-        setShowCombo(true);
-        setTimeout(() => setShowCombo(false), 2000);
-      }
+      if (newCombo >= 2) { setShowCombo(true); setTimeout(() => setShowCombo(false), 2000); }
 
       const particleCount = Math.min(wordCount * 5, 200);
-      confetti({ particleCount, spread: 90, origin: { y: 0.7 }, colors: [activeMission.color, '#FFD700', '#FF6B9D'] });
+      confetti({ particleCount, spread: 90, origin: { y: 0.7 }, colors: [activeMission.color, '#818cf8', '#34d399'] });
       if (wordCount >= 40) {
-        setTimeout(() => confetti({ particleCount: 80, angle: 60, spread: 55, origin: { x: 0 }, colors: ['#FFD700'] }), 300);
-        setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#FFD700'] }), 500);
+        setTimeout(() => confetti({ particleCount: 80, angle: 60,  spread: 55, origin: { x: 0 }, colors: ['#f59e0b'] }), 300);
+        setTimeout(() => confetti({ particleCount: 80, angle: 120, spread: 55, origin: { x: 1 }, colors: ['#f59e0b'] }), 500);
       }
 
       setText(""); setVocab("");
-      setPulseEditor(true);
-      setTimeout(() => setPulseEditor(false), 1000);
-    } catch (err) { console.error(err); } finally {
-      setIsSubmitting(false);
-      setTimeout(() => setSlotSpin(false), 800);
-    }
+      setPulseEditor(true); setTimeout(() => setPulseEditor(false), 1000);
+    } catch (err) { console.error(err); }
+    finally { setIsSubmitting(false); setTimeout(() => setSlotSpin(false), 800); }
   };
 
   const handleRemoveVocab = async (word) => {
@@ -206,8 +184,7 @@ export default function LearningSpace() {
 
   const toggleComments = (postId) => {
     if (activeCommentBox === postId) return setActiveCommentBox(null);
-    setActiveCommentBox(postId);
-    setCommentText("");
+    setActiveCommentBox(postId); setCommentText("");
     const q = query(collection(db, "global_posts", postId, "comments"), orderBy('timestamp', 'asc'));
     onSnapshot(q, (snap) => setComments(prev => ({ ...prev, [postId]: snap.docs.map(d => ({ id: d.id, ...d.data() })) })));
   };
@@ -218,9 +195,7 @@ export default function LearningSpace() {
       content: commentText, author: profile?.cityName || (isAdmin ? "Admin" : "User"),
       uid: user.uid, isCorrection, timestamp: serverTimestamp(),
     });
-    setCommentText("");
-    triggerXpPop(10);
-    setXp(prev => prev + 10);
+    setCommentText(""); triggerXpPop(10); setXp(prev => prev + 10);
   };
 
   const handleLike = async (p) => {
@@ -229,121 +204,106 @@ export default function LearningSpace() {
     if (!isLiked) { triggerXpPop(5); setXp(prev => prev + 5); }
   };
 
-  const confirmDelete = async (id) => {
-    await deleteDoc(doc(db, "global_posts", id));
-    setDeleteConfirmId(null);
-  };
+  const confirmDelete = async (id) => { await deleteDoc(doc(db, "global_posts", id)); setDeleteConfirmId(null); };
 
   if (authLoading) return (
-    <div style={{ background: '#0A0A0F', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '16px' }}>
-      <div style={{ fontSize: '48px', animation: 'spin 1s linear infinite' }}>🎰</div>
-      <p style={{ color: '#7C3AED', fontFamily: 'monospace', fontWeight: 900, letterSpacing: '0.3em', fontSize: '12px', textTransform: 'uppercase', animation: 'pulse 1s ease-in-out infinite' }}>Ładowanie areny...</p>
-      <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } } @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }`}</style>
+    <div style={{ background: '#020617', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '20px' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
+      `}</style>
+      <div style={{ fontSize: '52px', animation: 'spin 1s linear infinite' }}>✦</div>
+      <p style={{ color: '#818cf8', fontFamily: "'DM Sans', sans-serif", fontWeight: 800, letterSpacing: '0.3em', fontSize: '11px', textTransform: 'uppercase', animation: 'pulse 1s ease-in-out infinite' }}>
+        Ładowanie areny...
+      </p>
     </div>
   );
-
-  const streakDays = profile?.streak || 0;
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700;800&display=swap');
-        
-        :root {
-          --neon-purple: #7C3AED;
-          --neon-pink: #EC4899;
-          --neon-cyan: #00E5FF;
-          --neon-gold: #FFD700;
-          --neon-green: #10B981;
-          --bg-void: #0A0A0F;
-          --bg-card: #12121A;
-          --bg-card2: #1A1A26;
-          --border-glow: rgba(124, 58, 237, 0.3);
-          --text-primary: #F0F0FF;
-          --text-muted: #6B7280;
-        }
-        
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        
-        .ls-root { 
-          min-height: 100vh; 
-          background: var(--bg-void); 
-          color: var(--text-primary);
-          font-family: 'Space Grotesk', sans-serif;
-          padding-bottom: 80px;
-          position: relative;
-          overflow-x: hidden;
-        }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
 
+        *, *::before, *::after { box-sizing: border-box; }
+
+        /* ── Root wrapper (no min-height override, no fixed positioning) ── */
+        .ls-root {
+          background: #020617;
+          color: #f0f0ff;
+          font-family: 'DM Sans', sans-serif;
+          padding-bottom: 80px;
+          overflow-x: hidden;
+          position: relative;
+        }
         .ls-root::before {
           content: '';
           position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: 
-            radial-gradient(ellipse 800px 400px at 20% 10%, rgba(124,58,237,0.08) 0%, transparent 70%),
-            radial-gradient(ellipse 600px 300px at 80% 80%, rgba(236,72,153,0.06) 0%, transparent 70%);
+          inset: 0;
+          background:
+            radial-gradient(ellipse 800px 400px at 20% 20%, rgba(99,102,241,0.07) 0%, transparent 70%),
+            radial-gradient(ellipse 600px 300px at 80% 80%, rgba(52,211,153,0.05) 0%, transparent 70%);
           pointer-events: none;
           z-index: 0;
         }
 
-        /* XP POP */
-        .xp-pop {
+        /* ── XP Pop ── */
+        .ls-xp-pop {
           position: fixed;
           top: 80px; right: 24px;
-          background: linear-gradient(135deg, #7C3AED, #EC4899);
+          background: linear-gradient(135deg, #6366f1, #34d399);
           color: white;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 28px;
-          letter-spacing: 0.1em;
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
+          font-size: 26px;
+          font-weight: 700;
+          letter-spacing: -0.01em;
           padding: 12px 24px;
-          border-radius: 16px;
+          border-radius: 18px;
           z-index: 9999;
-          animation: xpPop 1.5s ease-out forwards;
-          box-shadow: 0 0 40px rgba(124,58,237,0.6);
+          animation: lsXpPop 1.5s ease-out forwards;
+          box-shadow: 0 0 40px rgba(99,102,241,0.5);
           pointer-events: none;
         }
-        @keyframes xpPop {
-          0% { transform: translateY(20px) scale(0.8); opacity: 0; }
-          20% { transform: translateY(-10px) scale(1.1); opacity: 1; }
-          60% { transform: translateY(-20px) scale(1); opacity: 1; }
-          100% { transform: translateY(-60px) scale(0.9); opacity: 0; }
+        @keyframes lsXpPop {
+          0%   { transform: translateY(20px) scale(0.85); opacity: 0; }
+          20%  { transform: translateY(-8px) scale(1.08); opacity: 1; }
+          60%  { transform: translateY(-18px) scale(1); opacity: 1; }
+          100% { transform: translateY(-55px) scale(0.92); opacity: 0; }
         }
 
-        /* COMBO BANNER */
-        .combo-banner {
+        /* ── Combo banner ── */
+        .ls-combo-banner {
           position: fixed;
           top: 50%; left: 50%;
           transform: translate(-50%, -50%);
           z-index: 9999;
           text-align: center;
-          animation: comboBurst 2s ease-out forwards;
+          animation: lsComboBurst 2s ease-out forwards;
           pointer-events: none;
         }
-        .combo-banner-text {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: clamp(48px, 10vw, 96px);
-          background: linear-gradient(135deg, #FFD700, #FF6B9D, #7C3AED);
+        .ls-combo-text {
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
+          font-size: clamp(52px, 10vw, 100px);
+          background: linear-gradient(135deg, #f59e0b, #ef4444, #818cf8);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
           background-clip: text;
-          text-shadow: none;
-          filter: drop-shadow(0 0 30px rgba(255,215,0,0.8));
-          letter-spacing: 0.05em;
+          filter: drop-shadow(0 0 30px rgba(245,158,11,0.7));
         }
-        @keyframes comboBurst {
-          0% { transform: translate(-50%,-50%) scale(0.3) rotate(-5deg); opacity: 0; }
-          30% { transform: translate(-50%,-50%) scale(1.2) rotate(2deg); opacity: 1; }
-          60% { transform: translate(-50%,-50%) scale(1) rotate(0deg); opacity: 1; }
-          100% { transform: translate(-50%,-50%) scale(1.3) rotate(0deg); opacity: 0; }
-        }  
-             
+        @keyframes lsComboBurst {
+          0%   { transform: translate(-50%,-50%) scale(0.3) rotate(-5deg); opacity: 0; }
+          30%  { transform: translate(-50%,-50%) scale(1.2) rotate(2deg);  opacity: 1; }
+          65%  { transform: translate(-50%,-50%) scale(1) rotate(0deg);    opacity: 1; }
+          100% { transform: translate(-50%,-50%) scale(1.3);               opacity: 0; }
+        }
 
-
-        /* MAIN LAYOUT */
+        /* ── Layout ── */
         .ls-main {
-          max-width: 1280px;
-          margin: auto auto;
-          padding: 32px 16px;
+          max-width: 1320px;
+          margin: 0 auto;
+          padding: 32px 20px;
           display: grid;
           grid-template-columns: 1fr;
           gap: 32px;
@@ -351,36 +311,37 @@ export default function LearningSpace() {
           z-index: 1;
         }
         @media (min-width: 1024px) {
-          .ls-main { grid-template-columns: 1fr 380px; }
+          .ls-main { grid-template-columns: 1fr 360px; }
         }
 
-        /* CARD BASE */
+        /* ── Card base ── */
         .ls-card {
-          background: var(--bg-card);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 24px;
+          background: #0d1526;
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 28px;
           overflow: hidden;
           position: relative;
+          transition: border-color 0.3s;
         }
         .ls-card-glow {
-          box-shadow: 0 0 40px rgba(124,58,237,0.1), inset 0 1px 0 rgba(255,255,255,0.05);
+          box-shadow: 0 0 48px rgba(99,102,241,0.08), inset 0 1px 0 rgba(255,255,255,0.04);
         }
 
-        /* MISSION SELECTOR */
-        .mission-tabs {
+        /* ── Mission tabs ── */
+        .ls-mission-tabs {
           display: flex;
           gap: 8px;
           overflow-x: auto;
           padding-bottom: 4px;
           scrollbar-width: none;
-          -ms-overflow-style: none;
         }
-        .mission-tabs::-webkit-scrollbar { display: none; }
-        .mission-tab {
+        .ls-mission-tabs::-webkit-scrollbar { display: none; }
+
+        .ls-mission-tab {
           padding: 8px 16px;
-          border-radius: 10px;
+          border-radius: 12px;
           font-size: 10px;
-          font-weight: 800;
+          font-weight: 700;
           text-transform: uppercase;
           letter-spacing: 0.12em;
           cursor: pointer;
@@ -388,433 +349,285 @@ export default function LearningSpace() {
           white-space: nowrap;
           border: 1px solid transparent;
           background: rgba(255,255,255,0.04);
-          color: var(--text-muted);
+          color: rgba(255,255,255,0.35);
+          font-family: 'DM Sans', sans-serif;
         }
-        .mission-tab:hover { background: rgba(124,58,237,0.18); color: #C4B5FD; border-color: rgba(124,58,237,0.4); }
-        .mission-tab.active {
+        .ls-mission-tab:hover {
+          background: rgba(99,102,241,0.14);
+          color: #c4b5fd;
+          border-color: rgba(99,102,241,0.35);
+        }
+        .ls-mission-tab.active {
           color: white;
           border-color: currentColor;
-          box-shadow: 0 0 16px currentColor;
-        }
-        .mission-xp-badge {
-          display: inline-block;
-          font-size: 9px;
-          font-family: 'JetBrains Mono', monospace;
-          font-weight: 700;
-          opacity: 0.7;
-          margin-left: 4px;
+          box-shadow: 0 0 14px currentColor;
         }
 
-        /* EDITOR CARD */
-        .editor-card {
-          padding: 28px;
-        }
-        @media (min-width: 768px) { .editor-card { padding: 36px; } }
-
-        .mission-prompt {
-          font-size: clamp(16px, 3vw, 22px);
-          font-weight: 700;
-          line-height: 1.4;
-          color: white;
-          margin: 20px 0 24px;
-          padding: 20px 24px;
-          border-radius: 16px;
-          border-left: 3px solid;
-          background: rgba(255,255,255,0.03);
-          font-style: italic;
-        }
-
-        .polish-chars {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 4px;
-          margin-bottom: 8px;
-        }
-        .polish-char-btn {
-          width: 32px; height: 32px;
-          display: flex; align-items: center; justify-content: center;
-          background: rgba(255,255,255,0.06);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 8px;
-          font-size: 13px;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.15s;
-          color: white;
-          font-family: 'Space Grotesk', sans-serif;
-        }
-        .polish-char-btn:hover {
-          background: var(--neon-purple);
-          border-color: var(--neon-purple);
-          box-shadow: 0 0 12px rgba(124,58,237,0.5);
-          transform: scale(1.1);
-        }
-        .polish-char-btn.small {
-          width: 26px; height: 26px;
-          font-size: 11px;
-          border-radius: 6px;
-        }
-
-        .main-textarea {
+        /* ── Textarea ── */
+        .ls-textarea {
           width: 100%;
           background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 16px;
+          border: 1.5px solid rgba(255,255,255,0.07);
+          border-radius: 18px;
           padding: 20px 24px;
-          font-size: 18px;
-          line-height: 1.7;
-          color: #E8E8FF;
-          font-family: 'Space Grotesk', sans-serif;
+          font-size: 17px;
+          line-height: 1.75;
+          color: #e8e8ff;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 500;
           resize: none;
           min-height: 160px;
           outline: none;
           transition: all 0.2s;
-          caret-color: var(--neon-purple);
-          -webkit-text-fill-color: #E8E8FF;
+          caret-color: #818cf8;
         }
-        .main-textarea::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
-        .main-textarea:focus {
-          border-color: rgba(124,58,237,0.5);
-          background: rgba(15,10,30,0.8);
-          box-shadow: 0 0 0 3px rgba(124,58,237,0.1), 0 0 30px rgba(124,58,237,0.1);
-          color: #E8E8FF;
-          -webkit-text-fill-color: #E8E8FF;
+        .ls-textarea::placeholder { color: rgba(255,255,255,0.18); }
+        .ls-textarea:focus {
+          border-color: rgba(99,102,241,0.45);
+          background: rgba(10,8,25,0.7);
+          box-shadow: 0 0 0 3px rgba(99,102,241,0.1), 0 0 28px rgba(99,102,241,0.07);
         }
-        .main-textarea.pulse-success {
-          animation: successPulse 0.8s ease-out;
-        }
-        @keyframes successPulse {
-          0% { box-shadow: 0 0 0 0 rgba(16,185,129,0.6); }
-          50% { box-shadow: 0 0 0 20px rgba(16,185,129,0); }
+        .ls-textarea.pulse-success { animation: lsSuccessPulse 0.8s ease-out; }
+        @keyframes lsSuccessPulse {
+          0%   { box-shadow: 0 0 0 0 rgba(52,211,153,0.55); }
+          50%  { box-shadow: 0 0 0 18px rgba(52,211,153,0); }
           100% { box-shadow: none; }
         }
 
-        .vocab-input {
-          width: 100%;
-          background: rgba(15,10,30,0.6);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
+        /* ── Vocab input ── */
+        .ls-vocab-input {
+          flex: 1;
+          background: rgba(10,8,25,0.5);
+          border: 1.5px solid rgba(255,255,255,0.07);
+          border-radius: 14px;
           padding: 14px 18px;
           font-size: 14px;
-          color: #D0C8FF;
-          -webkit-text-fill-color: #D0C8FF;
-          font-family: 'Space Grotesk', sans-serif;
+          font-weight: 500;
+          color: #d0c8ff;
+          font-family: 'DM Sans', sans-serif;
           outline: none;
-          font-weight: 600;
           transition: all 0.2s;
         }
-        .vocab-input::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
-        .vocab-input:focus {
-          border-color: rgba(236,72,153,0.4);
-          background: rgba(15,10,30,0.8);
-          box-shadow: 0 0 0 2px rgba(236,72,153,0.1);
-          color: #D0C8FF;
-          -webkit-text-fill-color: #D0C8FF;
+        .ls-vocab-input::placeholder { color: rgba(255,255,255,0.18); }
+        .ls-vocab-input:focus {
+          border-color: rgba(52,211,153,0.4);
+          background: rgba(10,8,25,0.8);
+          box-shadow: 0 0 0 2px rgba(52,211,153,0.08);
         }
 
-        /* WORD COUNT / METER */
-        .word-meter {
-          margin-top: 20px;
-          padding-top: 20px;
-          border-top: 1px solid rgba(255,255,255,0.06);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 12px;
+        /* ── Polish char buttons ── */
+        .ls-char-btn {
+          display: flex; align-items: center; justify-content: center;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.07);
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 700;
+          cursor: pointer;
+          transition: all 0.15s;
+          color: #c4b5fd;
+          font-family: 'DM Sans', sans-serif;
         }
-        .word-meter-label {
-          font-size: 10px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          font-family: 'JetBrains Mono', monospace;
+        .ls-char-btn:hover {
+          background: rgba(99,102,241,0.2);
+          border-color: rgba(99,102,241,0.5);
+          box-shadow: 0 0 10px rgba(99,102,241,0.25);
+          transform: scale(1.1);
         }
-        .word-meter-bar {
-          flex: 1;
-          height: 8px;
-          background: rgba(255,255,255,0.05);
-          border-radius: 99px;
-          overflow: hidden;
-          max-width: 200px;
-        }
-        .word-meter-fill {
-          height: 100%;
-          border-radius: 99px;
-          transition: width 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-          position: relative;
-        }
-        .word-count-num {
-          font-family: 'JetBrains Mono', monospace;
+        .ls-char-btn:active { transform: scale(0.88); }
+
+        /* ── Submit button ── */
+        .ls-submit-btn {
+          padding: 15px 28px;
+          border-radius: 16px;
           font-size: 11px;
           font-weight: 700;
-          color: rgba(255,255,255,0.3);
-          flex-shrink: 0;
-        }
-        .star-rating {
-          display: flex;
-          gap: 2px;
-        }
-
-        /* SUBMIT BUTTON */
-        .submit-btn {
-          padding: 16px 32px;
-          border-radius: 14px;
-          font-size: 11px;
-          font-weight: 800;
           text-transform: uppercase;
-          letter-spacing: 0.2em;
+          letter-spacing: 0.22em;
           cursor: pointer;
           border: none;
           color: white;
-          font-family: 'Space Grotesk', sans-serif;
-          background: linear-gradient(135deg, #7C3AED, #EC4899);
-          box-shadow: 0 8px 24px rgba(124,58,237,0.4);
+          font-family: 'DM Sans', sans-serif;
+          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          box-shadow: 0 8px 24px rgba(99,102,241,0.35);
           transition: all 0.2s;
           white-space: nowrap;
           flex-shrink: 0;
           position: relative;
           overflow: hidden;
         }
-        .submit-btn::before {
+        .ls-submit-btn::before {
           content: '';
           position: absolute;
           top: 0; left: -100%;
           width: 100%; height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
           transition: left 0.4s;
         }
-        .submit-btn:hover::before { left: 100%; }
-        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 32px rgba(124,58,237,0.5); }
-        .submit-btn:active { transform: scale(0.97); }
-        .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-        .submit-btn.spinning {
-          animation: slotSpin 0.15s linear infinite;
-        }
-        @keyframes slotSpin {
-          0% { background-position: 0% 50%; }
-          100% { background-position: 100% 50%; }
-        }
+        .ls-submit-btn:hover::before { left: 100%; }
+        .ls-submit-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(99,102,241,0.45); }
+        .ls-submit-btn:active { transform: scale(0.97); }
+        .ls-submit-btn:disabled { opacity: 0.22; cursor: not-allowed; transform: none; }
 
-        /* COMBO BAR */
-        .combo-bar {
+        /* ── Word meter ── */
+        .ls-word-meter {
+          margin-top: 20px;
+          padding-top: 20px;
+          border-top: 1px solid rgba(255,255,255,0.05);
           display: flex;
           align-items: center;
-          gap: 10px;
-          padding: 12px 16px;
-          background: rgba(255,215,0,0.06);
-          border: 1px solid rgba(255,215,0,0.2);
-          border-radius: 12px;
-          margin-top: 12px;
-        }
-        .combo-flames { font-size: 20px; }
-        .combo-text {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 16px;
-          letter-spacing: 0.1em;
-          color: var(--neon-gold);
-        }
-        .combo-desc {
-          font-size: 10px;
-          color: rgba(255,215,0,0.5);
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-        .combo-multiplier {
-          margin-left: auto;
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 24px;
-          color: var(--neon-gold);
-          text-shadow: 0 0 20px rgba(255,215,0,0.8);
+          justify-content: space-between;
+          gap: 14px;
         }
 
-        /* FEED POSTS */
-        .post-card {
-          padding: 24px;
+        /* ── Combo bar ── */
+        .ls-combo-bar {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 18px;
+          background: rgba(245,158,11,0.07);
+          border: 1px solid rgba(245,158,11,0.22);
+          border-radius: 16px;
+          margin-top: 14px;
+        }
+
+        /* ── Post cards ── */
+        .ls-post-card {
+          padding: 28px;
           transition: all 0.3s;
+          cursor: default;
         }
-        @media (min-width: 768px) { .post-card { padding: 28px 32px; } }
-        .post-card:hover {
-          border-color: rgba(124,58,237,0.2);         
-          background: rgb(44, 40, 97);
+        @media (min-width: 768px) { .ls-post-card { padding: 32px; } }
+        .ls-post-card:hover {
+          border-color: rgba(99,102,241,0.22);
+          background: rgba(99,102,241,0.04);
         }
-        .post-card.new-post {
-          animation: newPostSlide 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-          border-color: rgba(124,58,237,0.4);
-          box-shadow: 0 0 30px rgba(124,58,237,0.15);
+        .ls-post-card.new-post {
+          animation: lsSlideIn 0.5s cubic-bezier(0.34,1.56,0.64,1);
+          border-color: rgba(99,102,241,0.35);
+          box-shadow: 0 0 32px rgba(99,102,241,0.12);
         }
-        @keyframes newPostSlide {
-          from { transform: translateX(-10px); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
+        @keyframes lsSlideIn {
+          from { transform: translateX(-12px); opacity: 0; }
+          to   { transform: translateX(0);     opacity: 1; }
         }
 
-        .post-avatar {
-          width: 44px; height: 44px;
-          border-radius: 12px;
+        .ls-post-avatar {
+          width: 46px; height: 46px;
+          border-radius: 14px;
           display: flex; align-items: center; justify-content: center;
-          font-weight: 900;
-          font-size: 18px;
-          color: white;
-          font-family: 'Bebas Neue', sans-serif;
+          font-weight: 900; font-size: 20px; color: white;
+          font-family: 'Playfair Display', serif;
           flex-shrink: 0;
         }
-        .post-author { font-size: 13px; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 0.05em; }
-        .post-level {
-          font-size: 9px;
-          font-weight: 800;
-          padding: 2px 8px;
-          border-radius: 6px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-        }
-        .post-mission {
-          font-size: 9px;
-          font-weight: 700;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.15em;
-          margin-top: 2px;
-        }
-
-        .post-content {
-          font-size: 17px;
+        .ls-post-content {
+          font-size: 16px;
           line-height: 1.75;
-          color: rgba(240,240,255,0.9);
+          color: rgba(240,240,255,0.88);
           font-style: italic;
-          padding: 16px 20px;
-          border-left: 3px solid rgba(124,58,237,0.3);
+          font-family: 'Playfair Display', serif;
+          padding: 18px 20px;
+          border-left: 3px solid rgba(99,102,241,0.35);
           background: rgba(255,255,255,0.02);
-          border-radius: 0 12px 12px 0;
+          border-radius: 0 14px 14px 0;
           margin: 16px 0;
         }
-
-        .vocab-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
-        .vocab-tag {
+        .ls-vocab-tag {
           font-size: 9px;
-          font-weight: 800;
+          font-weight: 700;
           background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.08);
-          color: rgba(255,255,255,0.5);
+          border: 1px solid rgba(255,255,255,0.07);
+          color: rgba(255,255,255,0.4);
           padding: 4px 10px;
           border-radius: 8px;
           text-transform: uppercase;
-          letter-spacing: 0.08em;
-          font-family: 'JetBrains Mono', monospace;
+          letter-spacing: 0.1em;
+          font-family: 'DM Sans', sans-serif;
         }
-
-        .post-actions {
-          display: flex;
-          align-items: center;
-          gap: 24px;
-          padding-top: 16px;
-          border-top: 1px solid rgba(255,255,255,0.05);
-        }
-        .action-btn {
+        .ls-action-btn {
           display: flex; align-items: center; gap: 6px;
           background: none; border: none; cursor: pointer;
-          color: rgba(255,255,255,0.3);
-          font-size: 11px; font-weight: 800;
+          color: rgba(255,255,255,0.28);
+          font-size: 11px; font-weight: 700;
           text-transform: uppercase; letter-spacing: 0.1em;
           transition: all 0.2s;
-          font-family: 'Space Grotesk', sans-serif;
-          padding: 6px 10px;
-          border-radius: 8px;
+          font-family: 'DM Sans', sans-serif;
+          padding: 7px 12px;
+          border-radius: 10px;
         }
-        .action-btn:hover { color: #C4B5FD; background: rgba(124,58,237,0.12); }
-        .action-btn.liked { color: #EF4444; }
-        .action-btn.liked:hover { color: #EF4444; background: rgba(239,68,68,0.1); }
-        .action-btn span.icon { font-size: 18px; transition: transform 0.2s; }
-        .action-btn:hover span.icon { transform: scale(1.3) rotate(-5deg); }
-        .action-btn.liked:active span.icon { animation: heartBeat 0.3s ease-out; }
-        @keyframes heartBeat {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.5); }
-          100% { transform: scale(1.2); }
+        .ls-action-btn:hover { color: #c4b5fd; background: rgba(99,102,241,0.1); }
+        .ls-action-btn.liked { color: #ef4444; }
+        .ls-action-btn.liked:hover { background: rgba(239,68,68,0.1); }
+        .ls-action-btn .icon { font-size: 17px; transition: transform 0.2s; }
+        .ls-action-btn:hover .icon { transform: scale(1.25) rotate(-5deg); }
+        @keyframes lsHeartBeat {
+          0% { transform: scale(1); } 50% { transform: scale(1.5); } 100% { transform: scale(1.2); }
         }
+        .ls-action-btn.liked:active .icon { animation: lsHeartBeat 0.3s ease-out; }
 
-        /* COMMENT ZONE */
-        .comment-zone {
-          margin-top: 20px;
+        /* ── Comment zone ── */
+        .ls-comment-zone {
+          margin-top: 18px;
           background: rgba(255,255,255,0.02);
           border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 16px;
+          border-radius: 18px;
           padding: 20px;
         }
-        .comment-item {
-          display: flex;
-          gap: 12px;
-          padding: 12px;
+        .ls-comment-item {
+          display: flex; gap: 12px;
+          padding: 12px 14px;
           background: rgba(255,255,255,0.02);
-          border-radius: 10px;
+          border-radius: 12px;
           margin-bottom: 8px;
         }
-        .comment-stripe { width: 3px; border-radius: 99px; flex-shrink: 0; }
-        .comment-author { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: #C4B5FD; }
-        .comment-text { font-size: 14px; color: rgba(240,240,255,0.7); margin-top: 4px; line-height: 1.5; }
-        .comment-input {
+        .ls-comment-input {
           width: 100%;
-          background: rgba(15,10,30,0.6);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 12px;
+          background: rgba(10,8,25,0.5);
+          border: 1.5px solid rgba(255,255,255,0.07);
+          border-radius: 14px;
           padding: 12px 16px;
           font-size: 14px;
-          color: #D0C8FF;
-          -webkit-text-fill-color: #D0C8FF;
-          font-family: 'Space Grotesk', sans-serif;
+          color: #d0c8ff;
+          font-family: 'DM Sans', sans-serif;
           outline: none;
           resize: none;
           transition: all 0.2s;
           margin-top: 12px;
         }
-        .comment-input:focus {
-          border-color: rgba(124,58,237,0.4);
-          background: rgba(15,10,30,0.9);
-          box-shadow: 0 0 0 2px rgba(124,58,237,0.1);
-          color: #D0C8FF;
-          -webkit-text-fill-color: #D0C8FF;
+        .ls-comment-input:focus {
+          border-color: rgba(99,102,241,0.4);
+          background: rgba(10,8,25,0.85);
+          box-shadow: 0 0 0 2px rgba(99,102,241,0.09);
         }
-        .comment-input::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
+        .ls-comment-input::placeholder { color: rgba(255,255,255,0.18); }
 
-        /* EDIT ZONE */
-        .edit-zone {
-          background: rgba(255,255,255,0.03);
-          border: 1px solid rgba(255,255,255,0.08);
-          border-radius: 16px;
-          padding: 20px;
-          margin: 16px 0;
-        }
-        .edit-textarea {
+        /* ── Edit zone ── */
+        .ls-edit-textarea {
           width: 100%;
-          background: rgba(15,10,30,0.7);
-          border: 1px solid rgba(124,58,237,0.3);
-          border-radius: 12px;
+          background: rgba(10,8,25,0.6);
+          border: 1.5px solid rgba(99,102,241,0.3);
+          border-radius: 14px;
           padding: 14px 18px;
           font-size: 15px;
-          color: #E0D8FF;
-          -webkit-text-fill-color: #E0D8FF;
-          font-family: 'Space Grotesk', sans-serif;
+          color: #e0d8ff;
+          font-family: 'DM Sans', sans-serif;
           resize: none;
           outline: none;
           font-weight: 500;
-          line-height: 1.6;
+          line-height: 1.65;
           transition: all 0.2s;
         }
-        .edit-textarea:focus {
-          background: rgba(15,10,30,0.9);
-          border-color: rgba(124,58,237,0.6);
-          box-shadow: 0 0 0 2px rgba(124,58,237,0.15);
-          color: #E0D8FF;
-          -webkit-text-fill-color: #E0D8FF;
+        .ls-edit-textarea:focus {
+          border-color: rgba(99,102,241,0.6);
+          box-shadow: 0 0 0 2px rgba(99,102,241,0.12);
         }
 
-        /* SIDEBAR */
-        .sidebar { display: flex; flex-direction: column; gap: 20px; }
-
-        /* SHADOW PROTOCOL */
-        .shadow-card {
-          background: #0D0D14;
-          border: 1px solid rgba(16,185,129,0.2);
-          border-radius: 22px;
+        /* ── Sidebar cards ── */
+        .ls-shadow-card {
+          background: #090e1a;
+          border: 1px solid rgba(52,211,153,0.18);
+          border-radius: 24px;
           padding: 24px;
           position: relative;
           overflow: hidden;
@@ -822,213 +635,126 @@ export default function LearningSpace() {
           display: block;
           text-decoration: none;
         }
-        .shadow-card::before {
+        .ls-shadow-card::before {
           content: '';
           position: absolute;
           inset: 0;
-          background: radial-gradient(circle at 50% 50%, rgba(16,185,129,0.06), transparent);
+          background: radial-gradient(circle at 50% 50%, rgba(52,211,153,0.05), transparent);
           opacity: 0;
           transition: opacity 0.3s;
         }
-        .shadow-card:hover { transform: scale(1.02); border-color: rgba(16,185,129,0.4); box-shadow: 0 20px 60px rgba(16,185,129,0.1); }
-        .shadow-card:hover::before { opacity: 1; }
-        .shadow-card:active { transform: scale(0.98); }
-        .shadow-live-dot {
+        .ls-shadow-card:hover {
+          transform: scale(1.02);
+          border-color: rgba(52,211,153,0.38);
+          box-shadow: 0 20px 60px rgba(52,211,153,0.09);
+        }
+        .ls-shadow-card:hover::before { opacity: 1; }
+        .ls-shadow-card:active { transform: scale(0.98); }
+
+        .ls-live-dot {
           width: 8px; height: 8px;
           border-radius: 50%;
-          background: #10B981;
+          background: #34d399;
           position: relative;
         }
-        .shadow-live-dot::before {
+        .ls-live-dot::before {
           content: '';
-          position: absolute;
-          inset: -3px;
+          position: absolute; inset: -3px;
           border-radius: 50%;
-          background: rgba(16,185,129,0.4);
-          animation: ping 1.5s ease-in-out infinite;
+          background: rgba(52,211,153,0.4);
+          animation: lsPing 1.5s ease-in-out infinite;
         }
-        @keyframes ping {
-          0% { transform: scale(1); opacity: 0.7; }
-          100% { transform: scale(2); opacity: 0; }
+        @keyframes lsPing {
+          0%   { transform: scale(1); opacity: 0.7; }
+          100% { transform: scale(2.2); opacity: 0; }
         }
-        .shadow-title {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 28px;
-          letter-spacing: 0.05em;
-          color: white;
-        }
-        .shadow-title span { color: #10B981; }
-        .shadow-arrow {
-          width: 48px; height: 48px;
-          background: rgba(16,185,129,0.1);
-          border: 1px solid rgba(16,185,129,0.3);
-          border-radius: 14px;
-          display: flex; align-items: center; justify-content: center;
-          transition: all 0.3s;
-          color: #10B981;
-          font-size: 20px;
-          flex-shrink: 0;
-        }
-        .shadow-card:hover .shadow-arrow {
-          background: #10B981;
-          color: black;
-        }
-        .shadow-progress-bars { display: flex; gap: 4px; margin-top: 20px; }
-        .shadow-bar { height: 3px; flex: 1; border-radius: 99px; }
 
-        /* VOCAB CARD */
-        .vocab-card {
-          background: linear-gradient(135deg, #1a0533, #0f0f2a);
-          border: 1px solid rgba(124,58,237,0.3);
-          border-radius: 22px;
-          padding: 28px;
+        .ls-vocab-card {
+          background: linear-gradient(135deg, #0d0d2a, #0a1220);
+          border: 1px solid rgba(99,102,241,0.25);
+          border-radius: 24px;
+          padding: 26px;
           cursor: pointer;
           transition: all 0.3s;
           position: relative;
           overflow: hidden;
           text-align: left;
           color: white;
-          font-family: 'Space Grotesk', sans-serif;
+          font-family: 'DM Sans', sans-serif;
+          width: 100%;
         }
-        .vocab-card::after {
+        .ls-vocab-card::after {
           content: '';
           position: absolute;
           bottom: -30px; right: -30px;
           width: 120px; height: 120px;
-          background: var(--neon-purple);
+          background: #6366f1;
           border-radius: 50%;
-          opacity: 0.1;
+          opacity: 0.08;
           transition: all 0.5s;
         }
-        .vocab-card:hover { transform: scale(1.02); box-shadow: 0 20px 60px rgba(124,58,237,0.2); }
-        .vocab-card:hover::after { transform: scale(2); opacity: 0.15; }
-        .vocab-card:active { transform: scale(0.98); }
-        .vocab-count {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 56px;
-          line-height: 1;
-          background: linear-gradient(135deg, #7C3AED, #EC4899);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-        }
+        .ls-vocab-card:hover { transform: scale(1.02); box-shadow: 0 20px 60px rgba(99,102,241,0.18); }
+        .ls-vocab-card:hover::after { transform: scale(2); opacity: 0.14; }
+        .ls-vocab-card:active { transform: scale(0.98); }
 
-        /* VAULT MODAL */
-        .vault-overlay {
-          position: fixed; inset: 0; z-index: 100;
-          background: rgba(0,0,0,0.7);
-          backdrop-filter: blur(12px);
+        /* ── Vault modal ── */
+        .ls-vault-overlay {
+          position: fixed; inset: 0; z-index: 200;
+          background: rgba(0,0,0,0.72);
+          backdrop-filter: blur(14px);
           display: flex; align-items: center; justify-content: center;
           padding: 16px;
         }
-        .vault-modal {
-          background: #0F0F1A;
-          border: 1px solid rgba(124,58,237,0.3);
+        .ls-vault-modal {
+          background: #0d1526;
+          border: 1px solid rgba(99,102,241,0.28);
           border-radius: 28px;
-          width: 100%;
-          max-width: 600px;
-          max-height: 85vh;
-          display: flex;
-          flex-direction: column;
-          overflow: hidden;
-          box-shadow: 0 40px 100px rgba(124,58,237,0.2);
-          animation: vaultOpen 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-          position: relative;
+          width: 100%; max-width: 600px; max-height: 85vh;
+          display: flex; flex-direction: column; overflow: hidden;
+          box-shadow: 0 40px 100px rgba(99,102,241,0.18);
+          animation: lsVaultOpen 0.3s cubic-bezier(0.34,1.56,0.64,1);
         }
-        @keyframes vaultOpen {
+        @keyframes lsVaultOpen {
           from { transform: scale(0.9) translateY(20px); opacity: 0; }
-          to { transform: scale(1) translateY(0); opacity: 1; }
+          to   { transform: scale(1) translateY(0); opacity: 1; }
         }
-        .vault-header {
-          padding: 28px 32px;
-          border-bottom: 1px solid rgba(255,255,255,0.06);
-          background: rgba(124,58,237,0.05);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-        }
-        .vault-title {
-          font-family: 'Bebas Neue', sans-serif;
-          font-size: 28px;
-          letter-spacing: 0.05em;
-        }
-        .vault-title span { color: var(--neon-purple); }
-        .vault-close {
-          width: 40px; height: 40px;
-          border-radius: 12px;
-          background: rgba(255,255,255,0.06);
-          border: none;
-          cursor: pointer;
-          color: rgba(255,255,255,0.5);
-          font-size: 18px;
-          font-weight: 800;
-          transition: all 0.2s;
-          display: flex; align-items: center; justify-content: center;
-        }
-        .vault-close:hover { background: rgba(239,68,68,0.25); color: #FCA5A5; border: 1px solid rgba(239,68,68,0.4); }
-        .vault-search {
+        .ls-vault-search {
           width: 100%;
-          background: rgba(15,10,30,0.7);
-          border: 1px solid rgba(255,255,255,0.08);
+          background: rgba(10,8,25,0.6);
+          border: 1.5px solid rgba(255,255,255,0.07);
           border-radius: 14px;
           padding: 14px 20px;
           font-size: 15px;
-          color: #D0C8FF;
-          -webkit-text-fill-color: #D0C8FF;
-          font-family: 'Space Grotesk', sans-serif;
-          font-weight: 600;
+          font-weight: 500;
+          color: #d0c8ff;
+          font-family: 'DM Sans', sans-serif;
           outline: none;
           transition: all 0.2s;
+          margin-bottom: 16px;
         }
-        .vault-search:focus { 
-          border-color: rgba(124,58,237,0.4);
-          background: rgba(15,10,30,0.9);
-          box-shadow: 0 0 0 2px rgba(124,58,237,0.1);
-          color: #D0C8FF;
-          -webkit-text-fill-color: #D0C8FF;
+        .ls-vault-search:focus {
+          border-color: rgba(99,102,241,0.4);
+          box-shadow: 0 0 0 2px rgba(99,102,241,0.09);
         }
-        .vault-search::placeholder { color: rgba(255,255,255,0.2); -webkit-text-fill-color: rgba(255,255,255,0.2); }
-        .vault-word {
+        .ls-vault-search::placeholder { color: rgba(255,255,255,0.18); }
+        .ls-vault-word {
           display: flex; align-items: center; justify-content: space-between;
-          background: rgba(255,255,255,0.04);
-          border: 1px solid rgba(255,255,255,0.07);
+          background: rgba(255,255,255,0.03);
+          border: 1px solid rgba(255,255,255,0.06);
           border-radius: 12px;
-          padding: 12px 16px;
+          padding: 11px 16px;
           transition: all 0.2s;
         }
-        .vault-word:hover { border-color: rgba(124,58,237,0.35); background: rgba(124,58,237,0.1); }
-        .vault-word-text {
-          font-family: 'JetBrains Mono', monospace;
-          font-size: 12px;
-          font-weight: 700;
-          text-transform: uppercase;
-          letter-spacing: 0.08em;
-          color: #C4B5FD;
-        }
-        .vault-remove-btn {
-          font-size: 10px;
-          font-weight: 800;
-          color: rgba(239,68,68,0.5);
-          background: none;
-          border: none;
-          cursor: pointer;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          transition: color 0.2s;
-          opacity: 0;
-          font-family: 'Space Grotesk', sans-serif;
-        }
-        .vault-word:hover .vault-remove-btn { opacity: 1; }
-        .vault-remove-btn:hover { color: #EF4444; }
+        .ls-vault-word:hover { border-color: rgba(99,102,241,0.32); background: rgba(99,102,241,0.09); }
 
-        /* LIBRARY */
-        .library-card {
-          background: var(--bg-card);
-          border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 22px;
+        /* ── Library / tip / link cards ── */
+        .ls-library-card {
+          background: #0d1526;
+          border: 1px solid rgba(255,255,255,0.05);
+          border-radius: 24px;
           padding: 24px;
         }
-        .library-item {
+        .ls-library-item {
           display: block;
           padding: 12px 16px;
           border-radius: 12px;
@@ -1038,108 +764,101 @@ export default function LearningSpace() {
           transition: all 0.2s;
           margin-bottom: 8px;
         }
-        .library-item:last-child { margin-bottom: 0; }
-        .library-item:hover { background: rgba(124,58,237,0.12); border-color: rgba(124,58,237,0.25); }
-        .library-title { font-size: 12px; font-weight: 800; color: rgba(220,215,255,0.85); text-transform: uppercase; letter-spacing: 0.05em; }
-        .library-item:hover .library-title { color: #C4B5FD; }
-        .library-type { font-size: 9px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 3px; font-style: italic; }
+        .ls-library-item:last-child { margin-bottom: 0; }
+        .ls-library-item:hover { background: rgba(99,102,241,0.1); border-color: rgba(99,102,241,0.22); }
 
-        /* TIP */
-        .tip-card {
+        .ls-tip-card {
           background: rgba(245,158,11,0.06);
-          border: 1px solid rgba(245,158,11,0.2);
-          border-radius: 18px;
+          border: 1px solid rgba(245,158,11,0.18);
+          border-radius: 22px;
           padding: 20px 24px;
         }
-        .tip-label { font-size: 9px; font-weight: 800; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 8px; }
-        .tip-text { font-size: 13px; font-weight: 600; color: rgba(245,158,11,0.8); font-style: italic; line-height: 1.6; }
-
-        .link-card {
-          background: rgba(245,158,11,0.04);
-          border: 1px solid rgba(245,158,11,0.15);
-          border-radius: 16px;
+        .ls-link-card {
+          background: rgba(99,102,241,0.04);
+          border: 1px solid rgba(99,102,241,0.12);
+          border-radius: 18px;
           padding: 16px 20px;
           text-decoration: none;
           display: block;
           transition: all 0.2s;
         }
-        .link-card:hover { background: rgba(245,158,11,0.12); border-color: rgba(245,158,11,0.45); transform: translateX(3px); }
-        .link-card:hover .link-card-label { color: rgba(251,191,36,0.8); }
-        .link-card:hover .link-card-text { color: #FCD34D; }
-        .link-card-label { font-size: 9px; font-weight: 800; color: rgba(245,158,11,0.5); text-transform: uppercase; letter-spacing: 0.2em; margin-bottom: 6px; transition: color 0.2s; }
-        .link-card-text { font-size: 11px; font-weight: 800; color: #F59E0B; text-transform: uppercase; letter-spacing: 0.05em; transition: color 0.2s; }
-
-        /* SECTION LABELS */
-        .section-label {
-          display: flex; align-items: center; gap: 8px;
-          font-size: 10px; font-weight: 800;
-          color: var(--text-muted);
-          text-transform: uppercase;
-          letter-spacing: 0.2em;
-          margin-bottom: 24px;
-          font-family: 'JetBrains Mono', monospace;
-        }
-        .section-label-dot {
-          width: 6px; height: 6px;
-          border-radius: 50%;
-          flex-shrink: 0;
+        .ls-link-card:hover {
+          background: rgba(99,102,241,0.1);
+          border-color: rgba(99,102,241,0.35);
+          transform: translateX(3px);
         }
 
-        /* DELETE CONFIRM */
-        .delete-confirm { display: flex; gap: 6px; align-items: center; }
-        .btn-danger { background: #EF4444; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
-        .btn-danger:hover { background: #DC2626; }
-        .btn-cancel { background: rgba(255,255,255,0.06); color: rgba(200,195,255,0.7); border: none; padding: 6px 14px; border-radius: 8px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
-        .btn-cancel:hover { background: rgba(255,255,255,0.12); color: #E8E4FF; }
-        .btn-small-icon { background: none; border: none; cursor: pointer; padding: 6px; border-radius: 8px; transition: all 0.2s; font-size: 16px; }
-        .btn-small-icon:hover { background: rgba(124,58,237,0.2); transform: scale(1.15); }
+        /* ── Misc buttons ── */
+        .ls-btn-danger  { background: #ef4444; color: white; border: none; padding: 6px 14px; border-radius: 9px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.08em; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .ls-btn-danger:hover { background: #dc2626; }
+        .ls-btn-cancel  { background: rgba(255,255,255,0.06); color: rgba(200,195,255,0.7); border: none; padding: 6px 14px; border-radius: 9px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .ls-btn-cancel:hover { background: rgba(255,255,255,0.1); color: #e8e4ff; }
+        .ls-btn-icon    { background: none; border: none; cursor: pointer; padding: 7px; border-radius: 9px; transition: all 0.2s; font-size: 16px; }
+        .ls-btn-icon:hover { background: rgba(99,102,241,0.18); transform: scale(1.15); }
+        .ls-btn-save    { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; padding: 10px 22px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Sans', sans-serif; transition: all 0.2s; box-shadow: 0 4px 14px rgba(99,102,241,0.3); }
+        .ls-btn-save:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(99,102,241,0.4); }
+        .ls-btn-cancel-text { background: none; border: none; padding: 10px 14px; color: rgba(180,170,255,0.45); font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Sans', sans-serif; border-radius: 10px; transition: all 0.2s; }
+        .ls-btn-cancel-text:hover { color: #c4b5fd; background: rgba(99,102,241,0.1); }
+        .ls-btn-correction { background: none; border: none; padding: 8px 12px; font-size: 10px; font-weight: 700; color: rgba(239,68,68,0.7); cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .ls-btn-correction:hover { color: #ef4444; }
+        .ls-btn-send { background: linear-gradient(135deg, #6366f1, #4f46e5); color: white; border: none; padding: 10px 22px; border-radius: 12px; font-size: 10px; font-weight: 700; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'DM Sans', sans-serif; transition: all 0.2s; }
+        .ls-btn-send:hover { transform: translateY(-1px); opacity: 0.9; }
+        .ls-btn-close { width: 40px; height: 40px; border-radius: 12px; background: rgba(255,255,255,0.05); border: none; cursor: pointer; color: rgba(255,255,255,0.45); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; transition: all 0.2s; }
+        .ls-btn-close:hover { background: rgba(239,68,68,0.2); color: #fca5a5; border: 1px solid rgba(239,68,68,0.35); }
 
-        .btn-save { background: var(--neon-purple); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
-        .btn-save:hover { background: #6D28D9; }
-        .btn-cancel-text { background: none; border: none; padding: 10px 16px; color: rgba(180,170,255,0.5); font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; border-radius: 8px; }
-        .btn-cancel-text:hover { color: #C4B5FD; background: rgba(124,58,237,0.12); }
-        
-        .btn-correction { background: none; border: none; padding: 8px 12px; font-size: 10px; font-weight: 800; color: #EF4444; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; opacity: 0.7; transition: opacity 0.2s; }
-        .btn-correction:hover { opacity: 1; }
-        .btn-send { background: linear-gradient(135deg, #7C3AED, #EC4899); color: white; border: none; padding: 10px 20px; border-radius: 10px; font-size: 10px; font-weight: 800; cursor: pointer; text-transform: uppercase; letter-spacing: 0.1em; font-family: 'Space Grotesk', sans-serif; transition: all 0.2s; }
-        .btn-send:hover { opacity: 0.9; transform: translateY(-1px); }
-
-        .edited-badge {
-          font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.3);
+        .ls-edited-badge {
+          font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.28);
           text-transform: uppercase; letter-spacing: 0.1em;
           background: rgba(255,255,255,0.04); padding: 2px 8px; border-radius: 6px;
-          margin-left: 8px;
+          margin-left: 6px;
+        }
+        .ls-section-label {
+          display: flex; align-items: center; gap: 8px;
+          font-size: 9px; font-weight: 700;
+          color: rgba(255,255,255,0.28);
+          text-transform: uppercase;
+          letter-spacing: 0.22em;
+          margin-bottom: 20px;
+          font-family: 'DM Sans', sans-serif;
         }
       `}</style>
 
-      {/* XP POP */}
-      {showXpPop && <div className="xp-pop">+{showXpPop} XP ⚡</div>}
+      {/* ── XP Pop ── */}
+      {showXpPop && <div className="ls-xp-pop">+{showXpPop} XP ✦</div>}
 
-      {/* COMBO BANNER */}
+      {/* ── Combo banner ── */}
       {showCombo && (
-        <div className="combo-banner">
-          <div className="combo-banner-text">x{combo} COMBO!</div>
+        <div className="ls-combo-banner">
+          <div className="ls-combo-text">x{combo} Combo!</div>
         </div>
       )}
 
-      {/* VOCABULARY VAULT */}
+      {/* ── Vault modal ── */}
       {showVault && (
-        <div className="vault-overlay" onClick={() => setShowVault(false)}>
-          <div className="vault-modal" onClick={e => e.stopPropagation()}>
-            <div className="vault-header">
+        <div className="ls-vault-overlay" onClick={() => setShowVault(false)}>
+          <div className="ls-vault-modal" onClick={e => e.stopPropagation()}>
+            {/* Header */}
+            <div style={{ padding: '28px 32px', borderBottom: '1px solid rgba(255,255,255,0.06)', background: 'rgba(99,102,241,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <div>
-                <div className="vault-title">SŁOWNIK<span>VAULT</span></div>
-                <div style={{ fontSize: '10px', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '2px' }}>Twoje zasoby językowe</div>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '26px', fontWeight: 700, color: 'white', letterSpacing: '-0.01em' }}>
+                  Słownik <span style={{ color: '#818cf8' }}>Vault</span>
+                </p>
+                <p style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.18em', marginTop: '4px', fontFamily: "'DM Sans', sans-serif" }}>
+                  Twoje zasoby językowe
+                </p>
               </div>
-              <button className="vault-close" onClick={() => setShowVault(false)}>✕</button>
+              <button className="ls-btn-close" onClick={() => setShowVault(false)}>✕</button>
             </div>
             <div style={{ padding: '20px 28px', flex: 1, overflowY: 'auto' }}>
-              <input type="text" className="vault-search" placeholder="Szukaj słowa..." value={vaultSearch} onChange={(e) => setVaultSearch(e.target.value)} style={{ marginBottom: '16px' }} />
+              <input type="text" className="ls-vault-search" placeholder="Szukaj słowa..." value={vaultSearch} onChange={e => setVaultSearch(e.target.value)} />
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {profile?.vocabulary?.filter(w => w.toLowerCase().includes(vaultSearch.toLowerCase())).map((word, i) => (
-                  <div key={i} className="vault-word">
-                    <span className="vault-word-text">{word}</span>
-                    <button className="vault-remove-btn" onClick={() => handleRemoveVocab(word)}>Usuń</button>
+                  <div key={i} className="ls-vault-word">
+                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#c4b5fd' }}>{word}</span>
+                    <button onClick={() => handleRemoveVocab(word)} style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(239,68,68,0.5)', background: 'none', border: 'none', cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '0.1em', transition: 'color 0.2s', fontFamily: "'DM Sans', sans-serif" }}
+                      onMouseEnter={e => e.target.style.color = '#ef4444'} onMouseLeave={e => e.target.style.color = 'rgba(239,68,68,0.5)'}>
+                      Usuń
+                    </button>
                   </div>
                 ))}
               </div>
@@ -1148,135 +867,192 @@ export default function LearningSpace() {
         </div>
       )}
 
-    
-
+      {/* ── Main layout ── */}
       <main className="ls-main">
 
-        {/* LEFT: EDITOR + FEED */}
+        {/* ════ LEFT COLUMN ════ */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', minWidth: 0 }}>
 
-          {/* EDITOR CARD */}
-          <div className="ls-card ls-card-glow" style={{ position: 'relative', overflow: 'visible' }}>
-            {/* Decorative glow orb */}
-            <div style={{ position: 'absolute', top: -40, right: -40, width: 200, height: 200, background: `radial-gradient(circle, ${activeMission.color}22, transparent)`, borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'all 0.5s' }} />
+          {/* ── XP / Level bar ── */}
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px',
+            padding: '16px 24px',
+            background: '#0d1526',
+            border: '1px solid rgba(255,255,255,0.05)',
+            borderRadius: '20px',
+            flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '44px', height: '44px', borderRadius: '14px',
+                background: 'linear-gradient(135deg, #6366f1, #818cf8)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '20px', flexShrink: 0,
+                boxShadow: '0 4px 14px rgba(99,102,241,0.35)',
+              }}>✦</div>
+              <div>
+                <p style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.22em', color: 'rgba(255,255,255,0.28)', marginBottom: '3px', fontFamily: "'DM Sans', sans-serif" }}>Poziom</p>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '18px', color: '#c4b5fd', fontWeight: 700, letterSpacing: '-0.01em' }}>{LEVEL_NAMES[currentLevel]}</p>
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: '120px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: "'DM Sans', sans-serif" }}>XP</span>
+                <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', fontFamily: "'DM Sans', sans-serif" }}>{totalXp}</span>
+              </div>
+              <div style={{ height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${xpProgress}%`, background: 'linear-gradient(90deg, #6366f1, #34d399)', borderRadius: '99px', transition: 'width 0.6s cubic-bezier(0.34,1.56,0.64,1)' }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '22px', color: combo >= 5 ? '#ef4444' : combo >= 3 ? '#f59e0b' : 'white', fontWeight: 700 }}>{combo}</span>
+              <span style={{ fontSize: '16px' }}>🔥</span>
+              <span style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.15em', fontFamily: "'DM Sans', sans-serif" }}>Combo</span>
+            </div>
+          </div>
 
-            <div className="editor-card" style={{ position: 'relative', zIndex: 1 }}>
-              {/* MISSION TABS */}
-              <div className="mission-tabs">
+          {/* ── Editor card ── */}
+          <div className="ls-card ls-card-glow" style={{ overflow: 'visible' }}>
+            {/* Glow orb */}
+            <div style={{ position: 'absolute', top: -50, right: -50, width: 220, height: 220, background: `radial-gradient(circle, ${activeMission.color}18, transparent)`, borderRadius: '50%', pointerEvents: 'none', zIndex: 0, transition: 'all 0.5s' }} />
+
+            <div style={{ padding: '28px', position: 'relative', zIndex: 1 }}>
+
+              {/* Mission tabs */}
+              <div className="ls-mission-tabs" style={{ marginBottom: '20px' }}>
                 {MISSIONS.map(m => (
-                  <button
-                    key={m.id}
-                    onClick={() => setActiveMission(m)}
-                    className={`mission-tab ${activeMission.id === m.id ? 'active' : ''}`}
-                    style={activeMission.id === m.id ? { color: m.color, borderColor: m.color + '88', boxShadow: `0 0 16px ${m.color}44` } : {}}
+                  <button key={m.id} onClick={() => setActiveMission(m)}
+                    className={`ls-mission-tab ${activeMission.id === m.id ? 'active' : ''}`}
+                    style={activeMission.id === m.id ? { color: m.color, borderColor: m.color + '99', boxShadow: `0 0 14px ${m.color}44` } : {}}
                   >
-                    {m.icon} {m.label} <span className="mission-xp-badge">+{m.xp}xp</span>
+                    {m.icon} {m.label}
+                    <span style={{ fontSize: '9px', fontFamily: "'DM Sans', sans-serif", fontWeight: 700, opacity: 0.65, marginLeft: '4px' }}>+{m.xp}xp</span>
                   </button>
                 ))}
               </div>
 
-              {/* PROMPT */}
-              <div className="mission-prompt" style={{ borderLeftColor: activeMission.color, color: `${activeMission.color}dd` }}>
+              {/* Prompt */}
+              <div style={{
+                fontSize: 'clamp(15px, 2.8vw, 20px)', fontWeight: 700, lineHeight: 1.45, color: 'white',
+                marginBottom: '22px', padding: '18px 22px',
+                borderRadius: '18px', borderLeft: `3px solid ${activeMission.color}`,
+                background: 'rgba(255,255,255,0.025)',
+                fontFamily: "'Playfair Display', serif", fontStyle: 'italic',
+                color: `${activeMission.color}dd`,
+              }}>
                 "{activeMission.prompt}"
               </div>
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* POLISH CHARS */}
-                <div className="polish-chars">
+                {/* Polish chars — main textarea */}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
                   {POLISH_CHARS.map(char => (
-                    <button key={char} type="button" className="polish-char-btn" onClick={() => insertChar(char, mainTextareaRef, text, setText)}>
+                    <button key={char} type="button" className="ls-char-btn"
+                      style={{ width: '34px', height: '34px' }}
+                      onClick={() => insertChar(char, mainTextareaRef, text, setText)}>
                       {char}
                     </button>
                   ))}
                 </div>
 
-                <textarea
-                  ref={mainTextareaRef}
-                  required value={text} onChange={(e) => setText(e.target.value)}
+                <textarea ref={mainTextareaRef} required value={text}
+                  onChange={e => setText(e.target.value)}
                   placeholder="Napisz coś ambitnego..."
-                  className={`main-textarea ${pulseEditor ? 'pulse-success' : ''}`}
+                  className={`ls-textarea ${pulseEditor ? 'pulse-success' : ''}`}
                 />
 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  <div className="polish-chars">
+                  {/* Polish chars — vocab input */}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                     {POLISH_CHARS.map(char => (
-                      <button key={char} type="button" className="polish-char-btn small" onClick={() => insertChar(char, vocabInputRef, vocab, setVocab)}>
+                      <button key={char} type="button" className="ls-char-btn"
+                        style={{ width: '28px', height: '28px', fontSize: '11px' }}
+                        onClick={() => insertChar(char, vocabInputRef, vocab, setVocab)}>
                         {char}
                       </button>
                     ))}
                   </div>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
-                    <input ref={vocabInputRef} value={vocab} onChange={(e) => setVocab(e.target.value)} placeholder="Słówka (oddzielone przecinkiem)..." className="vocab-input" style={{ flex: 1 }} />
-                    <button disabled={!text.trim() || isSubmitting} className={`submit-btn ${slotSpin ? 'spinning' : ''}`}>
-                      {isSubmitting ? "🎰" : `OPUBLIKUJ ⚡`}
+                    <input ref={vocabInputRef} value={vocab} onChange={e => setVocab(e.target.value)}
+                      placeholder="Słówka (oddzielone przecinkiem)..."
+                      className="ls-vocab-input" />
+                    <button disabled={!text.trim() || isSubmitting}
+                      className={`ls-submit-btn ${slotSpin ? 'spinning' : ''}`}
+                      style={slotSpin ? { opacity: 0.7 } : {}}>
+                      {isSubmitting ? "✦" : "OPUBLIKUJ ✦"}
                     </button>
                   </div>
                 </div>
               </form>
 
-              {/* WORD METER */}
-              <div className="word-meter">
+              {/* Word meter */}
+              <div className="ls-word-meter">
                 <div>
-                  <div className="word-meter-label" style={{ color: milestone.color }}>{milestone.label}</div>
-                  <div className="star-rating" style={{ marginTop: '4px' }}>
-                    {[1, 2, 3, 4].map(i => (
-                      <span key={i} style={{ fontSize: '12px', opacity: i <= milestone.stars ? 1 : 0.15 }}>⭐</span>
-                    ))}
+                  <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', color: milestone.color, fontFamily: "'DM Sans', sans-serif" }}>{milestone.label}</div>
+                  <div style={{ display: 'flex', gap: '2px', marginTop: '5px' }}>
+                    {[1,2,3,4].map(i => <span key={i} style={{ fontSize: '11px', opacity: i <= milestone.stars ? 1 : 0.14 }}>⭐</span>)}
                   </div>
                 </div>
-                <div className="word-meter-bar">
-                  <div className="word-meter-fill" style={{ width: `${Math.min((wordCount / 40) * 100, 100)}%`, background: `linear-gradient(90deg, ${milestone.color}88, ${milestone.color})` }} />
+                <div style={{ flex: 1, height: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '99px', overflow: 'hidden', maxWidth: '200px' }}>
+                  <div style={{ height: '100%', borderRadius: '99px', width: `${Math.min((wordCount / 40) * 100, 100)}%`, background: `linear-gradient(90deg, ${milestone.color}88, ${milestone.color})`, transition: 'width 0.4s cubic-bezier(0.34,1.56,0.64,1)' }} />
                 </div>
-                <div className="word-count-num">{wordCount} słów</div>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', fontFamily: "'DM Sans', sans-serif", flexShrink: 0 }}>{wordCount} słów</span>
               </div>
 
-              {/* COMBO BAR */}
+              {/* Combo bar */}
               {combo >= 2 && (
-                <div className="combo-bar" style={{ animation: 'newPostSlide 0.3s ease-out' }}>
-                  <div className="combo-flames">{combo >= 4 ? '🔥🔥🔥' : combo >= 3 ? '🔥🔥' : '🔥'}</div>
+                <div className="ls-combo-bar">
+                  <span style={{ fontSize: '20px' }}>{combo >= 4 ? '🔥🔥🔥' : combo >= 3 ? '🔥🔥' : '🔥'}</span>
                   <div>
-                    <div className="combo-text">COMBO AKTYWNY</div>
-                    <div className="combo-desc">Pisz częściej, zarabiaj więcej XP!</div>
+                    <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '15px', color: '#f59e0b', fontWeight: 700 }}>Combo Aktywny</div>
+                    <div style={{ fontSize: '9px', color: 'rgba(245,158,11,0.5)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '2px', fontFamily: "'DM Sans', sans-serif" }}>Pisz częściej, zarabiaj więcej XP!</div>
                   </div>
-                  <div className="combo-multiplier">x{combo}</div>
+                  <div style={{ marginLeft: 'auto', fontFamily: "'Playfair Display', serif", fontSize: '26px', color: '#f59e0b', fontWeight: 700, textShadow: '0 0 18px rgba(245,158,11,0.7)' }}>x{combo}</div>
                 </div>
               )}
             </div>
           </div>
 
-          {/* FEED */}
+          {/* ── Feed ── */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            {posts.map((p) => (
-              <article key={p.id} className={`ls-card post-card ${newPostIds.has(p.id) ? 'new-post' : ''}`}>
-                {/* POST HEADER */}
+            {posts.map(p => (
+              <article key={p.id} className={`ls-card ls-post-card ${newPostIds.has(p.id) ? 'new-post' : ''}`}>
+                {/* Post header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <div className="post-avatar" style={{ background: p.authorEmail === ADMIN_EMAIL ? 'linear-gradient(135deg, #7C3AED, #EC4899)' : 'linear-gradient(135deg, #1E1E2E, #2A2A3E)', border: `1px solid ${p.authorEmail === ADMIN_EMAIL ? 'rgba(124,58,237,0.4)' : 'rgba(255,255,255,0.08)'}` }}>
+                    <div className="ls-post-avatar" style={{
+                      background: p.authorEmail === ADMIN_EMAIL
+                        ? 'linear-gradient(135deg, #6366f1, #34d399)'
+                        : 'linear-gradient(135deg, #1a1a2e, #2a2a3e)',
+                      border: `1px solid ${p.authorEmail === ADMIN_EMAIL ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.07)'}`,
+                    }}>
                       {p.author.charAt(0)}
                     </div>
                     <div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span className="post-author">{p.author}</span>
-                        <span className="post-level" style={{ background: 'rgba(124,58,237,0.15)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.2)' }}>{p.authorLevel}</span>
-                        {p.edited && <span className="edited-badge">editado</span>}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: 'white', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'DM Sans', sans-serif" }}>{p.author}</span>
+                        <span style={{ fontSize: '9px', fontWeight: 700, padding: '2px 9px', borderRadius: '7px', textTransform: 'uppercase', letterSpacing: '0.1em', background: 'rgba(99,102,241,0.12)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.2)', fontFamily: "'DM Sans', sans-serif" }}>{p.authorLevel}</span>
+                        {p.edited && <span className="ls-edited-badge">edytowano</span>}
                       </div>
-                      <div className="post-mission">{p.missionType || 'Wolna Myśl'} · {p.wordCount || 0} słów</div>
+                      <div style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '3px', fontFamily: "'DM Sans', sans-serif" }}>
+                        {p.missionType || 'Wolna Myśl'} · {p.wordCount || 0} słów
+                      </div>
                     </div>
                   </div>
 
                   {(p.uid === user.uid || isAdmin) && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {deleteConfirmId === p.id ? (
-                        <div className="delete-confirm">
-                          <button onClick={() => confirmDelete(p.id)} className="btn-danger">TAK</button>
-                          <button onClick={() => setDeleteConfirmId(null)} className="btn-cancel">NIE</button>
+                        <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                          <button onClick={() => confirmDelete(p.id)} className="ls-btn-danger">Tak</button>
+                          <button onClick={() => setDeleteConfirmId(null)} className="ls-btn-cancel">Nie</button>
                         </div>
                       ) : (
                         <div style={{ display: 'flex', gap: '2px' }}>
                           {p.uid === user.uid && (
-                            <button onClick={() => { setEditingId(p.id); setEditText(p.content); }} className="btn-small-icon" title="Edit">✍️</button>
+                            <button onClick={() => { setEditingId(p.id); setEditText(p.content); }} className="ls-btn-icon" title="Edytuj">✍️</button>
                           )}
-                          <button onClick={() => setDeleteConfirmId(p.id)} className="btn-small-icon" title="Delete">🗑️</button>
+                          <button onClick={() => setDeleteConfirmId(p.id)} className="ls-btn-icon" title="Usuń">🗑️</button>
                         </div>
                       )}
                     </div>
@@ -1284,65 +1060,67 @@ export default function LearningSpace() {
                 </div>
 
                 {editingId === p.id ? (
-                  <div className="edit-zone">
-                    <div className="polish-chars" style={{ marginBottom: '8px' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '18px', padding: '20px', margin: '16px 0' }}>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
                       {POLISH_CHARS.map(char => (
-                        <button key={char} type="button" className="polish-char-btn small" onClick={() => insertChar(char, editPostRef, editText, setEditText)}>{char}</button>
+                        <button key={char} type="button" className="ls-char-btn" style={{ width: '28px', height: '28px', fontSize: '11px' }}
+                          onClick={() => insertChar(char, editPostRef, editText, setEditText)}>{char}</button>
                       ))}
                     </div>
-                    <textarea ref={editPostRef} value={editText} onChange={(e) => setEditText(e.target.value)} className="edit-textarea" rows={4} />
+                    <textarea ref={editPostRef} value={editText} onChange={e => setEditText(e.target.value)} className="ls-edit-textarea" rows={4} />
                     <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
-                      <button onClick={() => handleEditPost(p.id)} className="btn-save">Zapisz</button>
-                      <button onClick={() => setEditingId(null)} className="btn-cancel-text">Anuluj</button>
+                      <button onClick={() => handleEditPost(p.id)} className="ls-btn-save">Zapisz</button>
+                      <button onClick={() => setEditingId(null)} className="ls-btn-cancel-text">Anuluj</button>
                     </div>
                   </div>
                 ) : (
-                  <p className="post-content">"{p.content}"</p>
+                  <p className="ls-post-content">"{p.content}"</p>
                 )}
 
                 {p.vocabulary?.length > 0 && (
-                  <div className="vocab-tags">
-                    {p.vocabulary.map((v, i) => <span key={i} className="vocab-tag">{v}</span>)}
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '16px' }}>
+                    {p.vocabulary.map((v, i) => <span key={i} className="ls-vocab-tag">{v}</span>)}
                   </div>
                 )}
 
-                {/* ACTIONS */}
-                <div className="post-actions">
-                  <button onClick={() => handleLike(p)} className={`action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
+                {/* Actions */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', paddingTop: '14px', borderTop: '1px solid rgba(255,255,255,0.05)' }}>
+                  <button onClick={() => handleLike(p)} className={`ls-action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
                     <span className="icon">{p.likes?.includes(user.uid) ? '❤️' : '🤍'}</span>
                     <span>{p.likes?.length || 0}</span>
                   </button>
-                  <button onClick={() => toggleComments(p.id)} className="action-btn">
+                  <button onClick={() => toggleComments(p.id)} className="ls-action-btn">
                     <span className="icon">💬</span>
                     <span>Komentarze</span>
                   </button>
                 </div>
 
-                {/* COMMENTS */}
+                {/* Comments */}
                 {activeCommentBox === p.id && (
-                  <div className="comment-zone">
+                  <div className="ls-comment-zone">
                     {comments[p.id]?.map(c => (
-                      <div key={c.id} className="comment-item">
-                        <div className="comment-stripe" style={{ background: c.isCorrection ? '#EF4444' : '#7C3AED' }} />
+                      <div key={c.id} className="ls-comment-item">
+                        <div style={{ width: '3px', borderRadius: '99px', background: c.isCorrection ? '#ef4444' : '#6366f1', flexShrink: 0 }} />
                         <div>
-                          <div className="comment-author">{c.author} {c.isCorrection && <span style={{ color: '#EF4444', fontSize: '9px' }}>✍️ POPRAWKA</span>}</div>
-                          <div className="comment-text">{c.content}</div>
+                          <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', color: '#c4b5fd', fontFamily: "'DM Sans', sans-serif" }}>
+                            {c.author} {c.isCorrection && <span style={{ color: '#ef4444', fontSize: '9px' }}>✍️ POPRAWKA</span>}
+                          </div>
+                          <div style={{ fontSize: '14px', color: 'rgba(240,240,255,0.7)', marginTop: '4px', lineHeight: 1.55, fontFamily: "'DM Sans', sans-serif" }}>{c.content}</div>
                         </div>
                       </div>
                     ))}
                     <div>
-                      <div className="polish-chars" style={{ marginBottom: '6px' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '6px' }}>
                         {POLISH_CHARS.map(char => (
-                          <button key={char} type="button" className="polish-char-btn small"
-                            onClick={() => { const ref = { current: document.getElementById(`comment-${p.id}`) }; insertChar(char, ref, commentText, setCommentText); }}>
-                            {char}
-                          </button>
+                          <button key={char} type="button" className="ls-char-btn" style={{ width: '28px', height: '28px', fontSize: '11px' }}
+                            onClick={() => { const ref = { current: document.getElementById(`comment-${p.id}`) }; insertChar(char, ref, commentText, setCommentText); }}>{char}</button>
                         ))}
                       </div>
-                      <textarea id={`comment-${p.id}`} value={commentText} onChange={(e) => setCommentText(e.target.value)} placeholder="Napisz feedback..." className="comment-input" rows={3} />
+                      <textarea id={`comment-${p.id}`} value={commentText} onChange={e => setCommentText(e.target.value)}
+                        placeholder="Napisz feedback..." className="ls-comment-input" rows={3} />
                       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
-                        <button onClick={() => handlePostComment(p.id, true)} className="btn-correction">✍️ Poprawka</button>
-                        <button onClick={() => handlePostComment(p.id, false)} className="btn-send">Wyślij</button>
+                        <button onClick={() => handlePostComment(p.id, true)} className="ls-btn-correction">✍️ Poprawka</button>
+                        <button onClick={() => handlePostComment(p.id, false)} className="ls-btn-send">Wyślij</button>
                       </div>
                     </div>
                   </div>
@@ -1352,77 +1130,83 @@ export default function LearningSpace() {
           </div>
         </div>
 
-        {/* SIDEBAR */}
-        <aside className="sidebar">
-          <div style={{ position: 'sticky', top: '90px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {/* ════ SIDEBAR ════ */}
+        <aside style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ position: 'sticky', top: '24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
 
-            {/* SHADOW PROTOCOL */}
-            <Link to="/shadow-protocol" className="shadow-card">
+            {/* Shadow Protocol */}
+            <Link to="/shadow-protocol" className="ls-shadow-card">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <div className="shadow-live-dot" />
-                  <span style={{ fontSize: '10px', fontWeight: 800, color: '#10B981', textTransform: 'uppercase', letterSpacing: '0.25em' }}>System: Active</span>
+                  <div className="ls-live-dot" />
+                  <span style={{ fontSize: '9px', fontWeight: 700, color: '#34d399', textTransform: 'uppercase', letterSpacing: '0.25em', fontFamily: "'DM Sans', sans-serif" }}>System: Active</span>
                 </div>
-                <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(16,185,129,0.4)', textTransform: 'uppercase', letterSpacing: '0.1em', border: '1px solid rgba(16,185,129,0.2)', padding: '3px 8px', borderRadius: '6px' }}>B1 Protocol</span>
+                <span style={{ fontSize: '8px', fontWeight: 700, color: 'rgba(52,211,153,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', border: '1px solid rgba(52,211,153,0.2)', padding: '3px 8px', borderRadius: '6px', fontFamily: "'DM Sans', sans-serif" }}>B1 Protocol</span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
                 <div>
-                  <div className="shadow-title">Shadow<span>Protocol</span></div>
-                  <div style={{ fontSize: '11px', fontWeight: 600, color: 'rgba(255,255,255,0.3)', marginTop: '4px', lineHeight: 1.5 }}>Inicjuj symulację<br/><span style={{ color: 'rgba(16,185,129,0.5)' }}>Autoryzacja wymagana...</span></div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '24px', fontWeight: 700, color: 'white', letterSpacing: '-0.01em' }}>
+                    Shadow<span style={{ color: '#34d399' }}> Protocol</span>
+                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: 500, color: 'rgba(255,255,255,0.3)', marginTop: '5px', lineHeight: 1.5, fontFamily: "'DM Sans', sans-serif" }}>
+                    Inicjuj symulację<br /><span style={{ color: 'rgba(52,211,153,0.5)' }}>Autoryzacja wymagana...</span>
+                  </div>
                 </div>
-                <div className="shadow-arrow">⚡</div>
+                <div style={{ width: '46px', height: '46px', background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.28)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', flexShrink: 0, transition: 'all 0.3s' }}>⚡</div>
               </div>
-              <div className="shadow-progress-bars">
-                {[1,2,3,4,5,6].map(i => <div key={i} className="shadow-bar" style={{ background: i < 4 ? '#10B981' : 'rgba(255,255,255,0.06)' }} />)}
+              <div style={{ display: 'flex', gap: '4px', marginTop: '18px' }}>
+                {[1,2,3,4,5,6].map(i => <div key={i} style={{ height: '3px', flex: 1, borderRadius: '99px', background: i < 4 ? '#34d399' : 'rgba(255,255,255,0.06)' }} />)}
               </div>
             </Link>
 
-            {/* VOCAB CARD */}
-            <button onClick={() => setShowVault(true)} className="vocab-card">
-              <div style={{ fontSize: '10px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(124,58,237,0.6)', marginBottom: '12px' }}>Mój Słownik</div>
+            {/* Vocab card */}
+            <button onClick={() => setShowVault(true)} className="ls-vocab-card">
+              <div style={{ fontSize: '9px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.25em', color: 'rgba(99,102,241,0.55)', marginBottom: '12px', fontFamily: "'DM Sans', sans-serif" }}>Mój Słownik</div>
               <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between' }}>
                 <div>
-                  <div className="vocab-count">{profile?.vocabulary?.length || 0}</div>
-                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '4px' }}>Poznane słowa</div>
+                  <div style={{ fontFamily: "'Playfair Display', serif", fontSize: '52px', fontWeight: 700, lineHeight: 1, background: 'linear-gradient(135deg, #6366f1, #34d399)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                    {profile?.vocabulary?.length || 0}
+                  </div>
+                  <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.1em', marginTop: '5px', fontFamily: "'DM Sans', sans-serif" }}>Poznane słowa</div>
                 </div>
-                <div style={{ fontSize: '40px', transition: 'transform 0.3s' }}>📚</div>
+                <span style={{ fontSize: '40px' }}>📚</span>
               </div>
             </button>
 
-            {/* LIBRARY */}
-            <div className="library-card">
-              <div className="section-label">
-                <div className="section-label-dot" style={{ background: 'var(--neon-purple)' }} />
+            {/* Library */}
+            <div className="ls-library-card">
+              <div className="ls-section-label">
+                <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#6366f1', flexShrink: 0 }} />
                 Biblioteka B1
               </div>
-              <div>
-                {resources.map(res => (
-                  <a key={res.id} href={res.url} target="_blank" rel="noreferrer" className="library-item">
-                    <div className="library-title">{res.title}</div>
-                    <div className="library-type">{res.type}</div>
-                  </a>
-                ))}
+              {resources.map(res => (
+                <a key={res.id} href={res.url} target="_blank" rel="noreferrer" className="ls-library-item">
+                  <div style={{ fontSize: '12px', fontWeight: 700, color: 'rgba(220,215,255,0.82)', textTransform: 'uppercase', letterSpacing: '0.05em', fontFamily: "'DM Sans', sans-serif" }}>{res.title}</div>
+                  <div style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(255,255,255,0.28)', textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '3px', fontStyle: 'italic', fontFamily: "'DM Sans', sans-serif" }}>{res.type}</div>
+                </a>
+              ))}
+            </div>
+
+            {/* Tip */}
+            <div className="ls-tip-card">
+              <div style={{ fontSize: '9px', fontWeight: 700, color: '#f59e0b', textTransform: 'uppercase', letterSpacing: '0.22em', marginBottom: '8px', fontFamily: "'DM Sans', sans-serif" }}>Wskazówka Dnia</div>
+              <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: '13px', fontWeight: 400, color: 'rgba(245,158,11,0.78)', lineHeight: 1.65 }}>
+                "Używaj spójników takich jak 'ponieważ', 'chociaż' oraz 'dlatego', aby Twoje zdania brzmiały bardziej naturalnie."
               </div>
             </div>
 
-            {/* TIP */}
-            <div className="tip-card">
-              <div className="tip-label">Wskazówka Dnia</div>
-              <div className="tip-text">"Używaj spójników takich jak 'ponieważ', 'chociaż' oraz 'dlatego', aby Twoje zdania brzmiały bardziej naturalnie."</div>
-            </div>
-
-            {/* LINK CARDS */}
+            {/* Link cards */}
             {[
-              { to: "/vocabularyvault", label: "Vocabulary Vault", text: "Otwórz pełny skarbiec słówek 🔑" },
-              { to: "/polish-simplified", label: "learn Polish vocabulary", text: "Polish Simplified 🎮" },
-              { to: "/polish-music", label: "Music & Polish", text: "Listen to Polish vibe 🎵" },
-              { to: "/reading-practice", label: "Reading Practice", text: "Practice Reading 📖" },
-              { to: "/conjugation-practice", label: "Conjugations", text: "Practice Conjugations 🧠" },
-              { to: "/play", label: "Learn Polish via Play", text: "Practice grammar rules, build vocabulary with games logics" },
+              { to: "/vocabularyvault",       label: "Vocabulary Vault",        text: "Otwórz pełny skarbiec słówek 🔑" },
+              { to: "/polish-simplified",     label: "Learn Polish Vocabulary", text: "Polish Simplified 🎮" },
+              { to: "/polish-music",          label: "Music & Polish",          text: "Listen to Polish vibe 🎵" },
+              { to: "/reading-practice",      label: "Reading Practice",        text: "Practice Reading 📖" },
+              { to: "/conjugation-practice",  label: "Conjugations",            text: "Practice Conjugations 🧠" },
+              { to: "/play",                  label: "Learn Polish via Play",   text: "Practice grammar & vocabulary with games" },
             ].map(({ to, label, text }) => (
-              <Link key={to} to={to} className="link-card">
-                <div className="link-card-label">{label}</div>
-                <div className="link-card-text">{text}</div>
+              <Link key={to} to={to} className="ls-link-card">
+                <div style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(99,102,241,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '5px', fontFamily: "'DM Sans', sans-serif" }}>{label}</div>
+                <div style={{ fontSize: '12px', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.06em', fontFamily: "'DM Sans', sans-serif' " }}>{text}</div>
               </Link>
             ))}
 
