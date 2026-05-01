@@ -9,6 +9,48 @@ function stripParens(str) {
   return str.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
 }
 
+/**
+ * Extract every valid alternative from a translation string.
+ * Handles: "admitted to / confessed (perf.)"  →  ["admitted to", "confessed"]
+ *          "he / she"                           →  ["he", "she"]
+ *          "go (somewhere)"                     →  ["go"]
+ */
+function getAlternatives(raw) {
+  // First strip parenthetical notes entirely
+  const cleaned = raw.replace(/\s*\([^)]*\)/g, '').trim();
+  // Split on " / " or "/"
+  return cleaned
+    .split(/\s*\/\s*/)
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean);
+}
+
+/**
+ * Build the full set of acceptable answer strings by combining
+ * per-slot alternatives via cartesian product.
+ * e.g. subject ["he","she"] × verb ["admitted to","confessed"] × object ["it"]
+ *   → ["he admitted to it", "he confessed it", "she admitted to it", "she confessed it"]
+ */
+function buildAcceptedAnswers(s, v, o) {
+  const sAlts = getAlternatives(s.en);
+  const vAlts = getAlternatives(v.en);
+  const oAlts = getAlternatives(o.en);
+  const results = [];
+  for (const sa of sAlts) {
+    for (const va of vAlts) {
+      for (const oa of oAlts) {
+        results.push(`${sa} ${va} ${oa}`.replace(/\s+/g, ' ').trim());
+      }
+    }
+  }
+  return results;
+}
+
+/** Normalise for comparison: lowercase, collapse spaces, strip trailing period */
+function norm(str) {
+  return str.toLowerCase().trim().replace(/\s+/g, ' ').replace(/\.$/, '');
+}
+
 const REEL_LABELS = ['Subject', 'Verb', 'Object'];
 
 // ── Individual reel card ──────────────────────────────────────────────────────
@@ -19,7 +61,6 @@ function ReelCard({ reel, index, spinning, hintRevealed, onRevealHint, showTrans
     <div className={`reel ${spinning ? 'spinning' : ''} ${reel.locked ? 'locked' : ''}`}>
       <div className="reel-lbl">{REEL_LABELS[index]}</div>
       <div className="reel-word">{reel.word}</div>
-
       <div className="reel-tr-wrap">
         {!reel.locked ? (
           <span className="reel-tr">&nbsp;</span>
@@ -44,7 +85,7 @@ function ReelCard({ reel, index, spinning, hintRevealed, onRevealHint, showTrans
 
 // ── Main component ────────────────────────────────────────────────────────────
 export default function SlotScreen({ onBack, onXpGain, toast }) {
-  const [reelState, setReelState] = useState('idle'); // idle | spinning | answering | done
+  const [reelState, setReelState] = useState('idle');
   const [reels, setReels] = useState([
     { word: '—', tr: '', locked: false },
     { word: '—', tr: '', locked: false },
@@ -58,6 +99,7 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
   const [hintsUsed, setHintsUsed] = useState([false, false, false]);
   const [hintsLeft, setHintsLeft] = useState(3);
   const [showAllTranslations, setShowAllTranslations] = useState(false);
+  const [acceptedAnswers, setAcceptedAnswers] = useState([]);
   const intervalRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -69,6 +111,7 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
     setAnswer('');
     setHintsUsed([false, false, false]);
     setShowAllTranslations(false);
+    setAcceptedAnswers([]);
 
     let ticks = 0;
     const maxTicks = 18;
@@ -76,8 +119,8 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
     intervalRef.current = setInterval(() => {
       setReels([
         { word: rand(SUBJECTS).pl, tr: '', locked: false },
-        { word: rand(VERBS).pl, tr: '', locked: false },
-        { word: rand(OBJECTS).pl, tr: '', locked: false },
+        { word: rand(VERBS).pl,    tr: '', locked: false },
+        { word: rand(OBJECTS).pl,  tr: '', locked: false },
       ]);
       ticks++;
       if (ticks >= maxTicks) {
@@ -86,6 +129,7 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
         const v = rand(VERBS);
         const o = rand(OBJECTS);
         setCurrent({ s, v, o });
+        setAcceptedAnswers(buildAcceptedAnswers(s, v, o));
         setReels([
           { word: s.pl, tr: s.en, locked: true },
           { word: v.pl, tr: v.en, locked: true },
@@ -100,34 +144,40 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
   // ── Reveal one hint ──
   const revealHint = (index) => {
     if (hintsLeft <= 0 || hintsUsed[index]) return;
-    setHintsUsed((prev) => {
-      const next = [...prev];
-      next[index] = true;
-      return next;
-    });
-    setHintsLeft((h) => h - 1);
+    setHintsUsed(prev => { const n = [...prev]; n[index] = true; return n; });
+    setHintsLeft(h => h - 1);
   };
 
   // ── Check answer ──
   const checkAnswer = () => {
     if (!current) return;
     const { s, v, o } = current;
-
-    const cleanS = stripParens(s.en);
-    const cleanV = stripParens(v.en);
-    const cleanO = stripParens(o.en);
-    const correct = `${cleanS} ${cleanV} ${cleanO}`.toLowerCase().replace(/\./g, '');
-    const ans = answer.toLowerCase().trim().replace(/\./g, '');
-    const correctWords = correct.split(/\s+/);
-    const hits = correctWords.filter((w) => ans.includes(w)).length;
-    const isCorrect = ans === correct || hits === correctWords.length;
-    const isNear = hits >= correctWords.length - 1 && !isCorrect;
-
+    const userAns = norm(answer);
     const usedCount = hintsUsed.filter(Boolean).length;
-    const display = `${s.en} ${v.en} ${o.en}`;
 
-    // Always reveal all translations after submitting
     setShowAllTranslations(true);
+
+    // Exact match against any accepted combo
+    const isCorrect = acceptedAnswers.some(a => norm(a) === userAns);
+
+    // "Near" — user's answer contains every word of at least one accepted combo
+    const isNear = !isCorrect && acceptedAnswers.some(accepted => {
+      const words = norm(accepted).split(/\s+/);
+      return words.length > 1 && words.every(w => userAns.includes(w));
+    });
+
+    // Build a clean display string showing all alternatives
+    const sAlts = getAlternatives(s.en);
+    const vAlts = getAlternatives(v.en);
+    const oAlts = getAlternatives(o.en);
+    const displayParts = [];
+    if (sAlts.length > 1) displayParts.push(sAlts.join(' / '));
+    else displayParts.push(sAlts[0] || s.en);
+    if (vAlts.length > 1) displayParts.push(vAlts.join(' / '));
+    else displayParts.push(vAlts[0] || v.en);
+    if (oAlts.length > 1) displayParts.push(oAlts.join(' / '));
+    else displayParts.push(oAlts[0] || o.en);
+    const displayAnswer = displayParts.join(' · ');
 
     if (isCorrect) {
       const pts = usedCount === 0 ? 100 : Math.max(40, 100 - usedCount * 20);
@@ -137,28 +187,22 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           ? `✓ Perfect — no hints needed! +${pts} XP`
           : `✓ Correct! ${usedCount} hint${usedCount > 1 ? 's' : ''} used. +${pts} XP`,
       });
-      setScore((sc) => sc + pts);
-      setStreak((st) => st + 1);
+      setScore(sc => sc + pts);
+      setStreak(st => st + 1);
       onXpGain(pts);
     } else if (isNear) {
-      setFeedback({
-        type: 'near',
-        text: `~ So close! Full answer: "${display}"`,
-      });
-      setScore((sc) => sc + 20);
+      setFeedback({ type: 'near', text: `~ So close! Accepted: ${displayAnswer}` });
+      setScore(sc => sc + 20);
       setStreak(0);
       onXpGain(20);
     } else {
-      setFeedback({
-        type: 'bad',
-        text: `✗ Answer was: "${display}"`,
-      });
+      setFeedback({ type: 'bad', text: `✗ Accepted: ${displayAnswer}` });
       setStreak(0);
     }
     setReelState('done');
   };
 
-  // ── Spin again — replenish 1 hint per round, max 3 ──
+  // ── Spin again ──
   const spinAgain = () => {
     setReelState('idle');
     setReels([
@@ -166,49 +210,44 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
       { word: '—', tr: '', locked: false },
       { word: '—', tr: '', locked: false },
     ]);
-    setHintsLeft((h) => Math.min(3, h + 1));
+    setHintsLeft(h => Math.min(3, h + 1));
     spin();
   };
+
+  const inputClass = `answer-input${
+    feedback?.type === 'good' ? ' correct'
+    : feedback?.type === 'bad' || feedback?.type === 'near' ? ' wrong'
+    : ''
+  }`;
 
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
+
+        *, *::before, *::after { box-sizing: border-box; }
 
         .slot-root {
           font-family: 'DM Sans', sans-serif;
           min-height: 100vh;
-          background: #0e0e12;
-          color: #f0ece4;
+          background: #020617;
+          color: #f0f0ff;
           display: flex;
           flex-direction: column;
           align-items: center;
-          padding: 24px 16px 56px;
+          padding: 32px 16px 72px;
           position: relative;
           overflow-x: hidden;
         }
 
-        /* Grain texture */
+        /* Ambient glow */
         .slot-root::before {
           content: '';
           position: fixed;
           inset: 0;
-          background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-          pointer-events: none;
-          z-index: 0;
-          opacity: 0.5;
-        }
-
-        /* Top ambient glow */
-        .slot-root::after {
-          content: '';
-          position: fixed;
-          top: -200px;
-          left: 50%;
-          transform: translateX(-50%);
-          width: 700px;
-          height: 500px;
-          background: radial-gradient(ellipse, rgba(234,179,8,0.06) 0%, transparent 68%);
+          background:
+            radial-gradient(ellipse 700px 400px at 50% 0%, rgba(99,102,241,0.07) 0%, transparent 70%),
+            radial-gradient(ellipse 500px 300px at 80% 90%, rgba(52,211,153,0.05) 0%, transparent 70%);
           pointer-events: none;
           z-index: 0;
         }
@@ -217,7 +256,7 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           position: relative;
           z-index: 1;
           width: 100%;
-          max-width: 660px;
+          max-width: 620px;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -229,63 +268,78 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          margin-bottom: 36px;
+          margin-bottom: 40px;
         }
 
         .back-btn {
-          background: none;
-          border: 1px solid rgba(240,236,228,0.13);
-          color: rgba(240,236,228,0.45);
-          padding: 8px 14px;
-          border-radius: 8px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(255,255,255,0.45);
+          padding: 9px 16px;
+          border-radius: 12px;
           cursor: pointer;
           font-family: 'DM Sans', sans-serif;
           font-size: 13px;
+          font-weight: 500;
           letter-spacing: 0.02em;
           transition: all 0.2s;
         }
         .back-btn:hover {
-          border-color: rgba(240,236,228,0.3);
-          color: #f0ece4;
+          border-color: rgba(255,255,255,0.18);
+          color: #f0f0ff;
+          background: rgba(255,255,255,0.07);
         }
 
-        .header-stats {
+        .header-stats { display: flex; gap: 6px; }
+        .stat-pill {
           display: flex;
-          gap: 24px;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+          padding: 10px 18px;
+          background: #0d1526;
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 14px;
+          min-width: 72px;
+          transition: border-color 0.3s;
         }
-        .stat-pill { display: flex; flex-direction: column; align-items: center; gap: 1px; }
+        .stat-pill:hover { border-color: rgba(99,102,241,0.2); }
         .stat-pill .val {
-          font-family: 'Syne', sans-serif;
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
           font-size: 22px;
-          font-weight: 800;
+          font-weight: 700;
           line-height: 1;
-          color: #f0ece4;
+          color: #f0f0ff;
           transition: color 0.3s;
         }
-        .stat-pill .val.streak { color: #f97316; }
+        .stat-pill .val.streak { color: #f59e0b; }
         .stat-pill .lbl {
           font-size: 9px;
-          letter-spacing: 0.12em;
+          letter-spacing: 0.18em;
           text-transform: uppercase;
-          color: rgba(240,236,228,0.3);
+          color: rgba(255,255,255,0.28);
+          font-weight: 700;
         }
 
         /* ─── Title ─── */
         .slot-title {
-          font-family: 'Syne', sans-serif;
-          font-size: clamp(24px, 5vw, 34px);
-          font-weight: 800;
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
+          font-size: clamp(26px, 5vw, 38px);
+          font-weight: 700;
           letter-spacing: -0.02em;
-          color: #f0ece4;
-          margin-bottom: 6px;
+          color: #f0f0ff;
+          margin-bottom: 8px;
           text-align: center;
         }
         .slot-sub {
-          font-size: 12.5px;
-          color: rgba(240,236,228,0.38);
+          font-size: 13px;
+          font-weight: 400;
+          color: rgba(255,255,255,0.35);
           text-align: center;
-          max-width: 400px;
-          line-height: 1.65;
+          max-width: 420px;
+          line-height: 1.7;
           margin-bottom: 32px;
         }
 
@@ -294,23 +348,24 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           display: flex;
           align-items: center;
           gap: 10px;
-          margin-bottom: 18px;
-          font-size: 11.5px;
-          color: rgba(240,236,228,0.35);
-          animation: fade-in 0.3s ease;
+          margin-bottom: 16px;
+          font-size: 11px;
+          font-weight: 500;
+          color: rgba(255,255,255,0.32);
+          animation: fadeUp 0.3s ease;
         }
         .hint-dots { display: flex; gap: 5px; }
         .hint-dot {
           width: 7px; height: 7px;
           border-radius: 50%;
-          background: rgba(249,115,22,0.18);
-          border: 1px solid rgba(249,115,22,0.15);
+          background: rgba(245,158,11,0.15);
+          border: 1px solid rgba(245,158,11,0.12);
           transition: all 0.35s;
         }
         .hint-dot.active {
-          background: #f97316;
-          border-color: #f97316;
-          box-shadow: 0 0 7px rgba(249,115,22,0.55);
+          background: #f59e0b;
+          border-color: #f59e0b;
+          box-shadow: 0 0 7px rgba(245,158,11,0.5);
         }
 
         /* ─── Reels ─── */
@@ -319,51 +374,67 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           grid-template-columns: repeat(3, 1fr);
           gap: 10px;
           width: 100%;
-          margin-bottom: 22px;
+          margin-bottom: 20px;
         }
 
         .reel {
-          background: #16161d;
-          border: 1px solid rgba(240,236,228,0.07);
-          border-radius: 16px;
-          padding: 18px 10px 14px;
+          background: #0d1526;
+          border: 1px solid rgba(255,255,255,0.06);
+          border-radius: 20px;
+          padding: 20px 12px 16px;
           display: flex;
           flex-direction: column;
           align-items: center;
           gap: 8px;
-          min-height: 128px;
+          min-height: 132px;
           transition: border-color 0.4s, box-shadow 0.4s;
+          position: relative;
+          overflow: hidden;
         }
+        .reel::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          background: radial-gradient(ellipse at 50% 0%, rgba(99,102,241,0.06) 0%, transparent 70%);
+          opacity: 0;
+          transition: opacity 0.4s;
+        }
+        .reel.locked::before { opacity: 1; }
         .reel.locked {
-          border-color: rgba(234,179,8,0.18);
-          box-shadow: 0 0 20px rgba(234,179,8,0.04);
+          border-color: rgba(99,102,241,0.22);
+          box-shadow: 0 0 24px rgba(99,102,241,0.06);
         }
         .reel.spinning .reel-word {
-          animation: blur-tick 0.08s linear infinite;
+          animation: blurTick 0.08s linear infinite;
         }
-        @keyframes blur-tick {
-          0%   { opacity: 0.25; transform: translateY(-3px); }
-          50%  { opacity: 1;    transform: translateY(0); }
-          100% { opacity: 0.25; transform: translateY(3px); }
+        @keyframes blurTick {
+          0%   { opacity: 0.2; transform: translateY(-4px); }
+          50%  { opacity: 1;   transform: translateY(0); }
+          100% { opacity: 0.2; transform: translateY(4px); }
         }
 
         .reel-lbl {
-          font-size: 8.5px;
-          letter-spacing: 0.15em;
+          font-size: 8px;
+          letter-spacing: 0.2em;
           text-transform: uppercase;
-          color: rgba(240,236,228,0.25);
-          font-weight: 500;
+          color: rgba(255,255,255,0.22);
+          font-weight: 700;
+          position: relative;
+          z-index: 1;
         }
         .reel-word {
-          font-family: 'Syne', sans-serif;
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
           font-size: clamp(13px, 2.8vw, 17px);
           font-weight: 700;
-          color: #eab308;
+          color: #818cf8;
           text-align: center;
           line-height: 1.3;
+          position: relative;
+          z-index: 1;
         }
+        .reel.locked .reel-word { color: #c4b5fd; }
 
-        /* Translation / hint area */
         .reel-tr-wrap {
           margin-top: auto;
           min-height: 28px;
@@ -371,46 +442,51 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           align-items: center;
           justify-content: center;
           width: 100%;
+          position: relative;
+          z-index: 1;
         }
         .reel-tr {
-          font-size: 10.5px;
-          color: rgba(240,236,228,0.28);
+          font-size: 10px;
+          color: rgba(255,255,255,0.25);
           text-align: center;
           line-height: 1.4;
         }
         .reel-tr.revealed {
-          font-size: 10.5px;
-          color: rgba(240,236,228,0.52);
+          font-size: 10px;
+          color: rgba(255,255,255,0.5);
           text-align: center;
-          animation: fade-in 0.35s ease;
+          animation: fadeUp 0.35s ease;
         }
-        .reel-tr.hint-color { color: #fb923c; }
+        .reel-tr.hint-color { color: #f59e0b; }
 
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(4px); }
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(5px); }
           to   { opacity: 1; transform: translateY(0); }
         }
 
         .hint-btn {
-          background: rgba(249,115,22,0.07);
-          border: 1px dashed rgba(249,115,22,0.28);
-          color: rgba(249,115,22,0.65);
+          background: rgba(245,158,11,0.07);
+          border: 1px dashed rgba(245,158,11,0.28);
+          color: rgba(245,158,11,0.6);
           font-family: 'DM Sans', sans-serif;
-          font-size: 10.5px;
-          padding: 3px 9px;
+          font-size: 10px;
+          font-weight: 700;
+          padding: 4px 10px;
           border-radius: 20px;
           cursor: pointer;
           transition: all 0.2s;
           white-space: nowrap;
+          letter-spacing: 0.04em;
         }
         .hint-btn:hover:not(:disabled) {
-          background: rgba(249,115,22,0.14);
-          border-color: rgba(249,115,22,0.55);
-          color: #f97316;
+          background: rgba(245,158,11,0.14);
+          border-color: rgba(245,158,11,0.5);
+          color: #f59e0b;
+          transform: scale(1.05);
         }
         .hint-btn.exhausted,
         .hint-btn:disabled {
-          opacity: 0.25;
+          opacity: 0.22;
           cursor: not-allowed;
           border-style: solid;
         }
@@ -418,58 +494,95 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
         /* ─── Polish sentence box ─── */
         .slot-sentence {
           width: 100%;
-          background: rgba(234,179,8,0.035);
-          border: 1px solid rgba(234,179,8,0.11);
-          border-radius: 14px;
-          padding: 16px 20px;
+          background: rgba(99,102,241,0.05);
+          border: 1px solid rgba(99,102,241,0.15);
+          border-radius: 18px;
+          padding: 18px 22px;
           text-align: center;
           margin-bottom: 16px;
+          animation: fadeUp 0.3s ease;
         }
         .slot-pl {
-          font-family: 'Syne', sans-serif;
-          font-size: clamp(15px, 3.2vw, 20px);
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
+          font-size: clamp(16px, 3.2vw, 21px);
           font-weight: 700;
-          color: #f0ece4;
-          margin-bottom: 5px;
+          color: #f0f0ff;
+          margin-bottom: 6px;
           letter-spacing: -0.01em;
         }
         .slot-hint-text {
           font-size: 11px;
-          color: rgba(240,236,228,0.3);
-          letter-spacing: 0.03em;
+          font-weight: 500;
+          color: rgba(255,255,255,0.28);
+          letter-spacing: 0.02em;
           font-style: italic;
+        }
+
+        /* ─── Alternatives helper ─── */
+        .slot-accepted {
+          width: 100%;
+          padding: 12px 18px;
+          background: rgba(52,211,153,0.04);
+          border: 1px solid rgba(52,211,153,0.12);
+          border-radius: 14px;
+          margin-bottom: 12px;
+          animation: fadeUp 0.3s ease;
+        }
+        .slot-accepted-lbl {
+          font-size: 8px;
+          font-weight: 700;
+          text-transform: uppercase;
+          letter-spacing: 0.2em;
+          color: rgba(52,211,153,0.5);
+          margin-bottom: 6px;
+        }
+        .slot-accepted-list {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 6px;
+        }
+        .slot-accepted-tag {
+          font-size: 11px;
+          font-weight: 600;
+          color: rgba(52,211,153,0.75);
+          background: rgba(52,211,153,0.08);
+          border: 1px solid rgba(52,211,153,0.15);
+          border-radius: 8px;
+          padding: 3px 10px;
         }
 
         .slot-divider {
           width: 100%;
           height: 1px;
-          background: rgba(240,236,228,0.055);
-          margin: 6px 0 18px;
+          background: rgba(255,255,255,0.05);
+          margin: 4px 0 18px;
         }
 
         /* ─── Input ─── */
         .answer-input {
           width: 100%;
-          background: #16161d;
-          border: 1px solid rgba(240,236,228,0.1);
-          border-radius: 12px;
-          padding: 14px 18px;
+          background: #0d1526;
+          border: 1.5px solid rgba(255,255,255,0.08);
+          border-radius: 14px;
+          padding: 15px 18px;
           font-family: 'DM Sans', sans-serif;
           font-size: 15px;
-          color: #f0ece4;
+          font-weight: 500;
+          color: #f0f0ff;
           outline: none;
           transition: border-color 0.25s, box-shadow 0.25s;
           margin-bottom: 12px;
-          box-sizing: border-box;
+          caret-color: #818cf8;
         }
-        .answer-input::placeholder { color: rgba(240,236,228,0.18); }
+        .answer-input::placeholder { color: rgba(255,255,255,0.18); }
         .answer-input:focus {
-          border-color: rgba(234,179,8,0.38);
-          box-shadow: 0 0 0 3px rgba(234,179,8,0.06);
+          border-color: rgba(99,102,241,0.45);
+          box-shadow: 0 0 0 3px rgba(99,102,241,0.08);
         }
         .answer-input.correct {
-          border-color: rgba(34,197,94,0.45);
-          box-shadow: 0 0 0 3px rgba(34,197,94,0.06);
+          border-color: rgba(52,211,153,0.45);
+          box-shadow: 0 0 0 3px rgba(52,211,153,0.07);
         }
         .answer-input.wrong {
           border-color: rgba(239,68,68,0.38);
@@ -479,93 +592,106 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
         /* ─── Feedback ─── */
         .feedback-box {
           width: 100%;
-          border-radius: 12px;
-          padding: 13px 18px;
+          border-radius: 14px;
+          padding: 14px 18px;
           font-size: 13px;
+          font-weight: 500;
           line-height: 1.6;
           margin-bottom: 14px;
-          box-sizing: border-box;
-          animation: fade-in 0.25s ease;
+          animation: fadeUp 0.25s ease;
         }
         .feedback-box.good {
-          background: rgba(34,197,94,0.07);
-          border: 1px solid rgba(34,197,94,0.22);
-          color: #86efac;
+          background: rgba(52,211,153,0.07);
+          border: 1px solid rgba(52,211,153,0.2);
+          color: #6ee7b7;
         }
         .feedback-box.near {
-          background: rgba(234,179,8,0.07);
-          border: 1px solid rgba(234,179,8,0.22);
+          background: rgba(245,158,11,0.07);
+          border: 1px solid rgba(245,158,11,0.2);
           color: #fde68a;
         }
         .feedback-box.bad {
           background: rgba(239,68,68,0.06);
-          border: 1px solid rgba(239,68,68,0.18);
+          border: 1px solid rgba(239,68,68,0.16);
           color: #fca5a5;
         }
 
         /* ─── Buttons ─── */
         .btn-primary {
           width: 100%;
-          background: #eab308;
-          color: #0e0e12;
+          background: linear-gradient(135deg, #6366f1, #4f46e5);
+          color: white;
           border: none;
-          border-radius: 12px;
-          padding: 15px;
-          font-family: 'Syne', sans-serif;
-          font-size: 14px;
-          font-weight: 800;
-          letter-spacing: 0.08em;
+          border-radius: 14px;
+          padding: 16px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: 0.22em;
           cursor: pointer;
           transition: all 0.2s;
           text-transform: uppercase;
+          box-shadow: 0 8px 24px rgba(99,102,241,0.3);
+          position: relative;
+          overflow: hidden;
         }
+        .btn-primary::before {
+          content: '';
+          position: absolute;
+          top: 0; left: -100%;
+          width: 100%; height: 100%;
+          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.12), transparent);
+          transition: left 0.4s;
+        }
+        .btn-primary:hover:not(:disabled)::before { left: 100%; }
         .btn-primary:hover:not(:disabled) {
-          background: #fbbf24;
-          transform: translateY(-1px);
-          box-shadow: 0 8px 24px rgba(234,179,8,0.22);
+          transform: translateY(-2px);
+          box-shadow: 0 12px 30px rgba(99,102,241,0.4);
         }
-        .btn-primary:active:not(:disabled) { transform: translateY(0); }
-        .btn-primary:disabled { opacity: 0.3; cursor: not-allowed; }
+        .btn-primary:active:not(:disabled) { transform: scale(0.98); }
+        .btn-primary:disabled { opacity: 0.22; cursor: not-allowed; }
 
         .btn-secondary {
           width: 100%;
-          background: transparent;
-          color: #f0ece4;
-          border: 1px solid rgba(240,236,228,0.18);
-          border-radius: 12px;
-          padding: 14px;
-          font-family: 'Syne', sans-serif;
-          font-size: 14px;
+          background: rgba(255,255,255,0.04);
+          color: rgba(255,255,255,0.75);
+          border: 1px solid rgba(255,255,255,0.1);
+          border-radius: 14px;
+          padding: 15px;
+          font-family: 'DM Sans', sans-serif;
+          font-size: 11px;
           font-weight: 700;
-          letter-spacing: 0.08em;
+          letter-spacing: 0.22em;
           cursor: pointer;
           transition: all 0.2s;
           text-transform: uppercase;
         }
         .btn-secondary:hover {
-          border-color: rgba(240,236,228,0.4);
-          background: rgba(240,236,228,0.04);
+          border-color: rgba(99,102,241,0.35);
+          background: rgba(99,102,241,0.08);
+          color: #c4b5fd;
           transform: translateY(-1px);
         }
 
         /* ─── XP toast ─── */
         .xp-toast {
           position: fixed;
-          top: 18px;
-          right: 18px;
-          background: #eab308;
-          color: #0e0e12;
-          font-family: 'Syne', sans-serif;
-          font-weight: 800;
-          font-size: 13px;
-          padding: 8px 16px;
+          top: 20px; right: 20px;
+          background: linear-gradient(135deg, #6366f1, #34d399);
+          color: white;
+          font-family: 'Playfair Display', serif;
+          font-style: italic;
+          font-weight: 700;
+          font-size: 15px;
+          padding: 10px 20px;
           border-radius: 20px;
           z-index: 999;
-          animation: toast-pop 0.3s ease;
+          animation: toastPop 0.3s ease;
           pointer-events: none;
+          box-shadow: 0 8px 24px rgba(99,102,241,0.4);
         }
-        @keyframes toast-pop {
-          from { opacity: 0; transform: translateY(-10px) scale(0.93); }
+        @keyframes toastPop {
+          from { opacity: 0; transform: translateY(-10px) scale(0.9); }
           to   { opacity: 1; transform: translateY(0) scale(1); }
         }
       `}</style>
@@ -582,7 +708,7 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
                 <span className="lbl">Score</span>
               </div>
               <div className="stat-pill">
-                <span className="val streak">{streak}</span>
+                <span className={`val ${streak > 0 ? 'streak' : ''}`}>{streak}</span>
                 <span className="lbl">Streak</span>
               </div>
             </div>
@@ -591,15 +717,14 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           {/* ── Title ── */}
           <div className="slot-title">Losowanie Słowa</div>
           <div className="slot-sub">
-            Spin the reels — translate each word you land on. Sentences may be
-            grammatically wild, and that's fine: your job is the words, not the meaning.
+            Spin the reels — translate each word you land on. Any correct alternative counts.
           </div>
 
-          {/* ── Hints bar — only during answering ── */}
+          {/* ── Hints bar ── */}
           {reelState === 'answering' && (
             <div className="hints-bar">
               <div className="hint-dots">
-                {[0, 1, 2].map((i) => (
+                {[0, 1, 2].map(i => (
                   <div key={i} className={`hint-dot ${i < hintsLeft ? 'active' : ''}`} />
                 ))}
               </div>
@@ -635,8 +760,23 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
               </div>
               <div className="slot-hint-text">
                 {reelState === 'answering'
-                  ? "Ignore the grammar notes in brackets — they don't count"
+                  ? "Any correct alternative is accepted — ignore grammar notes in brackets"
                   : 'Check the translations revealed on each card above'}
+              </div>
+            </div>
+          )}
+
+          {/* ── Accepted answers preview (shown after checking) ── */}
+          {reelState === 'done' && acceptedAnswers.length > 1 && (
+            <div className="slot-accepted">
+              <div className="slot-accepted-lbl">All accepted answers</div>
+              <div className="slot-accepted-list">
+                {acceptedAnswers.slice(0, 8).map((a, i) => (
+                  <span key={i} className="slot-accepted-tag">{a}</span>
+                ))}
+                {acceptedAnswers.length > 8 && (
+                  <span className="slot-accepted-tag">+{acceptedAnswers.length - 8} more</span>
+                )}
               </div>
             </div>
           )}
@@ -647,17 +787,11 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           {(reelState === 'answering' || reelState === 'done') && (
             <input
               ref={inputRef}
-              className={`answer-input ${
-                feedback?.type === 'good' ? 'correct'
-                : feedback?.type === 'bad' || feedback?.type === 'near' ? 'wrong'
-                : ''
-              }`}
+              className={inputClass}
               placeholder="Type your English translation..."
               value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              onKeyDown={(e) =>
-                e.key === 'Enter' && reelState === 'answering' && checkAnswer()
-              }
+              onChange={e => setAnswer(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && reelState === 'answering' && checkAnswer()}
               disabled={reelState === 'done'}
             />
           )}
@@ -671,21 +805,15 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
 
           {/* ── Action buttons ── */}
           {reelState === 'idle' && (
-            <button className="btn-primary" onClick={spin}>SPIN</button>
+            <button className="btn-primary" onClick={spin}>Spin the Reels</button>
           )}
           {reelState === 'answering' && (
-            <button
-              className="btn-primary"
-              onClick={checkAnswer}
-              disabled={!answer.trim()}
-            >
-              CHECK TRANSLATION
+            <button className="btn-primary" onClick={checkAnswer} disabled={!answer.trim()}>
+              Check Translation
             </button>
           )}
           {reelState === 'done' && (
-            <button className="btn-secondary" onClick={spinAgain}>
-              SPIN AGAIN
-            </button>
+            <button className="btn-secondary" onClick={spinAgain}>Spin Again</button>
           )}
 
         </div>
