@@ -340,11 +340,11 @@ export default function PolishArena() {
       {msg && (
         <motion.div
           key={msg}
-          initial={{ opacity: 0, y: 10, scale: 0.9 }}
+          initial={{ opacity: 0, y: -10, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: -8, scale: 0.95 }}
           style={{
-            position: 'fixed', top: 20, right: 20, zIndex: 9999,
+            position: 'fixed', top: 80, right: 20, zIndex: 9000,
             background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
             color: '#fff',
             fontFamily: "'Playfair Display', serif", fontStyle: 'italic',
@@ -391,23 +391,41 @@ export default function PolishArena() {
     <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        ::selection { background: rgba(99,102,241,0.3); }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 2px; }
-        ::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.4); }
 
-        /* ── Root — fills whatever space the parent leaves after the app navbar ── */
+        /* ── Scoped reset — only affects elements INSIDE .pa-root ── */
+        .pa-root *, .pa-root *::before, .pa-root *::after {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+
+        /* ── Scoped scrollbar — only sidebar/panel scrollable areas ── */
+        .pa-sidebar::-webkit-scrollbar,
+        .pa-panel::-webkit-scrollbar,
+        .pa-content::-webkit-scrollbar { width: 4px; }
+        .pa-sidebar::-webkit-scrollbar-track,
+        .pa-panel::-webkit-scrollbar-track,
+        .pa-content::-webkit-scrollbar-track { background: transparent; }
+        .pa-sidebar::-webkit-scrollbar-thumb,
+        .pa-panel::-webkit-scrollbar-thumb,
+        .pa-content::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 2px; }
+        .pa-sidebar::-webkit-scrollbar-thumb:hover,
+        .pa-panel::-webkit-scrollbar-thumb:hover,
+        .pa-content::-webkit-scrollbar-thumb:hover { background: rgba(99,102,241,0.4); }
+
+        /* ── Root — fills whatever space the parent gives it; never touches the navbar ── */
         .pa-root {
           font-family: 'Space Grotesk', sans-serif;
           background: #020617;
           color: #f0f0ff;
-          min-height: 100%;           /* fills parent; parent should be full viewport minus navbar */
+          min-height: 100%;
           display: flex;
           flex-direction: column;
           position: relative;
           overflow-x: hidden;
+          /* Isolation: creates its own stacking context so z-indexes
+             inside .pa-root can never accidentally sit above the app navbar */
+          isolation: isolate;
         }
 
         /* Subtle ambient gradient — position:absolute so it never overlaps the app navbar */
@@ -458,9 +476,6 @@ export default function PolishArena() {
         @media (max-width: 1023px) {
           .pa-sidebar {
             position: fixed;
-            /* top:0 would place it under the app navbar naturally since the app
-               navbar is position:fixed with a higher z-index. We use a large top
-               value only if needed — here we let the app navbar sit above. */
             top: 0; left: 0; bottom: 0;
             z-index: 200;
             transform: translateX(-100%);
