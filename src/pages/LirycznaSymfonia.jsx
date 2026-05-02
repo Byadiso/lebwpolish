@@ -347,9 +347,10 @@ export default function LirycznaSymfonia() {
 
   return (
     <div className="ls-root ls-grain" style={{
-      minHeight: "100%", background: BG, color: "#fff",
+      height: "100vh", background: BG, color: "#fff",
       fontFamily: "'Space Grotesk', sans-serif", overflowX: "hidden",
       position: "relative", isolation: "isolate",
+      display: "flex", flexDirection: "column",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
@@ -361,7 +362,11 @@ export default function LirycznaSymfonia() {
         .ls-root ::-webkit-scrollbar { width: 4px; }
         .ls-root ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.18); border-radius: 9999px; }
 
-        /* Word buttons */
+        /* Mobile: root should not be a fixed height — let it grow with content */
+        @media (max-width: 1023px) {
+          .ls-root { height: auto !important; min-height: 100vh !important; }
+          .ls-root .ls-lyrics-col { overflow-y: visible !important; height: auto !important; }
+        }
         .ls-root .ls-word {
           position: relative; display: inline-block;
           background: none; border: none; cursor: pointer;
@@ -372,16 +377,34 @@ export default function LirycznaSymfonia() {
         }
         .ls-root .ls-word:hover { background: rgba(99,102,241,0.1); }
 
-        /* Responsive grid */
+        /* Responsive layout */
+        /* Mobile: single column, lyrics col scrolls normally */
+        .ls-root .ls-body { width: 100%; }
+        .ls-root .ls-vocab-desktop { display: none; }
+
+        /* Desktop ≥1024px: side-by-side, only lyrics col scrolls */
         @media (min-width: 1024px) {
-          .ls-root .ls-grid { grid-template-columns: minmax(0, 1fr) 360px !important; }
+          .ls-root .ls-body {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            overflow: hidden;
+          }
+          .ls-root .ls-lyrics-col {
+            flex: 1;
+            min-width: 0;
+            overflow-y: auto;
+            height: 100%;
+          }
+          .ls-root .ls-vocab-desktop {
+            display: flex !important;
+            flex-direction: column;
+            width: 360px;
+            flex-shrink: 0;
+            overflow-y: auto;
+            height: 100%;
+          }
           .ls-root .ls-vocab-mobile { display: none !important; }
-        }
-        @media (max-width: 1023px) {
-          .ls-root .ls-vocab-desktop { display: none !important; }
-        }
-        @media (min-width: 1280px) {
-          .ls-root .ls-vocab-fixed { right: calc(50vw - 620px) !important; }
         }
 
         /* Grain overlay — scoped to .ls-root */
@@ -658,21 +681,34 @@ export default function LirycznaSymfonia() {
 
       {/* ─────────────────────────────────────────────────────────────────────
           MAIN LAYOUT
+          Two-column on desktop:
+          • Left  — lyrics column, independently scrollable
+          • Right — vocab panel, locked in place (never scrolls away)
+          The outer wrapper fills the remaining viewport height after the
+          sticky player bar so each column can scroll (or not) on its own.
           ───────────────────────────────────────────────────────────────── */}
       <div
-        className="ls-grid"
+        className="ls-body"
         style={{
-          maxWidth: 1280, margin: "0 auto",
-          padding: "48px 24px 96px",
-          display: "grid",
-          gridTemplateColumns: "minmax(0, 1fr)",
-          gap: 40,
-          position: "relative", zIndex: 1,
+          display: "flex",
+          flex: 1,
+          minHeight: 0,              /* crucial — lets flex children shrink below content height */
+          position: "relative",
+          zIndex: 1,
+          maxWidth: 1280,
+          margin: "0 auto",
+          width: "100%",
         }}
       >
-        {/* ── LEFT: LYRICS ──────────────────────────────────────────────── */}
-        <div style={{ minWidth: 0 }}>
-
+        {/* ── LEFT: LYRICS — scrolls independently ──────────────────────── */}
+        <div
+          className="ls-lyrics-col"
+          style={{
+            flex: 1, minWidth: 0,
+            overflowY: "auto",
+            padding: "48px 24px 96px",
+          }}
+        >
           {/* Song header */}
           <motion.div
             initial={{ opacity: 0, y: 16 }}
@@ -701,7 +737,7 @@ export default function LirycznaSymfonia() {
                 key={`${currentIndex}-${lineIdx}`}
                 initial={{ opacity: 0, y: 14 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-5%" }}
+                viewport={{ once: true, margin: "-5%", root: undefined }}
                 transition={{ duration: 0.45, delay: Math.min(lineIdx * 0.035, 0.22) }}
                 style={{
                   paddingLeft: "1.1rem",
@@ -759,57 +795,55 @@ export default function LirycznaSymfonia() {
           </div>
         </div>
 
-        {/* ── RIGHT: VOCAB SIDEBAR (desktop) ───────────────────────────── */}
-        <aside className="ls-vocab-desktop" style={{ position: "relative" }}>
-          <div
-            className="ls-vocab-fixed"
-            style={{
-              position: "sticky",
-              top: PLAYER_H + 24,          /* clears the sticky player bar */
-              width: 360,
-              maxHeight: `calc(100vh - ${PLAYER_H + 48}px)`,
-              overflowY: "auto",
-              paddingBottom: 8,
-            }}
-          >
-            <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.4)", marginBottom: 14 }}>Vocabulary</p>
+        {/* ── RIGHT: VOCAB — never scrolls, always visible ───────────────── */}
+        <aside
+          className="ls-vocab-desktop"
+          style={{
+            width: 360, flexShrink: 0,
+            overflowY: "auto",
+            padding: "48px 24px 48px 0",
+            /* No position:sticky needed — this column doesn't scroll at all.
+               It's a fixed-height flex child that sits beside the lyrics column. */
+            borderLeft: "1px solid rgba(255,255,255,0.04)",
+          }}
+        >
+          <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.4)", marginBottom: 14 }}>Vocabulary</p>
 
-            <AnimatePresence mode="wait">
-              {selectedWord ? (
-                <VocabCard
-                  word={selectedWord}
-                  isLearned={wordsLearned.has(selectedWord.pl)}
-                  onSave={saveWord}
-                  onClose={() => setSelectedWord(null)}
-                  savedFlash={savedFlash}
-                />
-              ) : (
-                <VocabEmpty />
-              )}
-            </AnimatePresence>
-
-            {/* Learned words mini-list */}
-            {learnedCount > 0 && (
-              <motion.div
-                initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                style={{ marginTop: 16 }}
-              >
-                <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: "rgba(52,211,153,0.4)", marginBottom: 10 }}>Saved words</p>
-                <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-                  {[...wordsLearned].map((w) => (
-                    <span key={w} style={{
-                      padding: "4px 10px", borderRadius: 9999,
-                      background: "rgba(52,211,153,0.07)",
-                      border: "1px solid rgba(52,211,153,0.18)",
-                      fontSize: 11, fontWeight: 700, color: "#6ee7b7",
-                    }}>
-                      {w}
-                    </span>
-                  ))}
-                </div>
-              </motion.div>
+          <AnimatePresence mode="wait">
+            {selectedWord ? (
+              <VocabCard
+                word={selectedWord}
+                isLearned={wordsLearned.has(selectedWord.pl)}
+                onSave={saveWord}
+                onClose={() => setSelectedWord(null)}
+                savedFlash={savedFlash}
+              />
+            ) : (
+              <VocabEmpty />
             )}
-          </div>
+          </AnimatePresence>
+
+          {/* Learned words mini-list */}
+          {learnedCount > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              style={{ marginTop: 16 }}
+            >
+              <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.24em", color: "rgba(52,211,153,0.4)", marginBottom: 10 }}>Saved words</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+                {[...wordsLearned].map((w) => (
+                  <span key={w} style={{
+                    padding: "4px 10px", borderRadius: 9999,
+                    background: "rgba(52,211,153,0.07)",
+                    border: "1px solid rgba(52,211,153,0.18)",
+                    fontSize: 11, fontWeight: 700, color: "#6ee7b7",
+                  }}>
+                    {w}
+                  </span>
+                ))}
+              </div>
+            </motion.div>
+          )}
         </aside>
       </div>
 
