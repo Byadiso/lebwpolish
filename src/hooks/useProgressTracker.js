@@ -5,7 +5,7 @@
  * All writes are fire-and-forget so they never block UI.
  *
  * Usage:
- *   const { logEvent, logGameResult, logStreak, logXp } = useProgressTracker();
+ *   const { logPageVisit, logLogin, logGameResult, logXp } = useProgressTracker();
  */
 
 import { useCallback } from 'react';
@@ -16,8 +16,13 @@ import {
 } from 'firebase/firestore';
 import { useAuth } from '../context/AuthContext';
 
-// ─── Event type constants (import these wherever you track) ─────────────────
+// ─── Event type constants ────────────────────────────────────────────────────
 export const EVENTS = {
+  // Navigation / session
+  PAGE_VISIT:         'page_visit',
+  LOGIN:              'login',
+  SESSION_START:      'session_start',
+  SESSION_END:        'session_end',
   // Arena
   SLOT_SPIN:          'slot_spin',
   SLOT_CORRECT:       'slot_correct',
@@ -38,6 +43,7 @@ export const EVENTS = {
   POST_LIKED:         'post_liked',
   COMMENT_POSTED:     'comment_posted',
   VOCAB_ADDED:        'vocab_added',
+  WORD_LEARNED:       'word_learned',
   // General
   XP_GAINED:          'xp_gained',
   STREAK_EXTENDED:    'streak_extended',
@@ -45,23 +51,29 @@ export const EVENTS = {
   BADGE_EARNED:       'badge_earned',
 };
 
-// ─── Badge definitions ──────────────────────────────────────────────────────
+// ─── Badge auto-award definitions ────────────────────────────────────────────
 const BADGES = [
-  { id: 'first_spin',     label: 'First Spin',      icon: '🎰', condition: (s) => s.totalSpins >= 1 },
-  { id: 'on_fire',        label: 'On Fire',          icon: '🔥', condition: (s) => s.currentStreak >= 3 },
-  { id: 'centurion',      label: 'Centurion',        icon: '⚔️', condition: (s) => s.totalCorrect >= 100 },
-  { id: 'wordsmith',      label: 'Wordsmith',        icon: '📖', condition: (s) => (s.vocabAdded || 0) >= 25 },
-  { id: 'duel_master',    label: 'Duel Master',      icon: '🏆', condition: (s) => s.duelWins >= 5 },
-  { id: 'perfectionist',  label: 'Perfectionist',    icon: '✦',  condition: (s) => s.nohintCorrect >= 10 },
-  { id: 'ghost_hunter',   label: 'Ghost Hunter',     icon: '👻', condition: (s) => s.phantomCorrect >= 20 },
-  { id: 'storyteller',    label: 'Storyteller',      icon: '📺', condition: (s) => s.chaptersComplete >= 3 },
+  { id: 'first_spin',    label: 'First Spin',    icon: '🎰', condition: (s) => (s.totalSpins        || 0) >= 1  },
+  { id: 'on_fire',       label: 'On Fire',        icon: '🔥', condition: (s) => (s.currentStreak     || 0) >= 3  },
+  { id: 'centurion',     label: 'Centurion',      icon: '⚔️', condition: (s) => (s.totalCorrect      || 0) >= 100 },
+  { id: 'wordsmith',     label: 'Wordsmith',      icon: '📖', condition: (s) => (s.vocabAdded        || 0) >= 25 },
+  { id: 'duel_master',   label: 'Duel Master',    icon: '🏆', condition: (s) => (s.duelWins          || 0) >= 5  },
+  { id: 'perfectionist', label: 'Perfectionist',  icon: '✦',  condition: (s) => (s.nohintCorrect     || 0) >= 10 },
+  { id: 'ghost_hunter',  label: 'Ghost Hunter',   icon: '👻', condition: (s) => (s.phantomCorrect    || 0) >= 20 },
+  { id: 'storyteller',   label: 'Storyteller',    icon: '📺', condition: (s) => (s.chaptersComplete  || 0) >= 3  },
+  { id: 'linguist',      label: 'Linguist',       icon: '🧠', condition: (s) => (s.wordsLearned      || 0) >= 10 },
+  { id: 'polyglot',      label: 'Polyglot',       icon: '🌍', condition: (s) => (s.wordsLearned      || 0) >= 50 },
+  { id: 'dedicated',     label: 'Dedicated',      icon: '📅', condition: (s) => (s.totalLogins       || 0) >= 7  },
+  { id: 'comeback',      label: 'Comeback Kid',   icon: '💪', condition: (s) => (s.totalLogins       || 0) >= 3  },
+  { id: 'explorer',      label: 'Explorer',       icon: '🗺️', condition: (s) => (s.totalPageVisits   || 0) >= 50 },
+  { id: 'time_lord',     label: 'Time Lord',      icon: '⏱️', condition: (s) => (s.totalSessionMinutes||0) >= 60 },
 ];
 
-// ─── Hook ───────────────────────────────────────────────────────────────────
+// ─── Hook ────────────────────────────────────────────────────────────────────
 export function useProgressTracker() {
   const { user } = useAuth();
 
-  // Low-level: write a raw event to the activity log sub-collection
+  // ── Low-level: append an event to the activity sub-collection ────────────
   const logEvent = useCallback(async (type, payload = {}) => {
     if (!user) return;
     try {
@@ -75,39 +87,73 @@ export function useProgressTracker() {
     }
   }, [user]);
 
-  // Core stat updater — merges into users/{uid}/stats
+  // ── Core: merge increments + plain fields into stats/aggregate ───────────
   const _updateStats = useCallback(async (delta = {}, newFields = {}) => {
     if (!user) return;
-    const ref = doc(db, 'users', user.uid, 'stats', 'aggregate');
     try {
-      // increment numeric fields
       const increments = {};
-      Object.entries(delta).forEach(([k, v]) => {
-        increments[k] = increment(v);
-      });
-      await setDoc(ref, { ...increments, ...newFields, lastActive: serverTimestamp() }, { merge: true });
+      Object.entries(delta).forEach(([k, v]) => { increments[k] = increment(v); });
+      const ref = doc(db, 'users', user.uid, 'stats', 'aggregate');
+      await setDoc(
+        ref,
+        { ...increments, ...newFields, lastActive: serverTimestamp() },
+        { merge: true },
+      );
     } catch (e) {
       console.warn('[tracker] _updateStats failed', e);
     }
   }, [user]);
 
-  // Check and award badges based on current stats snapshot
-  const _checkBadges = useCallback(async (statsSnapshot) => {
-    if (!user) return;
-    const earned = statsSnapshot?.earnedBadges || [];
+  // ── Auto-award badges from a fresh stats snapshot ────────────────────────
+  const checkBadges = useCallback(async (statsSnapshot) => {
+    if (!user || !statsSnapshot) return;
+    const earned    = statsSnapshot.earnedBadges || [];
     const newBadges = BADGES.filter(b => !earned.includes(b.id) && b.condition(statsSnapshot));
-    if (newBadges.length === 0) return;
+    if (!newBadges.length) return;
     const ref = doc(db, 'users', user.uid, 'stats', 'aggregate');
-    const badgeIds = newBadges.map(b => b.id);
-    await updateDoc(ref, { earnedBadges: arrayUnion(...badgeIds) });
-    // Log each badge event
+    await updateDoc(ref, { earnedBadges: arrayUnion(...newBadges.map(b => b.id)) });
     for (const b of newBadges) {
       await logEvent(EVENTS.BADGE_EARNED, { badgeId: b.id, badgeLabel: b.label });
     }
     return newBadges;
   }, [user, logEvent]);
 
-  // ── Public tracking methods ───────────────────────────────────────────────
+  // ── Navigation / session ─────────────────────────────────────────────────
+
+  /** Track a page visit — call once per page mount */
+  const logPageVisit = useCallback(async (page) => {
+    if (!user) return;
+    await Promise.all([
+      logEvent(EVENTS.PAGE_VISIT, { page }),
+      _updateStats({ totalPageVisits: 1 }),
+    ]);
+  }, [user, logEvent, _updateStats]);
+
+  /** Track a successful login */
+  const logLogin = useCallback(async () => {
+    if (!user) return;
+    await Promise.all([
+      logEvent(EVENTS.LOGIN, {}),
+      _updateStats({ totalLogins: 1 }, { lastLoginAt: serverTimestamp() }),
+    ]);
+  }, [user, logEvent, _updateStats]);
+
+  /** Track session start */
+  const logSessionStart = useCallback(async () => {
+    if (!user) return;
+    await logEvent(EVENTS.SESSION_START, { startedAt: Date.now() });
+  }, [user, logEvent]);
+
+  /** Track session end with duration in minutes */
+  const logSessionEnd = useCallback(async (durationMinutes = 0) => {
+    if (!user) return;
+    await Promise.all([
+      logEvent(EVENTS.SESSION_END, { durationMinutes: Math.round(durationMinutes) }),
+      _updateStats({ totalSessionMinutes: Math.round(durationMinutes) }),
+    ]);
+  }, [user, logEvent, _updateStats]);
+
+  // ── XP / streak ──────────────────────────────────────────────────────────
 
   /** Track an XP gain from any source */
   const logXp = useCallback(async (amount, source) => {
@@ -127,16 +173,37 @@ export function useProgressTracker() {
     ]);
   }, [user, logEvent, _updateStats]);
 
-  /** Track a game round result from SlotScreen / PhantomScreen / etc. */
+  // ── Vocabulary ───────────────────────────────────────────────────────────
+
+  /** Track a single word learned */
+  const logWordLearned = useCallback(async (word) => {
+    if (!user) return;
+    await Promise.all([
+      logEvent(EVENTS.WORD_LEARNED, { word }),
+      _updateStats({ wordsLearned: 1 }),
+    ]);
+  }, [user, logEvent, _updateStats]);
+
+  /** Track bulk vocab add (LearningSpace comma-separated field) */
+  const logVocabAdded = useCallback(async (words = []) => {
+    if (!user || !words.length) return;
+    await Promise.all([
+      logEvent(EVENTS.VOCAB_ADDED, { words, count: words.length }),
+      _updateStats({ vocabAdded: words.length, wordsLearned: words.length }),
+    ]);
+  }, [user, logEvent, _updateStats]);
+
+  // ── Gameplay ─────────────────────────────────────────────────────────────
+
+  /** Track a game round result (slot / phantom / duel / story) */
   const logGameResult = useCallback(async ({
-    game,          // 'slot' | 'phantom' | 'duel' | 'story'
-    result,        // 'correct' | 'near' | 'wrong' | 'win' | 'loss'
+    game,
+    result,
     xp = 0,
     hintsUsed = 0,
-    extra = {},    // any extra payload
+    extra = {},
   }) => {
     if (!user) return;
-
     const eventMap = {
       slot_correct:    EVENTS.SLOT_CORRECT,
       slot_near:       EVENTS.SLOT_NEAR,
@@ -147,24 +214,21 @@ export function useProgressTracker() {
       duel_win:        EVENTS.DUEL_WIN,
       duel_loss:       EVENTS.DUEL_LOSS,
     };
-    const key = `${game}_${result}`;
-    const eventType = eventMap[key] || `${game}_${result}`;
-
-    const statsDelta = { totalRounds: 1 };
-    if (xp)                              statsDelta.totalXp      = xp;
-    if (result === 'correct')            statsDelta.totalCorrect = 1;
-    if (result === 'correct' && !hintsUsed) statsDelta.nohintCorrect = 1;
-    if (result === 'win')                statsDelta.duelWins     = 1;
-    if (game === 'slot')                 statsDelta.totalSpins   = 1;
-    if (game === 'phantom' && result === 'correct') statsDelta.phantomCorrect = 1;
-
+    const eventType = eventMap[`${game}_${result}`] || `${game}_${result}`;
+    const delta = { totalRounds: 1 };
+    if (xp)                                         delta.totalXp        = xp;
+    if (result === 'correct')                       delta.totalCorrect   = 1;
+    if (result === 'correct' && !hintsUsed)         delta.nohintCorrect  = 1;
+    if (result === 'win')                           delta.duelWins       = 1;
+    if (game === 'slot')                            delta.totalSpins     = 1;
+    if (game === 'phantom' && result === 'correct') delta.phantomCorrect = 1;
     await Promise.all([
       logEvent(eventType, { game, result, xp, hintsUsed, ...extra }),
-      _updateStats(statsDelta),
+      _updateStats(delta),
     ]);
   }, [user, logEvent, _updateStats]);
 
-  /** Track drill session completion (PracticeLab) */
+  /** Track drill session end (PracticeLab) */
   const logDrillSession = useCallback(async ({ sessionXp, correct, total, streak }) => {
     if (!user) return;
     await Promise.all([
@@ -173,16 +237,7 @@ export function useProgressTracker() {
     ]);
   }, [user, logEvent, _updateStats]);
 
-  /** Track vocab additions (LearningSpace) */
-  const logVocabAdded = useCallback(async (words = []) => {
-    if (!user || !words.length) return;
-    await Promise.all([
-      logEvent(EVENTS.VOCAB_ADDED, { words, count: words.length }),
-      _updateStats({ vocabAdded: words.length }),
-    ]);
-  }, [user, logEvent, _updateStats]);
-
-  /** Track post published (LearningSpace) */
+  /** Track a post being published (LearningSpace) */
   const logPostPublished = useCallback(async ({ wordCount, missionType, xp }) => {
     if (!user) return;
     await Promise.all([
@@ -191,7 +246,7 @@ export function useProgressTracker() {
     ]);
   }, [user, logEvent, _updateStats]);
 
-  /** Track story chapter completion */
+  /** Track a story chapter completion */
   const logChapterComplete = useCallback(async ({ chapter, xp }) => {
     if (!user) return;
     await Promise.all([
@@ -201,14 +256,24 @@ export function useProgressTracker() {
   }, [user, logEvent, _updateStats]);
 
   return {
-    logEvent,
-    logXp,
-    logStreak,
+    // Navigation
+    logPageVisit,
+    logLogin,
+    logSessionStart,
+    logSessionEnd,
+    // Gameplay
     logGameResult,
     logDrillSession,
+    logChapterComplete,
+    // Learning
+    logXp,
+    logStreak,
+    logWordLearned,
     logVocabAdded,
     logPostPublished,
-    logChapterComplete,
+    // Meta
+    checkBadges,
+    logEvent,
     EVENTS,
   };
 }
