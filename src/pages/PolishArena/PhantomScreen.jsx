@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PHANTOM_DATA } from './data';
 
-/* ─── Design tokens (matches app design system) ─────────────────────────── */
+/* ─── Design tokens ─────────────────────────────────────────────────────── */
 const T = {
   bg:          '#020617',
   surface:     '#080f1f',
@@ -19,7 +19,7 @@ const T = {
   roseSoft:    'rgba(244,63,94,0.1)',
   roseMid:     'rgba(244,63,94,0.25)',
   amber:       '#f59e0b',
-  ghost:       'rgba(139,92,246,0.18)',   /* purple-ish phantom tint */
+  ghost:       'rgba(139,92,246,0.18)',
   ghostBorder: 'rgba(139,92,246,0.28)',
   sub:         'rgba(255,255,255,0.05)',
   muted:       'rgba(148,163,184,0.35)',
@@ -31,8 +31,8 @@ function GhostPips({ total, current }) {
   return (
     <div style={{ display: 'flex', gap: 6, justifyContent: 'center', marginBottom: 32 }}>
       {Array.from({ length: total }, (_, i) => {
-        const done    = i < current;
-        const active  = i === current;
+        const done   = i < current;
+        const active = i === current;
         return (
           <motion.div
             key={i}
@@ -65,7 +65,8 @@ function GhostOrbs() {
     { w: 150, h: 150, x: '40%',  y: '-5%', color: 'rgba(99,102,241,0.03)',  dur: 14 },
   ];
   return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+    // position:absolute (not fixed) so it stays inside the component, not over the navbar
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
       {orbs.map((o, i) => (
         <motion.div
           key={i}
@@ -90,11 +91,11 @@ function OptionBtn({ opt, answered, selected, correct, onClick }) {
   const isWrong    = answered && isSelected && !isCorrect;
   const isReveal   = answered && isCorrect;
 
-  let bg     = 'rgba(255,255,255,0.03)';
-  let border = 'rgba(255,255,255,0.07)';
-  let color  = 'rgba(226,232,240,0.75)';
-  let glow   = 'none';
-  let icon   = null;
+  let bg    = 'rgba(255,255,255,0.03)';
+  let border= 'rgba(255,255,255,0.07)';
+  let color = 'rgba(226,232,240,0.75)';
+  let glow  = 'none';
+  let icon  = null;
 
   if (isReveal) {
     bg     = T.greenSoft;
@@ -130,7 +131,7 @@ function OptionBtn({ opt, answered, selected, correct, onClick }) {
         cursor: answered ? 'default' : 'pointer',
         fontSize: '0.95rem',
         fontWeight: 600,
-        fontFamily: "'Space Grotesk', sans-serif",
+        fontFamily: "'DM Sans', sans-serif",
         textAlign: 'left',
         transition: 'background 0.25s, border-color 0.25s, color 0.25s',
         boxShadow: glow,
@@ -161,7 +162,12 @@ function OptionBtn({ opt, answered, selected, correct, onClick }) {
 /* ─── Complete screen ───────────────────────────────────────────────────── */
 function CompleteScreen({ onBack }) {
   return (
-    <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', textAlign: 'center', padding: '2rem' }}>
+    <div style={{
+      position: 'relative', zIndex: 1,
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      minHeight: '50vh', textAlign: 'center', padding: '2rem',
+    }}>
       <motion.div
         initial={{ scale: 0.7, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -176,7 +182,6 @@ function CompleteScreen({ onBack }) {
           boxShadow: `0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px ${T.accentMid}`,
         }}
       >
-        {/* Top accent strip */}
         <div style={{ height: 3, background: `linear-gradient(90deg, ${T.green}, #6ee7b7, transparent)`, borderRadius: 9999, marginBottom: 28 }} />
 
         <motion.div
@@ -185,13 +190,13 @@ function CompleteScreen({ onBack }) {
           style={{ fontSize: '3.5rem', marginBottom: '1.25rem', display: 'block' }}
         >🏆</motion.div>
 
-        <p style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.32em', color: 'rgba(52,211,153,0.5)', marginBottom: 8, fontFamily: "'Space Grotesk', sans-serif" }}>
+        <p style={{ fontSize: 9, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.32em', color: 'rgba(52,211,153,0.5)', marginBottom: 8, fontFamily: "'DM Sans', sans-serif" }}>
           All phantoms vanquished
         </p>
         <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontWeight: 700, fontSize: '2.2rem', color: '#f1f5f9', lineHeight: 1.05, marginBottom: 12 }}>
           All Ghosts Exorcised!
         </h2>
-        <p style={{ fontSize: '0.9rem', color: T.muted, lineHeight: 1.65, marginBottom: '2rem', fontFamily: "'Space Grotesk', sans-serif" }}>
+        <p style={{ fontSize: '0.9rem', color: T.muted, lineHeight: 1.65, marginBottom: '2rem', fontFamily: "'DM Sans', sans-serif" }}>
           Your weaknesses became strengths. New phantoms will appear after your next session.
         </p>
 
@@ -202,7 +207,7 @@ function CompleteScreen({ onBack }) {
           style={{
             width: '100%', padding: '15px', borderRadius: 14, border: 'none', cursor: 'pointer',
             background: `linear-gradient(135deg, ${T.accent}, #4f46e5)`,
-            color: '#fff', fontFamily: "'Space Grotesk', sans-serif",
+            color: '#fff', fontFamily: "'DM Sans', sans-serif",
             fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.26em', fontSize: 11,
             boxShadow: '0 12px 30px rgba(79,70,229,0.3)',
           }}
@@ -216,7 +221,7 @@ function CompleteScreen({ onBack }) {
 
 /* ─── Main ──────────────────────────────────────────────────────────────── */
 export default function PhantomScreen({ onBack, onXpGain, toast }) {
-  const [idx, setIdx]         = useState(0);
+  const [idx,      setIdx]      = useState(0);
   const [answered, setAnswered] = useState(false);
   const [selected, setSelected] = useState(null);
   const [feedback, setFeedback] = useState(null);
@@ -244,16 +249,42 @@ export default function PhantomScreen({ onBack, onXpGain, toast }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: T.bg, color: '#fff', fontFamily: "'Space Grotesk', sans-serif", position: 'relative', overflowX: 'hidden' }}>
+    /*
+     * ROOT FIX 1: No minHeight:"100vh" — the component flows inside the page layout.
+     * ROOT FIX 2: No overflowX:"hidden" — that can clip the main navbar.
+     * ROOT FIX 3: position:"relative" only (not fixed/sticky) so it doesn't escape its container.
+     */
+    <div className="ph-root" style={{
+      background: T.bg,
+      color: '#fff',
+      fontFamily: "'DM Sans', sans-serif",
+      position: 'relative',
+    }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        ::selection { background: rgba(99,102,241,0.3); }
+        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
+
+        /*
+         * NAVBAR FIX: Scoped entirely to .ph-root.
+         * The old code had a bare "*, *::before, *::after { margin: 0; padding: 0 }"
+         * which injected a global reset into the page and nuked the main navbar's
+         * padding, margins, and box model. Now it only affects children of .ph-root.
+         */
+        .ph-root *, .ph-root *::before, .ph-root *::after {
+          box-sizing: border-box;
+        }
+
+        /* Selection colour scoped to this component */
+        .ph-root ::selection { background: rgba(99,102,241,0.3); }
       `}</style>
 
+      {/* Ghost orbs use position:absolute (not fixed) — stays inside the component */}
       <GhostOrbs />
 
-      <div style={{ maxWidth: 520, margin: '0 auto', padding: '28px 20px 80px', position: 'relative', zIndex: 1 }}>
+      <div style={{
+        maxWidth: 520, margin: '0 auto',
+        padding: '28px 20px 80px',
+        position: 'relative', zIndex: 1,
+      }}>
 
         {/* ── Back button ── */}
         <motion.button
@@ -268,11 +299,13 @@ export default function PhantomScreen({ onBack, onXpGain, toast }) {
             color: T.muted, fontSize: 11, fontWeight: 700,
             textTransform: 'uppercase', letterSpacing: '0.18em',
             marginBottom: 32,
-            fontFamily: "'Space Grotesk', sans-serif",
+            fontFamily: "'DM Sans', sans-serif",
             transition: 'color 0.15s',
           }}
         >
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+          </svg>
           Arena
         </motion.button>
 
@@ -291,7 +324,7 @@ export default function PhantomScreen({ onBack, onXpGain, toast }) {
                 textTransform: 'uppercase', letterSpacing: '0.2em',
                 boxShadow: '0 0 28px rgba(245,158,11,0.45)',
                 whiteSpace: 'nowrap', pointerEvents: 'none',
-                fontFamily: "'Space Grotesk', sans-serif",
+                fontFamily: "'DM Sans', sans-serif",
               }}
             >
               {toast}
@@ -446,7 +479,8 @@ export default function PhantomScreen({ onBack, onXpGain, toast }) {
                           fontWeight: 500,
                           color: feedback.type === 'good' ? T.green : T.rose,
                           lineHeight: 1.6,
-                          fontFamily: "'Space Grotesk', sans-serif",
+                          fontFamily: "'DM Sans', sans-serif",
+                          margin: 0,
                         }}>
                           {feedback.text}
                         </p>
@@ -470,7 +504,7 @@ export default function PhantomScreen({ onBack, onXpGain, toast }) {
                       width: '100%', padding: '16px', borderRadius: 16,
                       border: 'none', cursor: 'pointer',
                       background: `linear-gradient(135deg, ${T.accent}, #4f46e5)`,
-                      color: '#fff', fontFamily: "'Space Grotesk', sans-serif",
+                      color: '#fff', fontFamily: "'DM Sans', sans-serif",
                       fontWeight: 800, textTransform: 'uppercase',
                       letterSpacing: '0.26em', fontSize: 11,
                       boxShadow: '0 12px 30px rgba(79,70,229,0.3)',
@@ -478,7 +512,9 @@ export default function PhantomScreen({ onBack, onXpGain, toast }) {
                     }}
                   >
                     {idx + 1 < PHANTOM_DATA.length ? 'Next Ghost' : 'Finish'}
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/>
+                    </svg>
                   </motion.button>
                 )}
               </AnimatePresence>

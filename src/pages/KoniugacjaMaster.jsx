@@ -413,16 +413,16 @@ export default function KoniugacjaMaster() {
   const isMastered = mastered.has(masteryKey);
 
   return (
-    <div style={{
-      minHeight: "100vh", background: "#020617", color: "#f0f0ff",
+    <div className="km-root" style={{
+      background: "#020617", color: "#f0f0ff",
       fontFamily: "'DM Sans', sans-serif", display: "flex", flexDirection: "column",
-      overflow: "hidden",
     }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        ::-webkit-scrollbar { width: 3px; height: 3px; }
-        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 9999px; }
+        /* Scoped to .km-root — does NOT affect the main navbar */
+        .km-root *, .km-root *::before, .km-root *::after { box-sizing: border-box; }
+        .km-root ::-webkit-scrollbar { width: 3px; height: 3px; }
+        .km-root ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 9999px; }
         .km-card { transition: all 0.18s cubic-bezier(0.4,0,0.2,1); }
         .km-card:hover { transform: translateY(-3px); }
         .km-card:active { transform: scale(0.97); }
@@ -437,11 +437,11 @@ export default function KoniugacjaMaster() {
 
       {/* ── TOP BAR ── */}
       <header style={{
-        background: "rgba(2,6,23,0.92)", backdropFilter: "blur(20px)",
+        background: "rgba(2,6,23,0.92)", backdropFilter: "blur(10px)",
         borderBottom: "1px solid rgba(255,255,255,0.05)",
         padding: "0 20px", height: 60, flexShrink: 0,
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        position: "sticky", top: 0, zIndex: 50,
+        position: "relative", zIndex: 10,
       }}>
         {/* Group switcher */}
         <div style={{ display: "flex", gap: 4, background: "rgba(255,255,255,0.04)", padding: 4, borderRadius: 14 }}>
@@ -588,7 +588,7 @@ export default function KoniugacjaMaster() {
       </div>
 
       {/* ── MAIN CONTENT ── */}
-      <main style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <main style={{ flex: 1, overflowY: "auto", display: "flex", flexDirection: "column", minHeight: 0 }}>
 
         {/* ════ STUDY MODE ════ */}
         {mode === "study" && (
