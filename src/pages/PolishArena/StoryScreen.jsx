@@ -41,7 +41,7 @@ function CinemaOrbs() {
     { w: 180, h: 180, x: '35%',  y: '-8%',  color: 'rgba(139,92,246,0.035)', dur: 11 },
   ];
   return (
-    <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
       {orbs.map((o, i) => (
         <motion.div
           key={i}
@@ -284,11 +284,10 @@ export default function StoryScreen({ onBack, onXpGain, totalXp, toast }) {
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: T.bg, color: '#fff', fontFamily: "'Space Grotesk', sans-serif", position: 'relative', overflowX: 'hidden' }}>
+    <div className="ss-root" style={{ minHeight: '100%', background: T.bg, color: '#fff', fontFamily: "'Space Grotesk', sans-serif", position: 'relative', overflowX: 'hidden', isolation: 'isolate' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
-        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-        ::selection { background: rgba(99,102,241,0.3); }
+        .ss-root *, .ss-root *::before, .ss-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
       `}</style>
 
       <CinemaOrbs />
@@ -321,7 +320,7 @@ export default function StoryScreen({ onBack, onXpGain, totalXp, toast }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -12 }}
               style={{
-                position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
+                position: 'fixed', top: 90, left: '50%', transform: 'translateX(-50%)',
                 zIndex: 9000, padding: '10px 22px', borderRadius: 9999,
                 background: T.amber, color: '#000',
                 fontWeight: 800, fontSize: 11,
