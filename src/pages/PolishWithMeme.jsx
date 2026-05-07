@@ -11,9 +11,7 @@ import confetti from "canvas-confetti";
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 const ADMIN_EMAIL = "byadiso@gmail.com";
-
 const TRENDING = ["gdyby", "ponieważ", "wcale", "przecież", "dopiero"];
-
 const LEVELS = ["Nowicjusz", "Uczeń", "Adept", "Mistrz", "Ekspert", "Legenda"];
 
 const getLevel = (xp = 0) => {
@@ -30,6 +28,42 @@ const fmt = (ts) => {
   if (mins < 1440) return `${Math.floor(mins / 60)}h ago`;
   return `${Math.floor(mins / 1440)}d ago`;
 };
+
+/* ─── Text-to-Speech hook ────────────────────────────────────────────────── */
+function useTTS() {
+  const [speaking, setSpeaking] = useState(false);
+  const utterRef = useRef(null);
+
+  const speak = useCallback((text) => {
+    if (!window.speechSynthesis) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "pl-PL";
+    utter.rate = 0.88;
+    utter.pitch = 1;
+
+    // Try to find a Polish voice
+    const voices = window.speechSynthesis.getVoices();
+    const plVoice = voices.find((v) => v.lang.startsWith("pl"));
+    if (plVoice) utter.voice = plVoice;
+
+    utter.onstart = () => setSpeaking(true);
+    utter.onend = () => setSpeaking(false);
+    utter.onerror = () => setSpeaking(false);
+    utterRef.current = utter;
+    window.speechSynthesis.speak(utter);
+  }, []);
+
+  const stop = useCallback(() => {
+    window.speechSynthesis?.cancel();
+    setSpeaking(false);
+  }, []);
+
+  // Cancel on unmount
+  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+
+  return { speak, stop, speaking };
+}
 
 /* ─── Floating XP ────────────────────────────────────────────────────────── */
 function XpBurst({ amount, onDone }) {
@@ -64,6 +98,178 @@ function HeartPop({ x, y }) {
       transition={{ duration: 0.7, ease: "easeOut" }}
       style={{ position: "fixed", zIndex: 9998, fontSize: 22, pointerEvents: "none" }}
     >❤️</motion.div>
+  );
+}
+
+/* ─── Fullscreen Image Modal ─────────────────────────────────────────────── */
+function FullscreenImage({ src, caption, onClose }) {
+  // Close on Escape key
+  useEffect(() => {
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    // Prevent body scroll
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handler);
+      document.body.style.overflow = "";
+    };
+  }, [onClose]);
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={onClose}
+        style={{
+          position: "fixed", inset: 0, zIndex: 1000,
+          background: "rgba(0,0,0,0.96)",
+          backdropFilter: "blur(24px)",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center",
+          padding: "20px",
+          cursor: "zoom-out",
+        }}
+      >
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: "fixed", top: 20, right: 20,
+            width: 44, height: 44, borderRadius: 14,
+            background: "rgba(255,255,255,0.08)",
+            border: "1px solid rgba(255,255,255,0.12)",
+            color: "rgba(255,255,255,0.7)", cursor: "pointer",
+            fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center",
+            zIndex: 1001, transition: "all 0.2s",
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(239,68,68,0.25)"; e.currentTarget.style.color = "#fca5a5"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "rgba(255,255,255,0.08)"; e.currentTarget.style.color = "rgba(255,255,255,0.7)"; }}
+        >✕</button>
+
+        {/* ESC hint */}
+        <div style={{
+          position: "fixed", top: 24, left: "50%", transform: "translateX(-50%)",
+          fontSize: 9, fontWeight: 800, letterSpacing: "0.25em", textTransform: "uppercase",
+          color: "rgba(255,255,255,0.2)", fontFamily: "'DM Mono', monospace",
+          zIndex: 1001,
+        }}>Press ESC or tap to close</div>
+
+        <motion.div
+          initial={{ scale: 0.88, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          transition={{ type: "spring", damping: 28, stiffness: 260 }}
+          onClick={(e) => e.stopPropagation()}
+          style={{
+            position: "relative", maxWidth: "min(90vw, 900px)",
+            maxHeight: "85vh", cursor: "default",
+          }}
+        >
+          <img
+            src={src}
+            alt="meme fullscreen"
+            style={{
+              width: "100%", height: "100%",
+              maxHeight: "85vh",
+              objectFit: "contain",
+              borderRadius: 20,
+              boxShadow: "0 40px 100px rgba(0,0,0,0.8)",
+              display: "block",
+            }}
+          />
+          {/* Caption overlay */}
+          {caption && (
+            <div style={{
+              position: "absolute", left: 0, right: 0, bottom: 0,
+              padding: "50px 28px 24px",
+              background: "linear-gradient(to top, rgba(0,0,0,0.85) 0%, transparent 100%)",
+              borderRadius: "0 0 20px 20px",
+            }}>
+              <p style={{
+                fontFamily: "'Playfair Display', serif",
+                fontStyle: "italic", fontSize: "clamp(1.2rem,3vw,1.8rem)",
+                fontWeight: 700, color: "#f1f5f9",
+                lineHeight: 1.25, textShadow: "0 4px 20px rgba(0,0,0,0.7)",
+              }}>{caption}</p>
+            </div>
+          )}
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+/* ─── TTS Button ─────────────────────────────────────────────────────────── */
+function TTSButton({ text, style = {} }) {
+  const { speak, stop, speaking } = useTTS();
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.88 }}
+      onClick={() => speaking ? stop() : speak(text)}
+      title={speaking ? "Stop reading" : "Read aloud in Polish"}
+      style={{
+        display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+        padding: "10px 14px", borderRadius: 13, border: "none", cursor: "pointer",
+        background: speaking
+          ? "rgba(52,211,153,0.15)"
+          : "rgba(255,255,255,0.04)",
+        border: `1px solid ${speaking ? "rgba(52,211,153,0.4)" : "rgba(255,255,255,0.08)"}`,
+        color: speaking ? "#34d399" : "rgba(255,255,255,0.55)",
+        fontSize: 13, fontWeight: 700, transition: "all 0.2s",
+        fontFamily: "'DM Sans', sans-serif",
+        position: "relative", overflow: "hidden",
+        ...style,
+      }}
+    >
+      {/* Ripple pulse when speaking */}
+      {speaking && (
+        <motion.div
+          style={{
+            position: "absolute", inset: 0, borderRadius: 13,
+            background: "rgba(52,211,153,0.08)",
+          }}
+          animate={{ opacity: [0.4, 0, 0.4] }}
+          transition={{ duration: 1.2, repeat: Infinity, ease: "easeInOut" }}
+        />
+      )}
+      {speaking ? (
+        <>
+          <SoundWaveIcon />
+          <span style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>Stop</span>
+        </>
+      ) : (
+        <>
+          🔊
+          <span style={{ fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase" }}>Czytaj</span>
+        </>
+      )}
+    </motion.button>
+  );
+}
+
+/* Animated sound wave icon */
+function SoundWaveIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+      {[
+        { x: 0, h: 4, delay: 0 },
+        { x: 4, h: 10, delay: 0.15 },
+        { x: 8, h: 14, delay: 0.3 },
+        { x: 12, h: 10, delay: 0.15 },
+      ].map((bar) => (
+        <motion.rect
+          key={bar.x}
+          x={bar.x} y={(16 - bar.h) / 2}
+          width={3} height={bar.h}
+          rx={1.5}
+          animate={{ scaleY: [1, 0.35, 1] }}
+          transition={{ duration: 0.7, repeat: Infinity, delay: bar.delay, ease: "easeInOut" }}
+        />
+      ))}
+    </svg>
   );
 }
 
@@ -104,8 +310,7 @@ function CommentSection({ postId, user, profile }) {
   };
 
   return (
-    <div style={{ padding: "0 22px 22px" }}>
-      {/* Comment list */}
+    <div style={{ padding: "0 16px 18px" }}>
       {comments.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 10, marginBottom: 14 }}>
           {comments.map((c) => (
@@ -113,9 +318,7 @@ function CommentSection({ postId, user, profile }) {
               key={c.id}
               initial={{ opacity: 0, x: -6 }}
               animate={{ opacity: 1, x: 0 }}
-              style={{
-                display: "flex", gap: 10, alignItems: "flex-start",
-              }}
+              style={{ display: "flex", gap: 10, alignItems: "flex-start" }}
             >
               <div style={{
                 width: 30, height: 30, borderRadius: 10, flexShrink: 0,
@@ -133,7 +336,7 @@ function CommentSection({ postId, user, profile }) {
                 border: "1px solid rgba(255,255,255,0.06)",
                 borderRadius: 12, padding: "9px 13px",
               }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 3, flexWrap: "wrap" }}>
                   <span style={{ fontSize: 11, fontWeight: 700, color: c.authorEmail === ADMIN_EMAIL ? "#34d399" : "#818cf8" }}>
                     {c.author}
                   </span>
@@ -149,7 +352,6 @@ function CommentSection({ postId, user, profile }) {
         </div>
       )}
 
-      {/* Input */}
       <div style={{ display: "flex", gap: 8 }}>
         <input
           ref={inputRef}
@@ -160,10 +362,10 @@ function CommentSection({ postId, user, profile }) {
           style={{
             flex: 1, background: "rgba(255,255,255,0.04)",
             border: "1px solid rgba(255,255,255,0.08)",
-            borderRadius: 14, padding: "12px 16px",
+            borderRadius: 14, padding: "12px 14px",
             color: "#fff", outline: "none", fontSize: 13,
             fontFamily: "'DM Sans', sans-serif",
-            transition: "border-color 0.2s",
+            minWidth: 0, transition: "border-color 0.2s",
           }}
           onFocus={(e) => e.target.style.borderColor = "rgba(99,102,241,0.4)"}
           onBlur={(e) => e.target.style.borderColor = "rgba(255,255,255,0.08)"}
@@ -191,6 +393,14 @@ function CommentSection({ postId, user, profile }) {
 
 /* ─── Learn panel ────────────────────────────────────────────────────────── */
 function LearnPanel({ post, onClose }) {
+  // Build the full lesson text for TTS
+  const lessonText = [
+    post.caption && `Podpis: ${post.caption}.`,
+    post.translation && `Tłumaczenie: ${post.translation}.`,
+    post.grammarRule && `Zasada gramatyczna: ${post.grammarRule}.`,
+    post.explanation && `Wyjaśnienie: ${post.explanation}.`,
+  ].filter(Boolean).join(" ");
+
   return (
     <motion.div
       initial={{ opacity: 0, height: 0 }}
@@ -199,36 +409,42 @@ function LearnPanel({ post, onClose }) {
       transition={{ duration: 0.3, ease: "easeOut" }}
       style={{ overflow: "hidden" }}
     >
-      <div style={{ margin: "0 22px 22px", display: "flex", flexDirection: "column", gap: 10 }}>
-        {/* Accent strip */}
+      <div style={{ margin: "0 16px 18px", display: "flex", flexDirection: "column", gap: 10 }}>
         <div style={{ height: 2, background: "linear-gradient(90deg,#6366f1,#34d399,transparent)", borderRadius: 9999 }} />
 
+        {/* TTS for full lesson */}
+        {lessonText && (
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <TTSButton text={lessonText} />
+          </div>
+        )}
+
         {post.translation && (
-          <div style={{
-            padding: "14px 16px", borderRadius: 14,
-            background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)",
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(99,102,241,0.5)", marginBottom: 6, fontFamily: "'DM Mono', monospace" }}>Translation</p>
+          <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(99,102,241,0.06)", border: "1px solid rgba(99,102,241,0.15)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(99,102,241,0.5)", fontFamily: "'DM Mono', monospace" }}>Translation</p>
+              <TTSButton text={post.translation} style={{ padding: "5px 10px", fontSize: 11 }} />
+            </div>
             <p style={{ fontSize: 14, color: "#c4b5fd", lineHeight: 1.65, fontFamily: "'DM Sans', sans-serif", fontStyle: "italic" }}>{post.translation}</p>
           </div>
         )}
 
         {post.grammarRule && (
-          <div style={{
-            padding: "14px 16px", borderRadius: 14,
-            background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.15)",
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(52,211,153,0.5)", marginBottom: 6, fontFamily: "'DM Mono', monospace" }}>Grammar Insight</p>
+          <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(52,211,153,0.06)", border: "1px solid rgba(52,211,153,0.15)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(52,211,153,0.5)", fontFamily: "'DM Mono', monospace" }}>Grammar Insight</p>
+              <TTSButton text={post.grammarRule} style={{ padding: "5px 10px", fontSize: 11 }} />
+            </div>
             <p style={{ fontSize: 14, color: "#6ee7b7", lineHeight: 1.65, fontFamily: "'DM Sans', sans-serif" }}>{post.grammarRule}</p>
           </div>
         )}
 
         {post.explanation && (
-          <div style={{
-            padding: "14px 16px", borderRadius: 14,
-            background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)",
-          }}>
-            <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(148,163,184,0.4)", marginBottom: 6, fontFamily: "'DM Mono', monospace" }}>Why It's Funny</p>
+          <div style={{ padding: "14px 16px", borderRadius: 14, background: "rgba(255,255,255,0.025)", border: "1px solid rgba(255,255,255,0.06)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+              <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.22em", color: "rgba(148,163,184,0.4)", fontFamily: "'DM Mono', monospace" }}>Why It's Funny</p>
+              <TTSButton text={post.explanation} style={{ padding: "5px 10px", fontSize: 11 }} />
+            </div>
             <p style={{ fontSize: 14, color: "rgba(226,232,240,0.75)", lineHeight: 1.65, fontFamily: "'DM Sans', sans-serif" }}>{post.explanation}</p>
           </div>
         )}
@@ -237,15 +453,13 @@ function LearnPanel({ post, onClose }) {
           whileTap={{ scale: 0.97 }}
           onClick={onClose}
           style={{
-            padding: "10px", borderRadius: 12, border: "none", cursor: "pointer",
-            background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)",
+            padding: "10px", borderRadius: 12, border: "1px solid rgba(255,255,255,0.07)",
+            cursor: "pointer", background: "rgba(255,255,255,0.04)",
             color: "rgba(148,163,184,0.5)", fontSize: 10, fontWeight: 800,
             textTransform: "uppercase", letterSpacing: "0.18em",
             fontFamily: "'DM Sans', sans-serif",
           }}
-        >
-          Close
-        </motion.button>
+        >Close</motion.button>
       </div>
     </motion.div>
   );
@@ -253,9 +467,10 @@ function LearnPanel({ post, onClose }) {
 
 /* ─── Meme card ──────────────────────────────────────────────────────────── */
 function MemeCard({ post, user, profile, onXp }) {
-  const [showLearn, setShowLearn]       = useState(false);
-  const [showComments, setShowComments] = useState(false);
-  const [hearts, setHearts]             = useState([]);
+  const [showLearn, setShowLearn]           = useState(false);
+  const [showComments, setShowComments]     = useState(false);
+  const [hearts, setHearts]                 = useState([]);
+  const [showFullscreen, setShowFullscreen] = useState(false);
   const liked = post.likes?.includes(user?.uid);
 
   const handleLike = async (e) => {
@@ -278,12 +493,21 @@ function MemeCard({ post, user, profile, onXp }) {
     if (!showLearn) onXp(10);
   };
 
-  const commentCount = post.commentCount || 0;
-
   return (
     <>
       <AnimatePresence>
         {hearts.map((h) => <HeartPop key={h.id} x={h.x} y={h.y} />)}
+      </AnimatePresence>
+
+      {/* Fullscreen image viewer */}
+      <AnimatePresence>
+        {showFullscreen && (
+          <FullscreenImage
+            src={post.imageUrl}
+            caption={post.caption}
+            onClose={() => setShowFullscreen(false)}
+          />
+        )}
       </AnimatePresence>
 
       <motion.article
@@ -301,79 +525,116 @@ function MemeCard({ post, user, profile, onXp }) {
         whileHover={{ borderColor: "rgba(99,102,241,0.2)", boxShadow: "0 16px 60px rgba(99,102,241,0.1)" }}
       >
         {/* ── Card header ── */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "16px 20px" }}>
-          <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "14px 16px" }}>
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
             <div style={{
-              width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+              width: 40, height: 40, borderRadius: 13, flexShrink: 0,
               background: post.authorEmail === ADMIN_EMAIL
                 ? "linear-gradient(135deg,#6366f1,#34d399)"
                 : "rgba(99,102,241,0.15)",
               border: "1px solid rgba(99,102,241,0.22)",
               display: "flex", alignItems: "center", justifyContent: "center",
-              fontSize: 18, fontWeight: 800, color: "#fff",
+              fontSize: 17, fontWeight: 800, color: "#fff",
               fontFamily: "'Playfair Display', serif",
               boxShadow: post.authorEmail === ADMIN_EMAIL ? "0 0 18px rgba(99,102,241,0.35)" : "none",
             }}>
               {post.author?.charAt(0)}
             </div>
             <div>
-              <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-                <span style={{ fontWeight: 700, fontSize: 14, color: "#f1f5f9", fontFamily: "'DM Sans', sans-serif" }}>{post.author}</span>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                <span style={{ fontWeight: 700, fontSize: 13, color: "#f1f5f9", fontFamily: "'DM Sans', sans-serif" }}>{post.author}</span>
                 {post.authorEmail === ADMIN_EMAIL && (
                   <span style={{ fontSize: 8, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.15em", color: "#34d399", padding: "2px 6px", borderRadius: 5, border: "1px solid rgba(52,211,153,0.3)", background: "rgba(52,211,153,0.08)" }}>Admin</span>
                 )}
               </div>
-              <div style={{ fontSize: 10, color: "rgba(148,163,184,0.35)", textTransform: "uppercase", letterSpacing: "0.14em", marginTop: 2, fontFamily: "'DM Mono', monospace" }}>
+              <div style={{ fontSize: 9, color: "rgba(148,163,184,0.35)", textTransform: "uppercase", letterSpacing: "0.14em", marginTop: 2, fontFamily: "'DM Mono', monospace" }}>
                 {post.level} · {fmt(post.createdAt)}
               </div>
             </div>
           </div>
-          <span style={{ color: post.authorEmail === ADMIN_EMAIL ? "#34d399" : "rgba(99,102,241,0.4)", fontSize: 16 }}>✦</span>
+          {/* TTS for the caption — always visible in header */}
+          {post.caption && (
+            <TTSButton text={post.caption} style={{ padding: "8px 12px" }} />
+          )}
         </div>
 
-        {/* ── Image ── */}
-        <div style={{ position: "relative", aspectRatio: "4/5", overflow: "hidden", background: "#000", cursor: "pointer" }}
-          onDoubleClick={handleLike}
+        {/* ── Image — click to fullscreen, double-tap to like ── */}
+        <div
+          style={{
+            position: "relative",
+            overflow: "hidden",
+            background: "#000",
+            cursor: "zoom-in",
+          }}
+          onClick={() => setShowFullscreen(true)}
+          onDoubleClick={(e) => { e.stopPropagation(); handleLike(e); }}
         >
-          <img src={post.imageUrl} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.4s ease", display: "block" }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.02)"}
+          <img
+            src={post.imageUrl}
+            alt=""
+            style={{
+              width: "100%",
+              display: "block",
+              objectFit: "contain",          // ← fit: no cropping
+              maxHeight: "480px",
+              background: "#000",
+              transition: "transform 0.4s ease",
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.015)"}
             onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
           />
-          {/* Caption overlay */}
+          {/* Tap hints overlay */}
+          <div style={{
+            position: "absolute", top: 10, right: 10,
+            display: "flex", flexDirection: "column", gap: 6, alignItems: "flex-end",
+          }}>
+            <div style={{
+              padding: "4px 9px", borderRadius: 9999,
+              background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)",
+              fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.35)",
+              textTransform: "uppercase", letterSpacing: "0.12em",
+              fontFamily: "'DM Mono', monospace",
+            }}>tap to zoom 🔍</div>
+            <div style={{
+              padding: "4px 9px", borderRadius: 9999,
+              background: "rgba(0,0,0,0.5)", backdropFilter: "blur(8px)",
+              fontSize: 8, fontWeight: 700, color: "rgba(255,255,255,0.35)",
+              textTransform: "uppercase", letterSpacing: "0.12em",
+              fontFamily: "'DM Mono', monospace",
+            }}>double tap ❤️</div>
+          </div>
+
+          {/* Bottom caption overlay */}
           <div style={{
             position: "absolute", left: 0, right: 0, bottom: 0,
-            padding: "60px 24px 24px",
-            background: "linear-gradient(to top, rgba(2,6,23,0.9) 0%, rgba(2,6,23,0.4) 60%, transparent 100%)",
+            padding: "50px 18px 16px",
+            background: "linear-gradient(to top, rgba(2,6,23,0.9) 0%, rgba(2,6,23,0.3) 60%, transparent 100%)",
+            pointerEvents: "none",
           }}>
             <p style={{
               fontFamily: "'Playfair Display', serif", fontStyle: "italic",
-              fontSize: "clamp(1.4rem,4vw,1.9rem)", fontWeight: 700,
-              color: "#f1f5f9", lineHeight: 1.2,
+              fontSize: "clamp(1rem,3.5vw,1.6rem)", fontWeight: 700,
+              color: "#f1f5f9", lineHeight: 1.25,
               textShadow: "0 4px 20px rgba(0,0,0,0.6)",
             }}>
               {post.caption}
             </p>
           </div>
-          {/* Double-tap hint */}
-          <div style={{
-            position: "absolute", top: 14, right: 14,
-            padding: "5px 10px", borderRadius: 9999,
-            background: "rgba(0,0,0,0.45)", backdropFilter: "blur(8px)",
-            fontSize: 9, fontWeight: 700, color: "rgba(255,255,255,0.4)",
-            textTransform: "uppercase", letterSpacing: "0.12em",
-            fontFamily: "'DM Mono', monospace",
-          }}>double tap ❤️</div>
         </div>
 
         {/* ── Action row ── */}
-        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 20px", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 6,
+          padding: "12px 16px", borderBottom: "1px solid rgba(255,255,255,0.05)",
+          flexWrap: "wrap",
+        }}>
           {/* Like */}
           <motion.button
             whileTap={{ scale: 0.88 }}
             onClick={handleLike}
             style={{
-              display: "flex", alignItems: "center", gap: 7,
-              padding: "10px 16px", borderRadius: 13, border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "9px 14px", borderRadius: 13, border: "none", cursor: "pointer",
               background: liked ? "rgba(244,63,94,0.12)" : "rgba(255,255,255,0.04)",
               border: `1px solid ${liked ? "rgba(244,63,94,0.3)" : "rgba(255,255,255,0.07)"}`,
               color: liked ? "#f43f5e" : "rgba(255,255,255,0.55)",
@@ -392,8 +653,8 @@ function MemeCard({ post, user, profile, onXp }) {
             whileTap={{ scale: 0.92 }}
             onClick={() => setShowComments((s) => !s)}
             style={{
-              display: "flex", alignItems: "center", gap: 7,
-              padding: "10px 16px", borderRadius: 13, border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "9px 14px", borderRadius: 13, border: "none", cursor: "pointer",
               background: showComments ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.04)",
               border: `1px solid ${showComments ? "rgba(99,102,241,0.28)" : "rgba(255,255,255,0.07)"}`,
               color: showComments ? "#818cf8" : "rgba(255,255,255,0.55)",
@@ -401,7 +662,7 @@ function MemeCard({ post, user, profile, onXp }) {
               fontFamily: "'DM Sans', sans-serif",
             }}
           >
-            💬 {commentCount > 0 ? commentCount : ""}
+            💬 {post.commentCount > 0 ? post.commentCount : ""}
           </motion.button>
 
           {/* Spacer */}
@@ -412,8 +673,8 @@ function MemeCard({ post, user, profile, onXp }) {
             whileTap={{ scale: 0.94 }}
             onClick={toggleLearn}
             style={{
-              display: "flex", alignItems: "center", gap: 7,
-              padding: "10px 18px", borderRadius: 13, border: "none", cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "9px 14px", borderRadius: 13, border: "none", cursor: "pointer",
               background: showLearn
                 ? "rgba(52,211,153,0.12)"
                 : "linear-gradient(135deg,rgba(99,102,241,0.15),rgba(52,211,153,0.1))",
@@ -443,7 +704,7 @@ function MemeCard({ post, user, profile, onXp }) {
               transition={{ duration: 0.28 }}
               style={{ overflow: "hidden", borderTop: "1px solid rgba(255,255,255,0.05)" }}
             >
-              <div style={{ padding: "16px 0 0" }}>
+              <div style={{ paddingTop: 14 }}>
                 <CommentSection postId={post.id} user={user} profile={profile} />
               </div>
             </motion.div>
@@ -456,15 +717,22 @@ function MemeCard({ post, user, profile, onXp }) {
 
 /* ─── Upload modal ───────────────────────────────────────────────────────── */
 function UploadModal({ user, profile, onClose, onSuccess }) {
-  const [caption, setCaption]       = useState("");
+  const [caption, setCaption]         = useState("");
   const [translation, setTranslation] = useState("");
   const [grammarRule, setGrammarRule] = useState("");
   const [explanation, setExplanation] = useState("");
-  const [image, setImage]           = useState(null);
-  const [preview, setPreview]       = useState(null);
-  const [uploading, setUploading]   = useState(false);
-  const [error, setError]           = useState("");
+  const [image, setImage]             = useState(null);
+  const [preview, setPreview]         = useState(null);
+  const [uploading, setUploading]     = useState(false);
+  const [error, setError]             = useState("");
   const fileRef = useRef(null);
+
+  // Close on Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [onClose]);
 
   const handleFile = (e) => {
     const f = e.target.files[0];
@@ -521,8 +789,8 @@ function UploadModal({ user, profile, onClose, onSuccess }) {
       style={{
         position: "fixed", inset: 0, background: "rgba(0,0,0,0.75)",
         backdropFilter: "blur(16px)", zIndex: 500,
-        display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
-        overflowY: "auto",
+        display: "flex", alignItems: "center", justifyContent: "center",
+        padding: "16px", overflowY: "auto",
       }}
     >
       <motion.div
@@ -532,11 +800,11 @@ function UploadModal({ user, profile, onClose, onSuccess }) {
         transition={{ type: "spring", damping: 26, stiffness: 280 }}
         onClick={(e) => e.stopPropagation()}
         style={{
-          width: "100%", maxWidth: 640, maxHeight: "90vh", overflowY: "auto",
+          width: "100%", maxWidth: 620, maxHeight: "90vh", overflowY: "auto",
           background: "#0c1427", borderRadius: 28,
           border: "1px solid rgba(99,102,241,0.22)",
           boxShadow: "0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.1)",
-          padding: "28px 28px 32px",
+          padding: "24px",
           display: "flex", flexDirection: "column", gap: 14,
         }}
       >
@@ -544,7 +812,7 @@ function UploadModal({ user, profile, onClose, onSuccess }) {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div>
             <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.28em", color: "rgba(99,102,241,0.5)", marginBottom: 6, fontFamily: "'DM Mono', monospace" }}>New Post</p>
-            <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1.8rem", fontWeight: 700, color: "#f1f5f9", lineHeight: 1 }}>
+            <h2 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "clamp(1.4rem,4vw,1.8rem)", fontWeight: 700, color: "#f1f5f9", lineHeight: 1 }}>
               Upload Meme ✨
             </h2>
           </div>
@@ -556,17 +824,18 @@ function UploadModal({ user, profile, onClose, onSuccess }) {
           onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}
           onClick={() => !preview && fileRef.current?.click()}
           style={{
-            borderRadius: 18, overflow: "hidden", cursor: preview ? "default" : "pointer",
+            borderRadius: 18, overflow: "hidden",
+            cursor: preview ? "default" : "pointer",
             border: `2px dashed ${preview ? "rgba(52,211,153,0.3)" : "rgba(99,102,241,0.2)"}`,
             background: preview ? "transparent" : "rgba(99,102,241,0.04)",
-            minHeight: preview ? "auto" : 160,
+            minHeight: preview ? "auto" : 140,
             display: "flex", alignItems: "center", justifyContent: "center",
             position: "relative", transition: "all 0.2s",
           }}
         >
           {preview ? (
-            <div style={{ position: "relative" }}>
-              <img src={preview} alt="" style={{ width: "100%", maxHeight: 300, objectFit: "cover", display: "block", borderRadius: 16 }} />
+            <div style={{ position: "relative", width: "100%" }}>
+              <img src={preview} alt="" style={{ width: "100%", maxHeight: 260, objectFit: "contain", display: "block", borderRadius: 16, background: "#050810" }} />
               <button onClick={(e) => { e.stopPropagation(); setImage(null); setPreview(null); }}
                 style={{ position: "absolute", top: 10, right: 10, width: 30, height: 30, borderRadius: 9999, border: "none", background: "rgba(0,0,0,0.6)", color: "#fff", cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center" }}>✕</button>
             </div>
@@ -582,21 +851,21 @@ function UploadModal({ user, profile, onClose, onSuccess }) {
 
         {/* Fields */}
         {[
-          { value: caption, set: setCaption, placeholder: "Polish meme caption (the funny text)…", required: true },
-          { value: translation, set: setTranslation, placeholder: "English translation…" },
-          { value: grammarRule, set: setGrammarRule, placeholder: "Grammar insight — what rule does this show?…" },
-          { value: explanation, set: setExplanation, placeholder: "Why is this funny in Polish culture?…" },
+          { value: caption, set: setCaption, placeholder: "Polish meme caption (the funny text)…", required: true, rows: 2 },
+          { value: translation, set: setTranslation, placeholder: "English translation…", rows: 2 },
+          { value: grammarRule, set: setGrammarRule, placeholder: "Grammar insight — what rule does this show?…", rows: 3 },
+          { value: explanation, set: setExplanation, placeholder: "Why is this funny in Polish culture?…", rows: 3 },
         ].map((f, i) => (
           <textarea
             key={i}
             value={f.value}
             onChange={(e) => f.set(e.target.value)}
             placeholder={f.placeholder}
-            rows={i === 0 ? 2 : 3}
+            rows={f.rows}
             style={{
               width: "100%", background: "rgba(255,255,255,0.04)",
               border: `1px solid ${f.required && !f.value.trim() ? "rgba(244,63,94,0.2)" : "rgba(255,255,255,0.08)"}`,
-              borderRadius: 14, padding: "13px 16px",
+              borderRadius: 14, padding: "12px 14px",
               color: "#f1f5f9", outline: "none", fontSize: 13, resize: "none",
               fontFamily: "'DM Sans', sans-serif", lineHeight: 1.6,
               transition: "border-color 0.2s",
@@ -638,7 +907,7 @@ export default function PolishMeme() {
   const [showUpload, setShowUpload] = useState(false);
   const [xpItems, setXpItems]       = useState([]);
 
-  const totalXp     = profile?.xp || 0;
+  const totalXp      = profile?.xp || 0;
   const currentLevel = LEVELS[getLevel(totalXp)];
   const streak       = profile?.streak || 0;
 
@@ -663,7 +932,6 @@ export default function PolishMeme() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap');
 
-        /* ── Scoped reset — does NOT touch the app navbar ── */
         .pm-root *, .pm-root *::before, .pm-root *::after { box-sizing: border-box; margin: 0; padding: 0; }
         .pm-root ::-webkit-scrollbar { width: 4px; }
         .pm-root ::-webkit-scrollbar-thumb { background: rgba(99,102,241,0.2); border-radius: 9999px; }
@@ -682,14 +950,13 @@ export default function PolishMeme() {
         .pm-layout {
           display: grid;
           grid-template-columns: 1fr;
-          gap: 28px;
+          gap: 24px;
           max-width: 1320px;
           margin: 0 auto;
-          padding: 28px 20px 80px;
+          padding: 24px 16px 80px;
         }
-
         @media (min-width: 1080px) {
-          .pm-layout { grid-template-columns: 1fr 320px; align-items: start; }
+          .pm-layout { grid-template-columns: 1fr 300px; align-items: start; padding: 28px 20px 80px; }
         }
 
         .pm-feed {
@@ -698,15 +965,15 @@ export default function PolishMeme() {
           margin: 0 auto;
           display: flex;
           flex-direction: column;
-          gap: 24px;
+          gap: 20px;
         }
+        @media (min-width: 1080px) { .pm-feed { max-width: 100%; } }
 
         .pm-sidebar {
           display: flex;
           flex-direction: column;
-          gap: 14px;
+          gap: 12px;
         }
-
         @media (min-width: 1080px) {
           .pm-sidebar { position: sticky; top: 24px; }
         }
@@ -714,17 +981,17 @@ export default function PolishMeme() {
         .pm-side-card {
           background: #0c1427;
           border: 1px solid rgba(255,255,255,0.06);
-          border-radius: 22px;
-          padding: 22px;
+          border-radius: 20px;
+          padding: 18px 20px;
           transition: border-color 0.2s;
         }
         .pm-side-card:hover { border-color: rgba(99,102,241,0.15); }
 
         .pm-upload-btn {
           width: 100%;
-          padding: 16px;
+          padding: 15px;
           border: none;
-          border-radius: 18px;
+          border-radius: 16px;
           background: linear-gradient(135deg, #6366f1, #4f46e5);
           color: #fff;
           font-family: 'DM Sans', sans-serif;
@@ -735,6 +1002,7 @@ export default function PolishMeme() {
           cursor: pointer;
           transition: all 0.25s;
           box-shadow: 0 10px 28px rgba(79,70,229,0.28);
+          touch-action: manipulation;
         }
         .pm-upload-btn:hover {
           transform: translateY(-2px);
@@ -763,17 +1031,31 @@ export default function PolishMeme() {
           cursor: pointer;
           transition: all 0.15s;
           font-family: 'DM Sans', sans-serif;
+          touch-action: manipulation;
         }
-        .pm-trending-tag:hover {
-          background: rgba(99,102,241,0.16);
-          transform: translateY(-1px);
-        }
+        .pm-trending-tag:hover { background: rgba(99,102,241,0.16); transform: translateY(-1px); }
 
         .pm-empty {
           text-align: center;
           padding: 60px 20px;
           color: rgba(148,163,184,0.3);
         }
+
+        /* Mobile feed top bar */
+        .pm-mobile-upload {
+          display: none;
+        }
+        @media (max-width: 1079px) {
+          .pm-mobile-upload { display: block; }
+          .pm-desktop-upload { display: none; }
+        }
+        @media (min-width: 1080px) {
+          .pm-mobile-upload { display: none; }
+          .pm-desktop-upload { display: block; }
+        }
+
+        /* Ensure buttons are tappable on mobile */
+        button { -webkit-tap-highlight-color: transparent; }
       `}</style>
 
       <div className="pm-root">
@@ -804,7 +1086,7 @@ export default function PolishMeme() {
               <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.3em", color: "rgba(99,102,241,0.45)", marginBottom: 6, fontFamily: "'DM Mono', monospace" }}>
                 Community Feed
               </p>
-              <h1 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "clamp(1.6rem,4vw,2.2rem)", color: "#f1f5f9", lineHeight: 1.05 }}>
+              <h1 style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "clamp(1.5rem,5vw,2.2rem)", color: "#f1f5f9", lineHeight: 1.05 }}>
                 Polish Meme Lab
               </h1>
               <p style={{ fontSize: 13, color: "rgba(148,163,184,0.4)", marginTop: 6, fontFamily: "'DM Sans', sans-serif" }}>
@@ -812,9 +1094,8 @@ export default function PolishMeme() {
               </p>
             </div>
 
-            {/* Mobile upload btn */}
-            <div className="pm-mobile-btn" style={{ display: "none" }}>
-              <style>{`@media(max-width:1079px){.pm-mobile-btn{display:block!important}}`}</style>
+            {/* Mobile upload button */}
+            <div className="pm-mobile-upload">
               <button className="pm-upload-btn" onClick={() => setShowUpload(true)}>Upload Meme ✦</button>
             </div>
 
@@ -840,19 +1121,18 @@ export default function PolishMeme() {
 
           {/* ── SIDEBAR ── */}
           <aside className="pm-sidebar">
-            {/* Profile card */}
+            {/* Profile / level card */}
             <div className="pm-side-card" style={{ border: "1px solid rgba(99,102,241,0.18)" }}>
-              <div style={{ height: 2, background: "linear-gradient(90deg,#6366f1,#34d399,transparent)", borderRadius: 9999, marginBottom: 18 }} />
+              <div style={{ height: 2, background: "linear-gradient(90deg,#6366f1,#34d399,transparent)", borderRadius: 9999, marginBottom: 16 }} />
               <p className="pm-label">Polish Brain Level</p>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "1.7rem", color: "#f1f5f9", marginBottom: 6 }}>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "1.6rem", color: "#f1f5f9", marginBottom: 6 }}>
                 {currentLevel}
               </p>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1.1rem", fontWeight: 700, color: "#818cf8" }}>{totalXp.toLocaleString()} XP</span>
-                <span style={{ color: "#34d399", fontSize: 14 }}>✦</span>
+                <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1rem", fontWeight: 700, color: "#818cf8" }}>{totalXp.toLocaleString()} XP</span>
+                <span style={{ color: "#34d399", fontSize: 13 }}>✦</span>
               </div>
-              {/* XP bar */}
-              <div style={{ marginTop: 12, height: 4, background: "rgba(255,255,255,0.05)", borderRadius: 9999, overflow: "hidden" }}>
+              <div style={{ marginTop: 10, height: 4, background: "rgba(255,255,255,0.05)", borderRadius: 9999, overflow: "hidden" }}>
                 <div style={{ height: "100%", width: `${Math.min(100, (totalXp % 500) / 5)}%`, background: "linear-gradient(90deg,#6366f1,#34d399)", borderRadius: 9999, transition: "width 0.6s ease" }} />
               </div>
             </div>
@@ -864,14 +1144,14 @@ export default function PolishMeme() {
                 <motion.span
                   animate={{ rotate: [-5, 5, -5] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                  style={{ fontSize: "2.5rem", filter: "drop-shadow(0 0 10px rgba(245,158,11,0.5))" }}
+                  style={{ fontSize: "2.2rem", filter: "drop-shadow(0 0 10px rgba(245,158,11,0.5))" }}
                 >🔥</motion.span>
                 <div>
-                  <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "2rem", color: "#f59e0b" }}>{streak}</span>
-                  <span style={{ fontSize: 13, color: "rgba(245,158,11,0.5)", marginLeft: 6, fontWeight: 700 }}>days</span>
+                  <span style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "1.8rem", color: "#f59e0b" }}>{streak}</span>
+                  <span style={{ fontSize: 12, color: "rgba(245,158,11,0.5)", marginLeft: 5, fontWeight: 700 }}>days</span>
                 </div>
               </div>
-              <p style={{ fontSize: 11, color: "rgba(148,163,184,0.3)", marginTop: 6, fontFamily: "'DM Mono', monospace" }}>Keep the flame alive 🔥</p>
+              <p style={{ fontSize: 11, color: "rgba(148,163,184,0.3)", marginTop: 5, fontFamily: "'DM Mono', monospace" }}>Keep the flame alive 🔥</p>
             </div>
 
             {/* Trending vocab */}
@@ -884,9 +1164,8 @@ export default function PolishMeme() {
               </div>
             </div>
 
-            {/* Upload */}
-            <div className="pm-desktop-btn">
-              <style>{`@media(max-width:1079px){.pm-desktop-btn{display:none}}`}</style>
+            {/* Desktop upload */}
+            <div className="pm-desktop-upload">
               <button className="pm-upload-btn" onClick={() => setShowUpload(true)}>
                 Upload New Meme ✦
               </button>
@@ -895,7 +1174,7 @@ export default function PolishMeme() {
             {/* Post count */}
             <div className="pm-side-card" style={{ textAlign: "center" }}>
               <p className="pm-label" style={{ marginBottom: 6 }}>Community</p>
-              <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "2rem", color: "#818cf8" }}>{posts.length}</p>
+              <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontWeight: 700, fontSize: "1.8rem", color: "#818cf8" }}>{posts.length}</p>
               <p style={{ fontSize: 11, color: "rgba(148,163,184,0.3)", fontFamily: "'DM Mono', monospace" }}>memes published</p>
             </div>
 
@@ -906,7 +1185,7 @@ export default function PolishMeme() {
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = "rgba(52,211,153,0.15)"}
               >
                 <p style={{ fontSize: 9, fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.2em", color: "rgba(52,211,153,0.5)", marginBottom: 8, fontFamily: "'DM Mono', monospace" }}>Shadow Protocol</p>
-                <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1.2rem", fontWeight: 700, color: "#34d399" }}>Continue Training ⚡</p>
+                <p style={{ fontFamily: "'Playfair Display', serif", fontStyle: "italic", fontSize: "1.1rem", fontWeight: 700, color: "#34d399" }}>Continue Training ⚡</p>
               </div>
             </Link>
           </aside>
