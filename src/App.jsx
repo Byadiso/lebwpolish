@@ -25,6 +25,7 @@ import ReadingComprehension from './pages/ReadingComprehension';
 import KoniugacjaMaster from './pages/KoniugacjaMaster';
 import B1ShadowBoxer from './pages/B1ShadowBoxer';
 import PolishArena from './pages/PolishArena';
+import PolishWithMeme from './pages/PolishWithMeme';
 
 // Secure Gatekeeper Helper
 const ProtectedRoute = ({ children }) => {
@@ -58,6 +59,7 @@ function App() {
              <Route path="/play" element={<PolishArena />} />
              <Route path="/polish-music" element={<LirycznaSymfonia />} />
              <Route path="/practice" element={<PracticeLab />} />
+             <Route path="/PolishMeme" element={<PolishWithMeme />} />
              
             
 
