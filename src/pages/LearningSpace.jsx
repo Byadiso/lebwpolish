@@ -1203,6 +1203,8 @@ export default function LearningSpace() {
               { to: "/reading-practice",      label: "Reading Practice",        text: "Practice Reading 📖" },
               { to: "/conjugation-practice",  label: "Conjugations",            text: "Practice Conjugations 🧠" },
               { to: "/play",                  label: "Learn Polish via Play",   text: "Practice grammar & vocabulary with games" },
+              { to: "/PolishMeme",                  label: "Learn Polish via Polish Meme",   text: "Practice grammar & vocabulary with Meme" },
+              { to: "/PolishRolePlay",        label: "Speak Polish via Role Play",   text: "Practice Speaking polish spontaneously" },
             ].map(({ to, label, text }) => (
               <Link key={to} to={to} className="ls-link-card">
                 <div style={{ fontSize: '9px', fontWeight: 700, color: 'rgba(99,102,241,0.5)', textTransform: 'uppercase', letterSpacing: '0.2em', marginBottom: '5px', fontFamily: "'DM Sans', sans-serif" }}>{label}</div>
