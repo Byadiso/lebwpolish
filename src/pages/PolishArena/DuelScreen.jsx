@@ -1,38 +1,50 @@
+import IconText from "../../components/IconText";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { DUEL_QUESTIONS } from './data';
-
-export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
-  const [phase, setPhase]             = useState('playing');
-  const [qIdx, setQIdx]               = useState(0);
+export default function DuelScreen({
+  onBack,
+  onXpGain,
+  onWin,
+  onLoss,
+  toast
+}) {
+  const [phase, setPhase] = useState('playing');
+  const [qIdx, setQIdx] = useState(0);
   const [playerScore, setPlayerScore] = useState(0);
-  const [rivalScore, setRivalScore]   = useState(0);
-  const [timeLeft, setTimeLeft]       = useState(30);
-  const [answered, setAnswered]       = useState(false);
-  const [selected, setSelected]       = useState(null);
-  const [feedback, setFeedback]       = useState(null);
-  const [rivalMsg, setRivalMsg]       = useState('Rywal pisze…');
+  const [rivalScore, setRivalScore] = useState(0);
+  const [timeLeft, setTimeLeft] = useState(30);
+  const [answered, setAnswered] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [rivalMsg, setRivalMsg] = useState('Komputer pisze…');
 
   // Refs that always hold current values — avoids ALL stale-closure bugs
-  const timerRef        = useRef(null);
-  const answeredRef     = useRef(false);
-  const playerScoreRef  = useRef(0);
-  const rivalScoreRef   = useRef(0);
-  const qIdxRef         = useRef(0);
+  const timerRef = useRef(null);
+  const answeredRef = useRef(false);
+  const playerScoreRef = useRef(0);
+  const rivalScoreRef = useRef(0);
+  const qIdxRef = useRef(0);
 
   // Keep refs in sync with state
-  useEffect(() => { answeredRef.current    = answered;    }, [answered]);
-  useEffect(() => { playerScoreRef.current = playerScore; }, [playerScore]);
-  useEffect(() => { rivalScoreRef.current  = rivalScore;  }, [rivalScore]);
-  useEffect(() => { qIdxRef.current        = qIdx;        }, [qIdx]);
-
+  useEffect(() => {
+    answeredRef.current = answered;
+  }, [answered]);
+  useEffect(() => {
+    playerScoreRef.current = playerScore;
+  }, [playerScore]);
+  useEffect(() => {
+    rivalScoreRef.current = rivalScore;
+  }, [rivalScore]);
+  useEffect(() => {
+    qIdxRef.current = qIdx;
+  }, [qIdx]);
   const q = DUEL_QUESTIONS[qIdx];
 
   /* ── advance to next question or end game ───────────────────────────────── */
   const advanceQ = useCallback((nextIdx, pScore, rScore) => {
     clearInterval(timerRef.current);
     if (nextIdx >= DUEL_QUESTIONS.length) {
-      if (pScore > rScore) onWin?.();
-      else onLoss?.();
+      if (pScore > rScore) onWin?.();else onLoss?.();
       setPlayerScore(pScore);
       setRivalScore(rScore);
       setPhase('result');
@@ -51,10 +63,8 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
   /* ── timer — runs once per question (qIdx change) ──────────────────────── */
   useEffect(() => {
     if (phase !== 'playing') return;
-
     clearInterval(timerRef.current);
     setTimeLeft(30);
-
     timerRef.current = setInterval(() => {
       setTimeLeft(t => {
         const next = t - 1;
@@ -73,41 +83,38 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
           if (!answeredRef.current) {
             answeredRef.current = true;
             setAnswered(true);
-            setFeedback({ type: 'bad', text: 'Czas minął! Rywal odpowiedział pierwszy.' });
-            advanceQ(
-              qIdxRef.current + 1,
-              playerScoreRef.current,
-              rivalScoreRef.current,
-            );
+            setFeedback({
+              type: 'bad',
+              text: 'Czas minął! Rywal odpowiedział pierwszy.'
+            });
+            advanceQ(qIdxRef.current + 1, playerScoreRef.current, rivalScoreRef.current);
           }
           return 0;
         }
-
         return next;
       });
     }, 1000);
-
     return () => clearInterval(timerRef.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [qIdx, phase]); // only re-run when question changes or phase changes
 
   /* ── player picks an option ─────────────────────────────────────────────── */
-  const choose = (opt) => {
+  const choose = opt => {
     if (answeredRef.current) return;
     clearInterval(timerRef.current);
-
     answeredRef.current = true;
     setAnswered(true);
     setSelected(opt);
-
     const correct = opt === q.correct;
-    const pts     = Math.max(1, timeLeft);
-
+    const pts = Math.max(1, timeLeft);
     if (correct) {
       const newPS = playerScoreRef.current + pts;
       playerScoreRef.current = newPS;
       setPlayerScore(newPS);
-      setFeedback({ type: 'good', text: `Poprawnie! +${pts} pkt (bonus czasowy: ${pts}s)` });
+      setFeedback({
+        type: 'good',
+        text: `Poprawnie! +${pts} pkt (bonus czasowy: ${pts}s)`
+      });
       setRivalMsg('Odpowiedziałeś pierwszy!');
       onXpGain?.(pts * 10);
       advanceQ(qIdxRef.current + 1, newPS, rivalScoreRef.current);
@@ -115,7 +122,10 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
       const newRS = rivalScoreRef.current + 1;
       rivalScoreRef.current = newRS;
       setRivalScore(newRS);
-      setFeedback({ type: 'bad', text: `Błąd! Poprawna odpowiedź: "${q.correct}"` });
+      setFeedback({
+        type: 'bad',
+        text: `Błąd! Poprawna odpowiedź: "${q.correct}"`
+      });
       setRivalMsg('Rywal zdobył punkt!');
       advanceQ(qIdxRef.current + 1, playerScoreRef.current, newRS);
     }
@@ -125,9 +135,9 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
   const reset = () => {
     clearInterval(timerRef.current);
     playerScoreRef.current = 0;
-    rivalScoreRef.current  = 0;
-    qIdxRef.current        = 0;
-    answeredRef.current    = false;
+    rivalScoreRef.current = 0;
+    qIdxRef.current = 0;
+    answeredRef.current = false;
     setPhase('playing');
     setQIdx(0);
     setPlayerScore(0);
@@ -140,9 +150,9 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
   };
 
   /* ── timer ring progress ────────────────────────────────────────────────── */
-  const timerPct  = timeLeft / 30;
-  const r         = 24;
-  const circ      = 2 * Math.PI * r;
+  const timerPct = timeLeft / 30;
+  const r = 24;
+  const circ = 2 * Math.PI * r;
   const dashOffset = circ - timerPct * circ;
   const timerColor = timeLeft > 10 ? '#818cf8' : timeLeft > 5 ? '#f59e0b' : '#ef4444';
 
@@ -150,12 +160,10 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
      RESULT SCREEN
   ══════════════════════════════════════════════════════════════════════════ */
   if (phase === 'result') {
-    const win    = playerScore > rivalScore;
-    const draw   = playerScore === rivalScore;
+    const win = playerScore > rivalScore;
+    const draw = playerScore === rivalScore;
     const margin = Math.abs(playerScore - rivalScore);
-
-    return (
-      <>
+    return <>
         <style>{STYLES}</style>
         <div className="du-root">
           <div className="du-inner">
@@ -163,29 +171,25 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
 
             <div className={`du-result-card ${win ? 'win' : draw ? 'draw' : 'lose'}`}>
               <div className="du-result-icon">
-                {win ? '🏆' : draw ? '🤝' : '💀'}
+                <IconText>{win ? "[icon:trophy]" : draw ? "[icon:users]" : "[icon:sparkles]"}</IconText>
               </div>
               <div className="du-result-title">
-                {win ? 'Wygrałeś!' : draw ? 'Remis!' : 'Przegrałeś'}
+                <IconText>{win ? 'Wygrałeś!' : draw ? 'Remis!' : 'Przegrałeś'}</IconText>
               </div>
               <div className="du-result-sub">
-                {win
-                  ? `Wygrałeś o ${margin} ${margin === 1 ? 'punkt' : 'punkty'}. Nowy rywal czeka.`
-                  : draw
-                  ? 'Remis — obaj jesteście na tym samym poziomie.'
-                  : `Przegrałeś o ${margin} ${margin === 1 ? 'punkt' : 'punkty'}. ${margin <= 2 ? 'Blisko! Rewanż?' : 'Ćwicz szybciej.'}`}
+                <IconText>{win ? `Wygrałeś o ${margin} ${margin === 1 ? 'punkt' : 'punkty'}. Nowy rywal czeka.` : draw ? 'Remis — obaj jesteście na tym samym poziomie.' : `Przegrałeś o ${margin} ${margin === 1 ? 'punkt' : 'punkty'}. ${margin <= 2 ? 'Blisko! Rewanż?' : 'Ćwicz szybciej.'}`}</IconText>
               </div>
 
               <div className="du-result-scores">
                 <div className="du-score-col">
                   <div className="du-score-av you">TY</div>
-                  <div className="du-score-big you">{playerScore}</div>
+                  <div className="du-score-big you"><IconText>{playerScore}</IconText></div>
                   <div className="du-score-lbl">Twój wynik</div>
                 </div>
                 <div className="du-score-divider">—</div>
                 <div className="du-score-col">
                   <div className="du-score-av rival">RY</div>
-                  <div className="du-score-big rival">{rivalScore}</div>
+                  <div className="du-score-big rival"><IconText>{rivalScore}</IconText></div>
                   <div className="du-score-lbl">Rywal</div>
                 </div>
               </div>
@@ -199,15 +203,13 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
             </div>
           </div>
         </div>
-      </>
-    );
+      </>;
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
      PLAYING SCREEN
   ══════════════════════════════════════════════════════════════════════════ */
-  return (
-    <>
+  return <>
       <style>{STYLES}</style>
       <div className="du-root">
         <div className="du-inner">
@@ -217,100 +219,81 @@ export default function DuelScreen({ onBack, onXpGain, onWin, onLoss, toast }) {
           <div className="du-title">Pojedynek</div>
           <div className="du-sub">Zmierzysz się z rywalem na Twoim poziomie.</div>
 
-          {toast && <div className="du-xp-toast">{toast}</div>}
+          {toast && <div className="du-xp-toast"><IconText>{toast}</IconText></div>}
 
           {/* ── Scoreboard ── */}
           <div className="du-scoreboard">
             <div className="du-player-side">
               <div className="du-avatar you">TY</div>
               <div className="du-player-name you">You</div>
-              <div className="du-player-score you">{playerScore}</div>
+              <div className="du-player-score you"><IconText>{playerScore}</IconText></div>
             </div>
 
             {/* Timer ring */}
             <div className="du-timer-wrap">
               <svg width="60" height="60" viewBox="0 0 60 60">
                 <circle cx="30" cy="30" r={r} fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="3.5" />
-                <circle
-                  cx="30" cy="30" r={r} fill="none"
-                  stroke={timerColor}
-                  strokeWidth="3.5"
-                  strokeLinecap="round"
-                  strokeDasharray={circ}
-                  strokeDashoffset={dashOffset}
-                  style={{ transform: 'rotate(-90deg)', transformOrigin: '50% 50%', transition: 'stroke-dashoffset 0.95s linear, stroke 0.3s' }}
-                />
+                <circle cx="30" cy="30" r={r} fill="none" stroke={timerColor} strokeWidth="3.5" strokeLinecap="round" strokeDasharray={circ} strokeDashoffset={dashOffset} style={{
+                transform: 'rotate(-90deg)',
+                transformOrigin: '50% 50%',
+                transition: 'stroke-dashoffset 0.95s linear, stroke 0.3s'
+              }} />
               </svg>
-              <div className="du-timer-num" style={{ color: timerColor }}>{timeLeft}</div>
+              <div className="du-timer-num" style={{
+              color: timerColor
+            }}><IconText>{timeLeft}</IconText></div>
             </div>
 
             <div className="du-player-side">
               <div className="du-avatar rival">RY</div>
-              <div className="du-player-name rival">Rival</div>
-              <div className="du-player-score rival">{rivalScore}</div>
+              <div className="du-player-name rival">Computer</div>
+              <div className="du-player-score rival"><IconText>{rivalScore}</IconText></div>
             </div>
           </div>
 
           {/* Progress dots */}
           <div className="du-progress">
-            {DUEL_QUESTIONS.map((_, i) => (
-              <div
-                key={i}
-                className={`du-dot ${i < qIdx ? 'done' : i === qIdx ? 'active' : ''}`}
-              />
-            ))}
+            {DUEL_QUESTIONS.map((_, i) => <div key={i} className={`du-dot ${i < qIdx ? 'done' : i === qIdx ? 'active' : ''}`} />)}
           </div>
 
           {/* Question card */}
           <div className="du-question-card">
             <div className="du-q-meta">
-              Pytanie {qIdx + 1} / {DUEL_QUESTIONS.length}
+              Pytanie <IconText>{qIdx + 1}</IconText> / <IconText>{DUEL_QUESTIONS.length}</IconText>
             </div>
-            <div className="du-q-text">{q.pl}</div>
+            <div className="du-q-text"><IconText>{q.pl}</IconText></div>
             <div className="du-q-hint">Wybierz poprawne tłumaczenie</div>
           </div>
 
           {/* Answer options */}
           <div className="du-opts">
             {q.opts.map((opt, i) => {
-              let cls = 'du-opt';
-              if (answered) {
-                if (opt === q.correct)   cls += ' hit';
-                else if (opt === selected) cls += ' miss';
-                else                       cls += ' dim';
-              }
-              return (
-                <button
-                  key={opt}
-                  className={cls}
-                  onClick={() => choose(opt)}
-                  disabled={answered}
-                >
-                  <span className="du-opt-letter">{String.fromCharCode(65 + i)}</span>
-                  <span className="du-opt-text">{opt}</span>
+            let cls = 'du-opt';
+            if (answered) {
+              if (opt === q.correct) cls += ' hit';else if (opt === selected) cls += ' miss';else cls += ' dim';
+            }
+            return <button key={opt} className={cls} onClick={() => choose(opt)} disabled={answered}>
+                  <span className="du-opt-letter"><IconText>{String.fromCharCode(65 + i)}</IconText></span>
+                  <span className="du-opt-text"><IconText>{opt}</IconText></span>
                   {answered && opt === q.correct && <span className="du-opt-check">✓</span>}
                   {answered && opt === selected && opt !== q.correct && <span className="du-opt-x">✗</span>}
-                </button>
-              );
-            })}
+                </button>;
+          })}
           </div>
 
           {/* Rival status */}
           <div className={`du-rival-msg ${rivalMsg.includes('odpowiedział') || rivalMsg.includes('zdobył') ? 'alert' : ''}`}>
             <span className="du-rival-dot" />
-            {rivalMsg}
+            <IconText>{rivalMsg}</IconText>
           </div>
 
           {/* Feedback */}
-          {feedback && (
-            <div className={`du-feedback ${feedback.type}`}>
-              {feedback.text}
-            </div>
-          )}
+          {feedback && <div className={`du-feedback ${feedback.type}`}>
+              <IconText>{feedback.text}</IconText>
+            </div>}
         </div>
       </div>
-    </>
-  );
+    </>;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════════

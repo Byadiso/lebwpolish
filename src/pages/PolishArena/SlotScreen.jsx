@@ -1,10 +1,9 @@
+import IconText from "../../components/IconText";
 import React, { useState, useRef, useCallback } from 'react';
 import { SUBJECTS, VERBS, OBJECTS } from './data';
-
 function rand(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
-
 function stripParens(str) {
   return str.replace(/\s*\([^)]*\)/g, '').replace(/\s+/g, ' ').trim();
 }
@@ -19,10 +18,7 @@ function getAlternatives(raw) {
   // First strip parenthetical notes entirely
   const cleaned = raw.replace(/\s*\([^)]*\)/g, '').trim();
   // Split on " / " or "/"
-  return cleaned
-    .split(/\s*\/\s*/)
-    .map(s => s.trim().toLowerCase())
-    .filter(Boolean);
+  return cleaned.split(/\s*\/\s*/).map(s => s.trim().toLowerCase()).filter(Boolean);
 }
 
 /**
@@ -50,47 +46,52 @@ function buildAcceptedAnswers(s, v, o) {
 function norm(str) {
   return str.toLowerCase().trim().replace(/\s+/g, ' ').replace(/\.$/, '');
 }
-
 const REEL_LABELS = ['Subject', 'Verb', 'Object'];
 
 // ── Individual reel card ──────────────────────────────────────────────────────
-function ReelCard({ reel, index, spinning, hintRevealed, onRevealHint, showTranslation, hintsLeft }) {
+function ReelCard({
+  reel,
+  index,
+  spinning,
+  hintRevealed,
+  onRevealHint,
+  showTranslation,
+  hintsLeft
+}) {
   const show = showTranslation || hintRevealed;
-
-  return (
-    <div className={`reel ${spinning ? 'spinning' : ''} ${reel.locked ? 'locked' : ''}`}>
-      <div className="reel-lbl">{REEL_LABELS[index]}</div>
-      <div className="reel-word">{reel.word}</div>
+  return <div className={`reel ${spinning ? 'spinning' : ''} ${reel.locked ? 'locked' : ''}`}>
+      <div className="reel-lbl"><IconText>{REEL_LABELS[index]}</IconText></div>
+      <div className="reel-word"><IconText>{reel.word}</IconText></div>
       <div className="reel-tr-wrap">
-        {!reel.locked ? (
-          <span className="reel-tr">&nbsp;</span>
-        ) : show ? (
-          <span className={`reel-tr revealed ${hintRevealed && !showTranslation ? 'hint-color' : ''}`}>
-            {reel.tr}
-          </span>
-        ) : (
-          <button
-            className={`hint-btn ${hintsLeft === 0 ? 'exhausted' : ''}`}
-            onClick={() => onRevealHint(index)}
-            title={hintsLeft === 0 ? 'No hints left' : 'Reveal translation (uses 1 hint)'}
-            disabled={hintsLeft === 0}
-          >
-            👁 Hint
-          </button>
-        )}
+        {!reel.locked ? <span className="reel-tr">&nbsp;</span> : show ? <span className={`reel-tr revealed ${hintRevealed && !showTranslation ? 'hint-color' : ''}`}>
+            <IconText>{reel.tr}</IconText>
+          </span> : <button className={`hint-btn ${hintsLeft === 0 ? 'exhausted' : ''}`} onClick={() => onRevealHint(index)} title={hintsLeft === 0 ? 'No hints left' : 'Reveal translation (uses 1 hint)'} disabled={hintsLeft === 0}><IconText>
+            [icon:sparkles] Hint
+          </IconText></button>}
       </div>
-    </div>
-  );
+    </div>;
 }
 
 // ── Main component ────────────────────────────────────────────────────────────
-export default function SlotScreen({ onBack, onXpGain, toast }) {
+export default function SlotScreen({
+  onBack,
+  onXpGain,
+  toast
+}) {
   const [reelState, setReelState] = useState('idle');
-  const [reels, setReels] = useState([
-    { word: '—', tr: '', locked: false },
-    { word: '—', tr: '', locked: false },
-    { word: '—', tr: '', locked: false },
-  ]);
+  const [reels, setReels] = useState([{
+    word: '—',
+    tr: '',
+    locked: false
+  }, {
+    word: '—',
+    tr: '',
+    locked: false
+  }, {
+    word: '—',
+    tr: '',
+    locked: false
+  }]);
   const [current, setCurrent] = useState(null);
   const [answer, setAnswer] = useState('');
   const [feedback, setFeedback] = useState(null);
@@ -112,29 +113,47 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
     setHintsUsed([false, false, false]);
     setShowAllTranslations(false);
     setAcceptedAnswers([]);
-
     let ticks = 0;
     const maxTicks = 18;
-
     intervalRef.current = setInterval(() => {
-      setReels([
-        { word: rand(SUBJECTS).pl, tr: '', locked: false },
-        { word: rand(VERBS).pl,    tr: '', locked: false },
-        { word: rand(OBJECTS).pl,  tr: '', locked: false },
-      ]);
+      setReels([{
+        word: rand(SUBJECTS).pl,
+        tr: '',
+        locked: false
+      }, {
+        word: rand(VERBS).pl,
+        tr: '',
+        locked: false
+      }, {
+        word: rand(OBJECTS).pl,
+        tr: '',
+        locked: false
+      }]);
       ticks++;
       if (ticks >= maxTicks) {
         clearInterval(intervalRef.current);
         const s = rand(SUBJECTS);
         const v = rand(VERBS);
         const o = rand(OBJECTS);
-        setCurrent({ s, v, o });
+        setCurrent({
+          s,
+          v,
+          o
+        });
         setAcceptedAnswers(buildAcceptedAnswers(s, v, o));
-        setReels([
-          { word: s.pl, tr: s.en, locked: true },
-          { word: v.pl, tr: v.en, locked: true },
-          { word: o.pl, tr: o.en, locked: true },
-        ]);
+        setReels([{
+          word: s.pl,
+          tr: s.en,
+          locked: true
+        }, {
+          word: v.pl,
+          tr: v.en,
+          locked: true
+        }, {
+          word: o.pl,
+          tr: o.en,
+          locked: true
+        }]);
         setReelState('answering');
         setTimeout(() => inputRef.current?.focus(), 60);
       }
@@ -142,19 +161,26 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
   }, [reelState]);
 
   // ── Reveal one hint ──
-  const revealHint = (index) => {
+  const revealHint = index => {
     if (hintsLeft <= 0 || hintsUsed[index]) return;
-    setHintsUsed(prev => { const n = [...prev]; n[index] = true; return n; });
+    setHintsUsed(prev => {
+      const n = [...prev];
+      n[index] = true;
+      return n;
+    });
     setHintsLeft(h => h - 1);
   };
 
   // ── Check answer ──
   const checkAnswer = () => {
     if (!current) return;
-    const { s, v, o } = current;
+    const {
+      s,
+      v,
+      o
+    } = current;
     const userAns = norm(answer);
     const usedCount = hintsUsed.filter(Boolean).length;
-
     setShowAllTranslations(true);
 
     // Exact match against any accepted combo
@@ -171,32 +197,32 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
     const vAlts = getAlternatives(v.en);
     const oAlts = getAlternatives(o.en);
     const displayParts = [];
-    if (sAlts.length > 1) displayParts.push(sAlts.join(' / '));
-    else displayParts.push(sAlts[0] || s.en);
-    if (vAlts.length > 1) displayParts.push(vAlts.join(' / '));
-    else displayParts.push(vAlts[0] || v.en);
-    if (oAlts.length > 1) displayParts.push(oAlts.join(' / '));
-    else displayParts.push(oAlts[0] || o.en);
+    if (sAlts.length > 1) displayParts.push(sAlts.join(' / '));else displayParts.push(sAlts[0] || s.en);
+    if (vAlts.length > 1) displayParts.push(vAlts.join(' / '));else displayParts.push(vAlts[0] || v.en);
+    if (oAlts.length > 1) displayParts.push(oAlts.join(' / '));else displayParts.push(oAlts[0] || o.en);
     const displayAnswer = displayParts.join(' · ');
-
     if (isCorrect) {
       const pts = usedCount === 0 ? 100 : Math.max(40, 100 - usedCount * 20);
       setFeedback({
         type: 'good',
-        text: usedCount === 0
-          ? `✓ Perfect — no hints needed! +${pts} XP`
-          : `✓ Correct! ${usedCount} hint${usedCount > 1 ? 's' : ''} used. +${pts} XP`,
+        text: usedCount === 0 ? `✓ Perfect — no hints needed! +${pts} XP` : `✓ Correct! ${usedCount} hint${usedCount > 1 ? 's' : ''} used. +${pts} XP`
       });
       setScore(sc => sc + pts);
       setStreak(st => st + 1);
       onXpGain(pts);
     } else if (isNear) {
-      setFeedback({ type: 'near', text: `~ So close! Accepted: ${displayAnswer}` });
+      setFeedback({
+        type: 'near',
+        text: `~ So close! Accepted: ${displayAnswer}`
+      });
       setScore(sc => sc + 20);
       setStreak(0);
       onXpGain(20);
     } else {
-      setFeedback({ type: 'bad', text: `✗ Accepted: ${displayAnswer}` });
+      setFeedback({
+        type: 'bad',
+        text: `✗ Accepted: ${displayAnswer}`
+      });
       setStreak(0);
     }
     setReelState('done');
@@ -205,23 +231,24 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
   // ── Spin again ──
   const spinAgain = () => {
     setReelState('idle');
-    setReels([
-      { word: '—', tr: '', locked: false },
-      { word: '—', tr: '', locked: false },
-      { word: '—', tr: '', locked: false },
-    ]);
+    setReels([{
+      word: '—',
+      tr: '',
+      locked: false
+    }, {
+      word: '—',
+      tr: '',
+      locked: false
+    }, {
+      word: '—',
+      tr: '',
+      locked: false
+    }]);
     setHintsLeft(h => Math.min(3, h + 1));
     spin();
   };
-
-  const inputClass = `answer-input${
-    feedback?.type === 'good' ? ' correct'
-    : feedback?.type === 'bad' || feedback?.type === 'near' ? ' wrong'
-    : ''
-  }`;
-
-  return (
-    <>
+  const inputClass = `answer-input${feedback?.type === 'good' ? ' correct' : feedback?.type === 'bad' || feedback?.type === 'near' ? ' wrong' : ''}`;
+  return <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
 
@@ -704,11 +731,11 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
             <button className="back-btn" onClick={onBack}>← Arena</button>
             <div className="header-stats">
               <div className="stat-pill">
-                <span className="val">{score}</span>
+                <span className="val"><IconText>{score}</IconText></span>
                 <span className="lbl">Score</span>
               </div>
               <div className="stat-pill">
-                <span className={`val ${streak > 0 ? 'streak' : ''}`}>{streak}</span>
+                <span className={`val ${streak > 0 ? 'streak' : ''}`}><IconText>{streak}</IconText></span>
                 <span className="lbl">Streak</span>
               </div>
             </div>
@@ -721,105 +748,59 @@ export default function SlotScreen({ onBack, onXpGain, toast }) {
           </div>
 
           {/* ── Hints bar ── */}
-          {reelState === 'answering' && (
-            <div className="hints-bar">
+          {reelState === 'answering' && <div className="hints-bar">
               <div className="hint-dots">
-                {[0, 1, 2].map(i => (
-                  <div key={i} className={`hint-dot ${i < hintsLeft ? 'active' : ''}`} />
-                ))}
+                {[0, 1, 2].map(i => <div key={i} className={`hint-dot ${i < hintsLeft ? 'active' : ''}`} />)}
               </div>
               <span>
-                {hintsLeft > 0
-                  ? `${hintsLeft} hint${hintsLeft !== 1 ? 's' : ''} left — tap 👁 on any word`
-                  : 'No hints left'}
+                <IconText>{hintsLeft > 0 ? `${hintsLeft} hint${hintsLeft !== 1 ? 's' : ''} left — tap [icon:sparkles] on any word` : 'No hints left'}</IconText>
               </span>
-            </div>
-          )}
+            </div>}
 
           {/* ── Reels ── */}
           <div className="reels-grid">
-            {reels.map((reel, i) => (
-              <ReelCard
-                key={i}
-                reel={reel}
-                index={i}
-                spinning={reelState === 'spinning'}
-                hintRevealed={hintsUsed[i]}
-                onRevealHint={revealHint}
-                showTranslation={showAllTranslations}
-                hintsLeft={hintsLeft}
-              />
-            ))}
+            {reels.map((reel, i) => <ReelCard key={i} reel={reel} index={i} spinning={reelState === 'spinning'} hintRevealed={hintsUsed[i]} onRevealHint={revealHint} showTranslation={showAllTranslations} hintsLeft={hintsLeft} />)}
           </div>
 
           {/* ── Polish sentence ── */}
-          {reelState !== 'idle' && reelState !== 'spinning' && current && (
-            <div className="slot-sentence">
+          {reelState !== 'idle' && reelState !== 'spinning' && current && <div className="slot-sentence">
               <div className="slot-pl">
-                {current.s.pl} {current.v.pl} {current.o.pl}.
+                <IconText>{current.s.pl}</IconText> <IconText>{current.v.pl}</IconText> <IconText>{current.o.pl}</IconText>.
               </div>
               <div className="slot-hint-text">
-                {reelState === 'answering'
-                  ? "Any correct alternative is accepted — ignore grammar notes in brackets"
-                  : 'Check the translations revealed on each card above'}
+                <IconText>{reelState === 'answering' ? "Any correct alternative is accepted — ignore grammar notes in brackets" : 'Check the translations revealed on each card above'}</IconText>
               </div>
-            </div>
-          )}
+            </div>}
 
           {/* ── Accepted answers preview (shown after checking) ── */}
-          {reelState === 'done' && acceptedAnswers.length > 1 && (
-            <div className="slot-accepted">
+          {reelState === 'done' && acceptedAnswers.length > 1 && <div className="slot-accepted">
               <div className="slot-accepted-lbl">All accepted answers</div>
               <div className="slot-accepted-list">
-                {acceptedAnswers.slice(0, 8).map((a, i) => (
-                  <span key={i} className="slot-accepted-tag">{a}</span>
-                ))}
-                {acceptedAnswers.length > 8 && (
-                  <span className="slot-accepted-tag">+{acceptedAnswers.length - 8} more</span>
-                )}
+                {acceptedAnswers.slice(0, 8).map((a, i) => <span key={i} className="slot-accepted-tag"><IconText>{a}</IconText></span>)}
+                {acceptedAnswers.length > 8 && <span className="slot-accepted-tag">+<IconText>{acceptedAnswers.length - 8}</IconText> more</span>}
               </div>
-            </div>
-          )}
+            </div>}
 
           <div className="slot-divider" />
 
           {/* ── Answer input ── */}
-          {(reelState === 'answering' || reelState === 'done') && (
-            <input
-              ref={inputRef}
-              className={inputClass}
-              placeholder="Type your English translation..."
-              value={answer}
-              onChange={e => setAnswer(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && reelState === 'answering' && checkAnswer()}
-              disabled={reelState === 'done'}
-            />
-          )}
+          {(reelState === 'answering' || reelState === 'done') && <input ref={inputRef} className={inputClass} placeholder="Type your English translation..." value={answer} onChange={e => setAnswer(e.target.value)} onKeyDown={e => e.key === 'Enter' && reelState === 'answering' && checkAnswer()} disabled={reelState === 'done'} />}
 
           {/* ── Feedback ── */}
-          {feedback && (
-            <div className={`feedback-box ${feedback.type}`}>
-              {feedback.text}
-            </div>
-          )}
+          {feedback && <div className={`feedback-box ${feedback.type}`}>
+              <IconText>{feedback.text}</IconText>
+            </div>}
 
           {/* ── Action buttons ── */}
-          {reelState === 'idle' && (
-            <button className="btn-primary" onClick={spin}>Spin the Reels</button>
-          )}
-          {reelState === 'answering' && (
-            <button className="btn-primary" onClick={checkAnswer} disabled={!answer.trim()}>
+          {reelState === 'idle' && <button className="btn-primary" onClick={spin}>Spin the Reels</button>}
+          {reelState === 'answering' && <button className="btn-primary" onClick={checkAnswer} disabled={!answer.trim()}>
               Check Translation
-            </button>
-          )}
-          {reelState === 'done' && (
-            <button className="btn-secondary" onClick={spinAgain}>Spin Again</button>
-          )}
+            </button>}
+          {reelState === 'done' && <button className="btn-secondary" onClick={spinAgain}>Spin Again</button>}
 
         </div>
 
-        {toast && <div className="xp-toast">{toast}</div>}
+        {toast && <div className="xp-toast"><IconText>{toast}</IconText></div>}
       </div>
-    </>
-  );
+    </>;
 }

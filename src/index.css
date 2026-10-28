@@ -1,2 +1,70 @@
-/* ✅ ADD THIS */
 @import "tailwindcss";
+.app-icon {
+  display: inline-block;
+  vertical-align: -.15em;
+  flex-shrink: 0;
+  overflow: visible;
+}
+html {
+  scroll-padding-top: 96px;
+}
+body {
+  margin: 0;
+  min-width: 320px;
+}
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 3px solid #ef4444;
+  outline-offset: 3px;
+}
+img,
+video {
+  max-width: 100%;
+}
+button {
+  touch-action: manipulation;
+}
+textarea {
+  max-width: 100%;
+}
+.app-guest-notice {
+  background: #fff1f2;
+  color: #9f1239;
+  text-align: center;
+  padding: 10px 20px;
+  font-size: 11px;
+  line-height: 1.7;
+}
+.app-loading {
+  padding: 80px 24px;
+  text-align: center;
+  color: #64748b;
+  font-size: 14px;
+}
+#app-content {
+  outline: none;
+  min-width: 0;
+}
+.refresh-root input[type=checkbox] {
+  accent-color: #dc2626;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
