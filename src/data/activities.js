@@ -1,0 +1,20 @@
+export const activities = [
+ {path:'/cloze',title:'One word closer',skill:'Vocabulary',level:'B1',minutes:5,icon:'target',description:'Fill Polish sentence gaps, earn XP, and grow recall through spaced review.'},
+ {path:'/learn',title:'Daily Journey',skill:'Mixed',level:'A1–B1',minutes:5,icon:'compass',description:'Learn one pattern, try it, then use it in your life.'},
+ {path:'/play',title:'Polish Arcade',skill:'Play',level:'A2–B1',minutes:5,icon:'game',description:'Build sentences, recall words, and follow a story.'},
+ {path:'/PolishRolePlay',title:'Role-play studio',skill:'Speaking',level:'A2–B1',minutes:5,icon:'mic',description:'Become a detective, traveller, or supermarket king.'},
+ {path:'/vocabularyvault',title:'Vocabulary Vault',skill:'Vocabulary',level:'B1',minutes:5,icon:'book',description:'Explore words for work, travel, feelings, and everyday life.'},
+ {path:'/practice',title:'Listen & write',skill:'Listening',level:'A2–B1',minutes:5,icon:'headphones',description:'Hear a phrase, then reconstruct it in Polish.'},
+ {path:'/grammar',title:'Grammar Codex',skill:'Grammar',level:'B1',minutes:8,icon:'brain',description:'Turn a grammar idea into a small practical challenge.'},
+ {path:'/practice-polish-case',title:'Cases, made clearer',skill:'Grammar',level:'B1',minutes:8,icon:'list',description:'See what each case does, with examples and hints.'},
+ {path:'/polish-simplified',title:'Sentence Forge',skill:'Grammar',level:'A2–B1',minutes:5,icon:'tool',description:'Arrange words into useful Polish sentences.'},
+ {path:'/conjugation-practice',title:'Verb workshop',skill:'Grammar',level:'A2–B1',minutes:8,icon:'refresh',description:'Explore verb patterns before trying a short quiz.'},
+ {path:'/reading-practice',title:'Read a story',skill:'Reading',level:'B1',minutes:10,icon:'book',description:'Read in context, explore meanings, and save words.'},
+ {path:'/Reading-comprehension',title:'Reading detective',skill:'Reading',level:'B1',minutes:10,icon:'search',description:'Find clues in short texts and explain your answers.'},
+ {path:'/shadow-protocol',title:'Everyday missions',skill:'Mixed',level:'A2–B1',minutes:10,icon:'chat',description:'Complete everyday situations, one response at a time.'},
+ {path:'/B1-writing',title:'B1 writing studio',skill:'Writing',level:'B1',minutes:15,icon:'pen',description:'Plan a message, draft it, and review a practical checklist.'},
+ {path:'/B1-ready',title:'B1 grammar challenge',skill:'Grammar',level:'B1',minutes:10,icon:'target',description:'Practise twenty grammar situations with tutor hints.'},
+ {path:'/polish-music',title:'Polish through music',skill:'Listening',level:'B1',minutes:10,icon:'music',description:'Explore songs and phrases at your own pace.'},
+ {path:'/PolishMeme',title:'Polish through memes',skill:'Play',level:'A2–B1',minutes:5,icon:'image',description:'Discover community humour, captions, and language notes.'},
+ {path:'/space',title:'Community writing',skill:'Writing',level:'A2–B1',minutes:10,icon:'users',description:'Share a thought and learn with other writers.',account:true}
+];

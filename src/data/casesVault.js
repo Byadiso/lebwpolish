@@ -1,7 +1,7 @@
 export const CASES_VAULT = [
   {
     id: "mianownik",
-    icon: "👤",
+    icon: "[icon:user]",
     label: "Case 1",
     concept: "Mianownik (The 'Who is it?' Case)",
     lesson: "The default form. No changes! Use it for the subject of the sentence.",
@@ -13,7 +13,7 @@ export const CASES_VAULT = [
       },
       {
         title: "Plural Forms (More than one)",
-        content: "👦 Boys & 👧 Girls usually end in -e, -y, or -i. 📦 Neuter (Nijaki) ends in -a.",
+        content: "Masculine and feminine plural nouns often use -y, -i, or -e. Many neuter nouns use -a. Masculine personal nouns have additional patterns; learn examples with each noun.",
         ex: "Dwa domy, Trzy kobiety, Cztery okna."
       }
     ],
@@ -21,24 +21,24 @@ export const CASES_VAULT = [
       q: "Identify the plural subject: 'Moje ______ (okno) są otwarte.'",
       options: ["oknie", "okna", "oknu", "oknem"],
       correct: "okna",
-      hint: "For Neuter (Nijaki) nouns like 'okno', the plural ending is always -a."
+      hint: "For this noun, learn okno → okna. Many neuter nouns follow this pattern, but there are exceptions."
     }
   },
   {
     id: "dopełniacz",
-    icon: "🚫",
+    icon: "[icon:warning]",
     label: "Case 2",
     concept: "Dopełniacz (The 'Empty' Case)",
-    lesson: "Use this whenever you say 'NIE' (No), talk about possession, or quantities.",
+    lesson: "Use this for possession, many quantities, and the direct object of a negated verb that normally takes the accusative. Not every sentence containing nie uses this case.",
     sections: [
       {
         title: "How to swap letters",
-        content: "👦 Boy adjectives get -ego. 👧 Girl adjectives get -ej. 👧 Girl nouns: -a turns into -y/-i.",
+        content: "[icon:user] Boy adjectives get -ego. [icon:user] Girl adjectives get -ej. [icon:user] Girl nouns: -a turns into -y/-i.",
         ex: "Nie mam zimnej wody. Szukam mojego brata."
       },
       {
         title: "Plural Forms",
-        content: "📦 Adjectives: -ych / -ich. 👦 Boys: often -ów. 👧 Girls/Neuter: usually the ending is removed.",
+        content: "[icon:folder] Adjectives: -ych / -ich. [icon:user] Boys: often -ów. [icon:user] Girls/Neuter: usually the ending is removed.",
         ex: "Nie mam nowych butów. Dużo kobiet."
       }
     ],
@@ -51,19 +51,19 @@ export const CASES_VAULT = [
   },
   {
     id: "celownik",
-    icon: "🎁",
+    icon: "[icon:gift]",
     label: "Case 3",
     concept: "Celownik (The 'Gift' Case)",
     lesson: "The 'To/For' case. Use it when you give, help, or say thanks to someone.",
     sections: [
       {
         title: "How to swap letters",
-        content: "👦 Boys: add -owi. 👧 Girls: -a becomes -e. 📦 Adjectives: add -emu.",
+        content: "Masculine nouns often take -owi, but learn common exceptions: brat → bratu, pies → psu. Feminine nouns often take -e or -i, with spelling changes. Masculine/neuter adjectives use -emu.",
         ex: "Daję to bratu. Pomagam koleżance."
       },
       {
         title: "Plural Forms",
-        content: "📦 Adjectives: -ym / -im. 👥 Nouns: ALWAYS end in -om regardless of gender.",
+        content: "[icon:folder] Adjectives: -ym / -im. [icon:users] Nouns: ALWAYS end in -om regardless of gender.",
         ex: "Dziękuję dobrym ludziom."
       }
     ],
@@ -76,19 +76,19 @@ export const CASES_VAULT = [
   },
   {
     id: "biernik",
-    icon: "🎯",
+    icon: "[icon:target]",
     label: "Case 4",
     concept: "Biernik (The 'Action' Case)",
     lesson: "Use this for the target of your action (Buying, seeing, eating).",
     sections: [
       {
         title: "Living vs. Inanimate",
-        content: "👦 Boys (Living): add -a. 📦 Objects: No change. 👧 Girls: -a turns to -ę (adjective -ą).",
+        content: "[icon:user] Boys (Living): add -a. [icon:folder] Objects: No change. [icon:user] Girls: -a turns to -ę (adjective -ą).",
         ex: "Widzę psa (living). Widzę dom (object). Piję kawę."
       },
       {
         title: "Plural Forms",
-        content: "👦 People: -ych + -ów. 👧 Girls/Objects: Same as Case 1 plural (-e, -y, -a).",
+        content: "Masculine personal plural takes forms like dobrych studentów. Other plural nouns usually share their nominative forms here: widzę nowe domy, kobiety, okna.",
         ex: "Mam nowe książki. Widzę dobrych kolegów."
       }
     ],
@@ -101,19 +101,19 @@ export const CASES_VAULT = [
   },
   {
     id: "narzednik",
-    icon: "🤝",
+    icon: "[icon:users]",
     label: "Case 5",
     concept: "Narzędnik (The 'With' Case)",
     lesson: "Use this after 'Z' (With) or when talking about your job.",
     sections: [
       {
         title: "How to swap letters",
-        content: "👦 Boys: Add -em. 👧 Girls: Add -ą. 📦 Adjectives: Add -ym/-im.",
+        content: "Masculine and neuter nouns often take -em; feminine nouns take -ą. Adjectives use -ym/-im for masculine/neuter and -ą for feminine. Learn spelling changes through examples.",
         ex: "Z bratem. Z mamą. Jestem uczniem."
       },
       {
         title: "Plural Forms",
-        content: "📦 Adjectives: -ymi / -imi. 👥 Nouns: ALWAYS end in -ami regardless of gender.",
+        content: "[icon:folder] Adjectives: -ymi / -imi. [icon:users] Most nouns take -ami; learn common exceptions: dzieci → dziećmi, ludzie → ludźmi.",
         ex: "Idę z nowymi kolegami."
       }
     ],
@@ -126,19 +126,19 @@ export const CASES_VAULT = [
   },
   {
     id: "miejscownik",
-    icon: "📍",
+    icon: "[icon:pin]",
     label: "Case 6",
     concept: "Miejscownik (The 'Location' Case)",
     lesson: "Only used after: W (in), NA (on), O (about), Przy (at).",
     sections: [
       {
         title: "The tricky swap",
-        content: "👦👧 Nouns: Usually -ie or -u. 📦 Adjectives: -ym/-im or -ej.",
+        content: "Location endings depend on the noun: w domu, w parku, w szkole, na ulicy. Learn the preposition and noun together. Adjectives use -ym/-im or feminine -ej.",
         ex: "W domu. Na stole. O mamie."
       },
       {
         title: "Plural Forms",
-        content: "📦 Adjectives: -ych / -ich. 👥 Nouns: ALWAYS end in -ach regardless of gender.",
+        content: "[icon:folder] Adjectives: -ych / -ich. [icon:users] Nouns: ALWAYS end in -ach regardless of gender.",
         ex: "W tych dużych miastach."
       }
     ],
@@ -151,14 +151,14 @@ export const CASES_VAULT = [
   },
   {
     id: "wolacz",
-    icon: "📣",
+    icon: "[icon:volume]",
     label: "Case 7",
     concept: "Wołacz (The 'Calling' Case)",
     lesson: "Used for calling names or direct address.",
     sections: [
       {
         title: "How to swap letters",
-        content: "👧 Girls: -a changes to -o. 👦 Boys: add -u or -ie.",
+        content: "[icon:user] Many feminine names use -o, but forms vary (Anna → Anno, Maria → Mario). Masculine forms often use -u or -ie; learn names as whole chunks.",
         ex: "Mamo! Tato! Marku!"
       },
       {

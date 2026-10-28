@@ -1,96 +1,52 @@
-# LEBWPolish (Learn By Writing Polish)
+# LEBWPOLISH — learn by doing
 
-### *Forge Your Fluency Through Active Construction*
+Polish for real life, through short missions, sentence games, reading, speaking prompts, music, and writing. The original red/slate/white brand and existing module fonts are preserved.
 
-**LEBWPolish** is a social, gamified learning platform where users master Polish not through passive clicking, but through active writing. It combines a unique "War Forge" sentence-building mechanic with collaborative learning spaces and a "brutal" streak system to ensure consistent progress.
+## Start locally
 
----
+Use Node.js 20.19+ or 22.12+.
 
-## Core Philosophy: "The Writing Forge"
-
-Most language apps focus on recognition. **LEBWPolish** focuses on **reconstruction**.
-
-* **Active Production**: Users must write and construct sentences to progress.
-* **Social Learning**: Learning Spaces allow users to see what others are writing in real-time.
-* **Identity & Immersion**: Every user is assigned a Polish city or historical name upon joining a space.
-
----
-
-## Features
-
-### 1. The Learning Spaces (The Forge)
-
-* **Level-Based Realms**: Unique writing environments tailored to user proficiency (A1-C2).
-* **Social Feed**: A live "Forge Feed" where you can see sentences written by other learners in your space.
-* **Vocabulary Runes**: A dedicated sidebar to add and save new words discovered during writing sessions.
-* **XP Rewards**: Earn experience points for every sentence forged and word saved.
-
-### 2. User Profiles & "Brutal" Motivation
-
-* **The Codex**: Track your learning trends, total vocabulary count, and mastery percentage.
-* **The Streak**: A reward system for daily consistency.
-* *Reward*: Special badges and XP multipliers for daily writing.
-* *Brutal Penalty*: If a day is missed, the system provides "Brutal" feedback, urging the user back into the forge to prevent linguistic "rust."
-
-
-
-### 3. Administrative Command Center
-
-* **Controlled Access**: Secure admin-only account creation to maintain a high-quality learning community.
-* **Permission Engine**: Admins can assign users to specific spaces, grant permissions, and manage roles.
-* **Account Deployment**: Tools to assign Polish identities (City/Name) to new recruits.
-
----
-
-## Tech Stack
-
-* **Frontend**: React.js & Tailwind CSS (Fully Responsive).
-* **Animations**: Framer Motion for XP popups and "Forge" physics.
-* **Backend**: Firebase (Firestore for data, Auth for security, Storage for images).
-* **Deployment**: Hosted via Netlify / GitHub Pages.
-
----
-
-## Getting Started
-
-1. **Clone & Install**
 ```bash
-git clone https://github.com/Byadiso/lebwpolish.git
-npm install
-
+npm ci
+npm run dev
 ```
 
+Open the exact local URL printed by Vite. Start with `/learn`, `/explore`, or `/B1-writing`.
 
-2. **Environment Variables**
-Create a `.env` file with your Firebase credentials:
-```env
-VITE_FIREBASE_API_KEY=FIREBASE_API_KEY
-VITE_FIREBASE_AUTH_DOMAIN=FIREBASE_AUTH_DOMAIN
-VITE_FIREBASE_PROJECT_ID= FIREBASE_PROJECT_ID
-VITE_FIREBASE_STORAGE_BUCKET=FIREBASE_STORAGE_BUCKET
-VITE_FIREBASE_MESSAGING_SENDER_ID= FIREBASE_MESSAGING_SENDER_ID
-VITE_FIREBASE_APP_ID= FIREBASE_APP_ID
-VITE_FIREBASE_MEASUREMENT_ID= FIREBASE_MEASUREMENT_ID
-...
+The public practice tools work without Firebase configuration. To enable sign-in, saved account profiles, and community features, copy `.env.example` to `.env` and fill in your own Firebase project values. Keep an existing working `.env`; do not overwrite it with the empty example. Restart Vite after changing environment variables.
 
-```
+## Main learning flows
 
+- **One word closer** (`/cloze`): a single-file B1 Cloze game with sixty original sentences, typing/four-choice modes, mastery-based reviews, streaks, XP, JSON imports, and backups. See `CLOZE-GUIDE.md`.
+- **Daily Journey** (`/learn`): twelve A1–B1 missions, thirty-six short exercises, contextual phrases, optional hints, and everyday transfer prompts.
+- **Memory Garden** (`/learn?tab=review`): recall before reveal, then schedule a phrase for review based on honest self-assessment.
+- **B1 Compass** (`/learn?tab=b1`): five exam skill areas, a self-reflection checklist, and official practice links.
+- **Explore** (`/explore`): searchable activity directory, skill filters, five-minute filter, favourites, recent activity, and a surprise activity.
+- **Writing Studio** (`/B1-writing`): three original practice tasks, planning prompts, saved drafts, word counts, and self-review.
+- Existing arcade, reading, listening, music, vocabulary, cases, conjugation, role-play, community writing, and administration routes remain available.
 
-3. **Run the App**
+## Checks
+
 ```bash
-npm start
-
+npm test
+npm run test:render
+npm run build
 ```
 
+`npm test` covers progress, scheduling, route integrity, and isolated resets. `test:render` checks initial server-rendered public screens and icon rendering; it does not simulate browser interactions. `npm run lint` also checks legacy modules, which still contain pre-existing lint findings. See `APP-REVIEW.md` for exact validation scope.
 
+## Storage and audio
 
----
+Guests keep their progress in the current browser on the current device. Signed-in learners save their journey, reviews, writing drafts, preferences, favourites, recent activity, and existing saved activity state to their Firebase account. Account-specific browser caches retain pending changes if sync fails; the UI reports whether a save is confirmed or still pending. Guest history is not attached to an account automatically. Daily Journey offers an explicit guest-journey import.
 
+Cloud progress is stored in `users/{uid}.learningData`, with a bounded `learningApplied` list used to avoid replaying writes. Existing account profile fields are preserved. See `ACCOUNT-PROGRESS.md` for setup, migration, conflict handling, and verification. Audio examples use browser/device speech where implemented; Polish voice availability and quality vary.
 
-## Author
+## Exam preparation scope
 
-Designed and developed by Desire BYAMUNGU
+The missions are a growing practice foundation, not a complete B1 course or an exam-readiness certification. Add authentic listening, full-length timed sample papers, and teacher feedback on writing and speaking. The adult exam information links to the official certyfikatpolski.pl resources.
 
-**LEBWPolish** — *Writing is the only way forward.*
+## Interface icons
 
----
+`src/components/AppIcon.jsx` provides local SVGs with a consistent stroke. Serializable `[icon:name]` tokens in content are presented through `IconText`. No icon font, icon CDN, or extra package is needed. User-authored content is not rewritten.
+
+Created by Desire BYAMUNGU.

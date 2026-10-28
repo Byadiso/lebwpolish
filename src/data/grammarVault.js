@@ -1,10 +1,10 @@
 export const GRAMMAR_VAULT = [
   { 
-    id: 'Genders', label: 'Basics', icon: '🎭',
+    id: 'Genders', label: 'Basics', icon: "[icon:sparkles]",
     difficulty: 'B1 Foundation',
     concept: "The Gender Trio",
     lesson: "Gender is the 'DNA' of Polish. Every noun, adjective, and past-tense verb must align with this identity to maintain structural integrity.",
-    memory: "Think of Polish nouns as having a 'personality type'. The noun's last letter is its ID card — consonant = masculine, -a = feminine, -o/-e/-ę = neuter. The adjective is a chameleon that must match.",
+    memory: "Think of Polish nouns as having a 'personality type'. The noun's last letter is its ID card — consonants often suggest masculine, -a often feminine, and -o/-e/-ę often neuter, with exceptions. The adjective is a chameleon that must match.",
     sections: [
       { title: "Masculine", content: "Ends in a consonant. Adjectives take -y / -i.", ex: "Nowy projekt (New project)" },
       { title: "Feminine", content: "Ends in -a. Adjectives take -a.", ex: "Wielka szansa (Great chance)" },
@@ -17,10 +17,10 @@ export const GRAMMAR_VAULT = [
         correct: "Młode dziecko",
         why: "Dziecko ends in -o, making it neuter. Neuter adjectives must use the -e ending: Młode."
     },
-    tip: "99% of the time, the last letter of the noun dictates the entire sentence structure."
+    tip: "The last letter is a useful first clue to gender, but learn common exceptions: mężczyzna is masculine and pani is feminine. Check a dictionary when unsure."
   },
   { 
-    id: 'Aspects', label: 'B1 Core', icon: '⏳',
+    id: 'Aspects', label: 'B1 Core', icon: "[icon:clock]",
     difficulty: 'B1 Essential',
     concept: "Aspect: Done vs. Doing",
     lesson: "In B1, verbs come in pairs. 'Imperfective' for habits/processes, and 'Perfective' for a single, completed strike of action.",
@@ -39,7 +39,7 @@ export const GRAMMAR_VAULT = [
     tip: "If you can say 'I finished it', you almost always need the Perfective (usually with a prefix like za-, z-, na-)."
   },
   { 
-    id: 'Cases_1', label: 'Syntax', icon: '🎯',
+    id: 'Cases_1', label: 'Syntax', icon: "[icon:target]",
     difficulty: 'B1 Essential',
     concept: "Biernik (The Target)",
     lesson: "The Accusative case transforms the 'Object' of your action. It is the most frequent transition in daily Polish.",
@@ -58,7 +58,7 @@ export const GRAMMAR_VAULT = [
     tip: "B1 precision requires matching the adjective (-ą) with the noun (-ę)."
   },
   { 
-    id: 'Negation', label: 'Logic', icon: '🚫',
+    id: 'Negation', label: 'Logic', icon: "[icon:warning]",
     difficulty: 'B1 Essential',
     concept: "The Genitive Trap",
     lesson: "A simple 'Nie' (Negation) is a powerful force that pulls objects from the Accusative into the Genitive case.",
@@ -77,7 +77,7 @@ export const GRAMMAR_VAULT = [
     tip: "Whenever you see 'NIE', expect the following noun's ending to change. This is the most tested rule in B1 exams."
   },
   {
-    id: 'Genitive', label: 'Possession', icon: '🔑',
+    id: 'Genitive', label: 'Possession', icon: "[icon:lock]",
     difficulty: 'B1 Foundation',
     concept: "Dopełniacz (The Possessive)",
     lesson: "Genitive is the case of 'of' — it expresses possession, origin, and absence. It also follows critical prepositions: do, bez, dla, z, od, u.",
@@ -97,7 +97,7 @@ export const GRAMMAR_VAULT = [
     tip: "Memorize the prepositions that trigger Genitive: do, bez, dla, z, od, u, koło, obok, podczas."
   },
   {
-    id: 'Dative', label: 'Recipients', icon: '🎁',
+    id: 'Dative', label: 'Recipients', icon: "[icon:gift]",
     difficulty: 'B1 Advanced',
     concept: "Celownik (The Giver)",
     lesson: "Dative marks the indirect object — the recipient of an action. It is also the case behind the 'podoba mi się' construction, the #1 B1 exam trap.",
@@ -117,7 +117,7 @@ export const GRAMMAR_VAULT = [
     tip: "'Podoba mi się' is singular. 'Podobają mi się' is plural (for multiple things you like). This agreement is tested heavily."
   },
   { 
-    id: 'Conditional', label: 'Hypotheticals', icon: '☁️',
+    id: 'Conditional', label: 'Hypotheticals', icon: "[icon:sparkles]",
     difficulty: 'B1 Advanced',
     concept: "Tryb Przypuszczający",
     lesson: "The marker '-by' is the 'magic particle' of Polish. It allows you to exit reality and enter the realm of possibility, politeness, and dreams.",
@@ -137,7 +137,7 @@ export const GRAMMAR_VAULT = [
     tip: "The '-by' particle usually attaches to the 3rd person past tense form. Precision in gender is mandatory here."
   },
   { 
-    id: 'Instrumental', label: 'Identity', icon: '🛠️',
+    id: 'Instrumental', label: 'Identity', icon: "[icon:sparkles]",
     difficulty: 'B1 Essential',
     concept: "Narzędnik (The Bridge)",
     lesson: "This case defines who you are (profession/nationality) and what you use to navigate the world.",
@@ -156,7 +156,7 @@ export const GRAMMAR_VAULT = [
     tip: "Whenever you describe a 'permanent role' or 'transport mode', Narzędnik is your go-to tool."
   },
   { 
-    id: 'RelativeClauses', label: 'Architecture', icon: '🔗',
+    id: 'RelativeClauses', label: 'Architecture', icon: "[icon:link]",
     difficulty: 'B1 Advanced',
     concept: "The 'Który' Connector",
     lesson: "B1 sentences aren't short. To build complex thoughts, you must master 'Który'. It acts as a bridge between two ideas.",
@@ -175,7 +175,7 @@ export const GRAMMAR_VAULT = [
     tip: "Always identify the role of the object in the *second* clause to choose the correct case for 'Który'."
   },
   { 
-    id: 'Motion', label: 'B1 Strategy', icon: '✈️',
+    id: 'Motion', label: 'B1 Strategy', icon: "[icon:plane]",
     difficulty: 'B1 Essential',
     concept: "Motion Dynamics",
     lesson: "Polish distinguishes between movement on foot and movement by vehicle. Swapping these is a common indicator of a beginner.",
@@ -194,7 +194,7 @@ export const GRAMMAR_VAULT = [
     tip: "B1 mastery requires choosing the specific mode of transport (Lecę, Jadę, Płynę) rather than a generic 'go'."
   },
   {
-    id: 'Numbers', label: 'Counting', icon: '🔢',
+    id: 'Numbers', label: 'Counting', icon: "[icon:sparkles]",
     difficulty: 'B1 Advanced',
     concept: "Number Agreement",
     lesson: "Polish numbers are grammatical landmines. The noun's case changes depending on whether the quantity is 1, 2–4, or 5+. This three-way split is one of the most tested B1 rules.",

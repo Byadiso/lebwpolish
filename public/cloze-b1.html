@@ -1,0 +1,730 @@
+<!doctype html>
+<!-- Scheduler: due reviews first, then at most 10 new sentences. Accepted answers
+advance mastery 1–5 with reviews after 1/2/4/8/16 days. Wrong answers reset to 0
+and return after up to three other cards in this run. Free play changes no dates. -->
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>One word closer · LEBWPOLISH</title>
+<style>
+:root{--bg:#fafafa;--card:#fff;--ink:#0f172a;--muted:#64748b;--line:#e2e8f0;--soft:#f1f5f9;--red:#dc2626;--red-soft:#fff1f2;--success:#15803d;--success-bg:#f0fdf4;--amber:#a16207;--amber-bg:#fffbeb;--shadow:0 14px 50px #0f172a06;font-family:ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-synthesis:none}
+:root[data-theme=dark]{--bg:#080e1b;--card:#101a2c;--ink:#f1f5f9;--muted:#a4b1c7;--line:#253248;--soft:#19253a;--red:#f87171;--red-soft:#341827;--success:#86efac;--success-bg:#102d24;--amber:#fcd34d;--amber-bg:#302712;--shadow:0 14px 50px #00000018;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;min-width:300px}button,input,select,textarea{font:inherit}button{cursor:pointer;touch-action:manipulation}button:disabled{cursor:default;opacity:.45}button,a,input,select,textarea{-webkit-tap-highlight-color:transparent}button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--red);outline-offset:4px}button{color:inherit}h1,h2,h3,p{margin:0}button{border:0}a{color:var(--red)}.icon{width:1.1em;height:1.1em;display:inline-block;vertical-align:-.15em;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.defs{position:absolute;width:0;height:0;overflow:hidden}.skip{position:absolute;left:16px;top:-80px;z-index:99;background:var(--card);padding:12px}.skip:focus{top:10px}.topbar{background:#0f172a;color:#f8fafc;border-bottom:1px solid #ffffff0e}.top-inner{max-width:1140px;margin:auto;display:flex;justify-content:space-between;align-items:center;padding:20px 24px;gap:20px}.brand{font-size:24px;font-weight:900;letter-spacing:-1.2px;line-height:1}.brand span{color:#ef4444}.brand small{display:block;letter-spacing:2.8px;font-size:8px;color:#94a3b8;margin-top:8px;font-weight:800}.top-actions{display:flex;gap:8px;align-items:center}.top-pill{display:flex;align-items:center;gap:7px;color:#cbd5e1;padding:10px 13px;border-radius:12px;border:1px solid #ffffff16;font-size:12px;font-weight:800}.top-pill .icon{color:#f87171}.theme-btn{background:#1e293b;color:#f8fafc;padding:11px 14px;border-radius:12px;font-size:12px;display:flex;gap:8px;align-items:center}.wrap{max-width:1100px;margin:auto;padding:40px 24px 36px}.heading{display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:30px}.kicker{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--red);font-weight:900}.heading h1{font-size:clamp(32px,5vw,52px);font-weight:900;line-height:1.08;letter-spacing:-.055em;margin:12px 0}.heading p,.muted{color:var(--muted);font-size:14px;line-height:1.75}.xp-card{width:210px;flex-shrink:0;border:1px solid var(--line);background:var(--card);border-radius:16px;padding:17px 20px}.xp-title{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px;font-weight:800;margin-bottom:10px}.xp-title>span{color:var(--red)}progress{display:block;width:100%;height:6px;accent-color:#dc2626;border:0;border-radius:10px;overflow:hidden}progress::-webkit-progress-bar{background:var(--soft)}progress::-webkit-progress-value{background:#dc2626}.xp-card small{display:block;color:var(--muted);font-size:10px;margin-top:10px}.tabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin-bottom:24px}.tabs button{display:flex;align-items:center;gap:9px;background:none;padding:16px 20px;min-height:50px;font-size:13px;font-weight:800;border-bottom:3px solid transparent;white-space:nowrap;color:var(--muted)}.tabs button[aria-current]{color:var(--red);border-color:var(--red)}.notice{padding:13px 17px;border:1px solid var(--line);border-radius:12px;font-size:12px;line-height:1.7;margin-bottom:20px;color:var(--muted);background:var(--card)}.notice.error{color:var(--red);border-color:var(--red)}.grid{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr);gap:22px}.card{background:var(--card);border:1px solid var(--line);border-radius:24px;padding:30px;box-shadow:var(--shadow);min-width:0}.card h2{font-size:25px;letter-spacing:-.04em;font-weight:900;line-height:1.25}.card h3{font-size:16px;font-weight:900;letter-spacing:-.02em;margin-bottom:12px}.hero{background:#0f172a;color:white;position:relative;overflow:hidden;min-height:310px;display:flex;flex-direction:column;align-items:start;justify-content:center;padding:36px}.hero::after{content:"";width:220px;height:220px;border:45px solid #ffffff05;border-radius:50%;position:absolute;right:-100px;bottom:-100px;pointer-events:none}.hero h2{font-size:36px;max-width:430px;line-height:1.1;margin:18px 0}.hero p{font-size:14px;line-height:1.8;color:#cbd5e1;max-width:420px}.hero .kicker{color:#f87171}.primary,.secondary,.subtle{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:46px;border-radius:12px;padding:13px 19px;font-size:13px;font-weight:800;text-decoration:none}.primary{background:#dc2626;color:#fff}.primary:hover{background:#b91c1c}.secondary{background:var(--card);border:1px solid var(--line);color:var(--ink)}.subtle{background:var(--soft);color:var(--muted)}.actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:22px}.hero .actions{margin-top:24px}.hero small{display:block;font-size:11px;line-height:1.7;color:#94a3b8;margin-top:17px}.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:18px}.mini-stat{padding:20px 16px;border:1px solid var(--line);border-radius:16px;background:var(--card)}.mini-stat strong{display:block;font-size:27px;letter-spacing:-.05em;font-weight:900}.mini-stat span{display:block;font-size:10px;font-weight:800;color:var(--muted);margin-top:5px;line-height:1.6}.flow{display:grid;gap:19px;margin-top:24px}.flow-step{display:flex;gap:14px;align-items:start}.step-num{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:var(--red-soft);color:var(--red);font-size:11px;font-weight:900;flex-shrink:0}.flow-step b{font-size:13px}.flow-step p{color:var(--muted);font-size:12px;line-height:1.7;margin-top:4px}.small-note{font-size:11px;line-height:1.75;color:var(--muted);margin-top:22px}.text-button{padding:8px 0;background:none;color:var(--red);font-size:12px;font-weight:800;text-decoration:underline}.session-layout{display:grid;grid-template-columns:minmax(0,1fr) 255px;gap:22px}.quiz-card{padding:34px;min-width:0}.quiz-meta{display:flex;justify-content:space-between;gap:15px;align-items:center;margin-bottom:20px;font-size:10px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.1em}.topic{padding:6px 10px;border-radius:8px;background:var(--red-soft);color:var(--red)}.sentence{font-size:clamp(24px,3.7vw,36px);font-weight:800;line-height:1.65;letter-spacing:-.03em;margin:23px 0 16px;overflow-wrap:anywhere}.blank{display:inline-block;min-width:95px;border-bottom:3px solid var(--red);line-height:1.2;color:var(--red);text-align:center;letter-spacing:.1em;padding:0 8px 4px;font-size:.85em}.translation{padding:15px 18px;border-radius:13px;background:var(--soft);font-size:14px;line-height:1.7;color:var(--muted);margin-bottom:24px}.quiz-label{display:flex;justify-content:space-between;gap:10px;align-items:center;margin-bottom:10px}.quiz-label label{font-size:12px;font-weight:800}.input-row{display:flex;gap:10px}.answer-input{min-width:0;width:100%;border:2px solid var(--line);border-radius:13px;background:var(--bg);color:var(--ink);padding:16px 18px;font-size:21px;font-weight:700}.input-row .primary{min-width:110px}.characters{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}.characters button{background:var(--soft);border:1px solid var(--line);border-radius:9px;min-width:38px;min-height:40px;padding:8px;font-size:16px;font-weight:700}.form-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:15px;flex-wrap:wrap}.key-hint{font-size:10px;color:var(--muted)}kbd{border:1px solid var(--line);border-bottom-width:2px;padding:3px 6px;border-radius:5px;font:inherit;background:var(--card)}.icon-button{display:inline-flex;align-items:center;gap:7px;background:none;color:var(--muted);font-size:12px;font-weight:700;padding:10px 0;min-height:42px}.quiz-tools{display:grid;gap:16px}.setting{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:12px;margin:17px 0;line-height:1.7}.setting select{max-width:160px;border:1px solid var(--line);border-radius:9px;padding:9px;background:var(--bg);color:var(--ink);font-size:12px}.setting input{width:18px;height:18px;accent-color:#dc2626}.session-stat{display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--line);font-size:12px;color:var(--muted)}.session-stat b{color:var(--ink)}.feedback{border:1px solid var(--line);padding:22px;border-radius:17px;margin-top:22px;outline:none}.feedback.correct{background:var(--success-bg);border-color:var(--success);color:var(--success)}.feedback.almost{background:var(--amber-bg);border-color:var(--amber);color:var(--amber)}.feedback.wrong{background:var(--red-soft);border-color:var(--red);color:var(--red)}.feedback-title{font-size:17px;font-weight:900;display:flex;justify-content:space-between;align-items:center;gap:10px}.feedback p{font-size:13px;line-height:1.8;margin-top:9px}.full-sentence{color:var(--ink);font-size:19px!important;font-weight:700;margin-top:15px!important;line-height:1.7}mark{background:transparent;color:var(--red);text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:4px}.feedback .primary{margin-top:18px}.choice-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.choice{display:flex;align-items:center;gap:13px;text-align:left;padding:17px;border:2px solid var(--line);border-radius:13px;background:var(--card);font-size:18px;font-weight:700;min-width:0;overflow-wrap:anywhere}.choice>small{display:grid;place-items:center;width:24px;height:24px;border-radius:6px;background:var(--soft);font-size:10px;font-weight:800;color:var(--muted);flex-shrink:0}.choice:hover:not(:disabled){border-color:var(--red)}.choice.right{border-color:var(--success);background:var(--success-bg)}.choice.selected-wrong{border-color:var(--red);background:var(--red-soft)}.run-progress{margin-bottom:18px;display:flex;gap:12px;align-items:center}.run-progress span{font-size:11px;white-space:nowrap;color:var(--muted)}.progress-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin-bottom:24px}.big-stat{padding:24px;background:var(--card);border:1px solid var(--line);border-radius:19px}.big-stat .icon{color:var(--red);font-size:22px;margin-bottom:15px}.big-stat b{display:block;font-size:36px;font-weight:900;letter-spacing:-.05em}.big-stat span{font-size:11px;color:var(--muted);display:block;margin-top:5px;line-height:1.7}.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin-top:22px}.calendar-label{font-size:9px;color:var(--muted);text-align:center}.day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;font-size:10px;border-radius:9px;background:var(--soft);color:var(--muted);border:1px solid transparent}.day.active{background:var(--red-soft);color:var(--red);border-color:var(--red)}.day.today{outline:2px solid var(--red);outline-offset:2px}.distribution{display:flex;flex-direction:column;gap:15px;margin-top:25px}.distribution-row{display:grid;grid-template-columns:72px 1fr 22px;gap:10px;align-items:center;font-size:11px;color:var(--muted)}.bar{height:7px;background:var(--soft);border-radius:99px;overflow:hidden}.bar>i{display:block;height:100%;background:var(--red);border-radius:99px}.library-toolbar{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:22px}.search{flex:1;min-width:150px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-size:14px}.library-list{display:grid;gap:10px;margin-top:18px;max-height:500px;overflow:auto;padding:3px}.library-item{padding:18px;border:1px solid var(--line);border-radius:13px;background:var(--card)}.library-item>p{font-size:15px;font-weight:700;line-height:1.7}.library-item small{display:block;color:var(--muted);font-size:11px;line-height:1.7;margin-top:7px}.library-item .meta-line{display:flex;justify-content:space-between;gap:12px;font-size:10px;color:var(--muted);margin-top:12px}.import-area{width:100%;min-height:220px;resize:vertical;padding:16px;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:12px;font-size:12px;line-height:1.7;font-family:ui-monospace,SFMono-Regular,Consolas,monospace;margin-top:18px}.file-label{display:inline-flex;gap:8px;align-items:center;cursor:pointer}.file-label input{max-width:210px;font-size:11px}.restore-review{background:var(--amber-bg);border:1px solid var(--amber);border-radius:14px;padding:20px;margin-top:20px}.restore-review p{font-size:13px;line-height:1.8;margin-top:8px}.summary{text-align:center;padding:42px}.summary .icon{font-size:46px;color:var(--red);margin-bottom:18px}.summary h2{font-size:32px}.summary p{color:var(--muted);font-size:14px;line-height:1.8;margin-top:14px}.summary .actions{justify-content:center}.footer{display:flex;justify-content:space-between;gap:15px;margin-top:30px;font-size:10px;color:var(--muted);line-height:1.8}.save-status{min-height:19px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}[hidden]{display:none!important}.small-card{padding:23px}.help{font-size:12px;line-height:1.8;color:var(--muted)}.help p{margin-bottom:12px}.embedded .topbar{display:none}.embedded .wrap{padding-top:28px}.import-hint{padding:13px;border-radius:10px;background:var(--soft);font-family:ui-monospace,monospace;font-size:10px;line-height:1.8;white-space:pre-wrap;overflow-wrap:anywhere;margin-top:14px}.empty{text-align:center;padding:35px 20px;color:var(--muted);font-size:14px;line-height:1.8}.check-label{display:flex;gap:9px;align-items:center;font-size:12px;color:var(--muted)}.check-label input{accent-color:#dc2626;width:17px;height:17px}.session-banner{padding:10px 14px;border:1px solid var(--line);background:var(--soft);font-size:11px;line-height:1.7;border-radius:10px;margin-bottom:20px;color:var(--muted)}
+@media(max-width:850px){.session-layout{grid-template-columns:1fr}.quiz-tools{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.progress-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:540px){.wrap{padding:26px 16px}.top-inner{padding:18px 16px}.brand{font-size:21px}.top-actions{gap:6px}.top-pill{padding:9px;font-size:11px}.top-pill .streak-word,.theme-word{display:none}.heading{display:block}.heading h1{font-size:36px}.xp-card{width:100%;margin-top:20px;padding:15px 18px}.xp-card small{display:none}.tabs{gap:0;justify-content:space-between}.tabs button{padding:14px 12px;font-size:12px}.card{padding:24px}.hero{padding:28px}.hero h2{font-size:31px}.stat-row{gap:8px}.mini-stat{padding:16px 12px}.mini-stat strong{font-size:24px}.mini-stat span{font-size:9px}.quiz-card{padding:23px}.sentence{font-size:25px;line-height:1.7}.input-row{flex-direction:column}.input-row .primary{width:100%}.answer-input{font-size:20px}.quiz-tools{grid-template-columns:1fr}.choice-grid{grid-template-columns:1fr}.choice{padding:15px;font-size:18px}.big-stat{padding:20px}.big-stat b{font-size:30px}.footer{flex-direction:column}.summary{padding:30px 24px}.summary h2{font-size:29px}.setting select{max-width:185px}.quiz-meta{font-size:9px;gap:8px}.library-toolbar>*{width:100%}.library-toolbar .search{min-width:0}.primary,.secondary{min-height:48px}.feedback{padding:19px}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to learning</a>
+<svg class="defs" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><symbol id="i-arrow" viewBox="0 0 24 24"><path d="M4 12h16m-6-6 6 6-6 6"/></symbol><symbol id="i-book" viewBox="0 0 24 24"><path d="M3 4h6a3 3 0 0 1 3 3v14a4 4 0 0 0-4-2H3ZM21 4h-6a3 3 0 0 0-3 3v14a4 4 0 0 1 4-2h5Z"/></symbol><symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="m12 12 8-8"/></symbol><symbol id="i-flame" viewBox="0 0 24 24"><path d="M13 2c2 7-4 6-3 11-3-1-4-3-4-3-5 10 9 16 13 7 2-5-2-11-6-15Z"/></symbol><symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11Z"/></symbol><symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><path d="M12 1v3m0 16v3M1 12h3m16 0h3M4 4l2 2m12 12 2 2M4 20l2-2M18 6l2-2"/></symbol><symbol id="i-play" viewBox="0 0 24 24"><path d="m7 3 14 9-14 9Z"/></symbol><symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18M7 17v-5m5 5V7m5 10V4"/></symbol><symbol id="i-volume" viewBox="0 0 24 24"><path d="m11 4-6 5H2v6h3l6 5ZM15 8a6 6 0 0 1 0 8m3-12a11 11 0 0 1 0 16"/></symbol><symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 4 4L20 5"/></symbol><symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M6 18 18 6"/></symbol><symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol><symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 3h10v7a5 5 0 0 1-10 0ZM7 5H3v3a4 4 0 0 0 4 4m10-7h4v3a4 4 0 0 1-4 4m-5 3v6m-5 0h10"/></symbol><symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/></symbol><symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4m-5 5 5-5 5 5M4 16v5h16v-5"/></symbol><symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 7A9 9 0 0 0 4 6l-2 4m0-6v6h6m-4 7a9 9 0 0 0 16 1l2-4m-6 0h6v6"/></symbol></svg>
+<header class="topbar"><div class="top-inner"><div class="brand">LEBW<span>POLISH</span><small>LEARN BY DOING</small></div><div class="top-actions"><div class="top-pill" id="header-streak"></div><button class="theme-btn" id="theme-toggle" type="button"></button></div></div></header>
+<div class="wrap"><header class="heading"><div><span class="kicker">B1 SENTENCE LAB · FAST TRACK</span><h1>One word closer.</h1><p>A small gap. A useful sentence. A little more Polish.</p></div><div class="xp-card" id="xp-card"></div></header>
+<nav class="tabs" aria-label="Cloze sections"><button data-screen="play" aria-current="page" type="button"><svg class="icon" aria-hidden="true"><use href="#i-play"/></svg>Play & learn</button><button data-screen="progress" type="button"><svg class="icon" aria-hidden="true"><use href="#i-chart"/></svg>Your progress</button><button data-screen="library" type="button"><svg class="icon" aria-hidden="true"><use href="#i-book"/></svg>Library</button></nav>
+<div id="system-notice" role="status" hidden></div>
+<main id="main" tabindex="-1"></main>
+<footer class="footer"><span class="save-status" id="save-status" role="status"></span><span>Small sessions. Real sentences. Your pace.</span></footer>
+</div>
+<script id="starter-data" type="application/json">[
+  {
+    "id": "daily-01",
+    "polish": "Dzisiaj nie mam czasu, żeby przygotować obiad.",
+    "english": "Today I do not have time to prepare dinner.",
+    "targetWord": "czasu",
+    "frequencyRank": 18
+  },
+  {
+    "id": "daily-02",
+    "polish": "Kiedy wróciłem do domu, dzieci już spały.",
+    "english": "When I returned home, the children were already asleep.",
+    "targetWord": "spały",
+    "frequencyRank": 45
+  },
+  {
+    "id": "daily-03",
+    "polish": "Zawsze piję szklankę wody przed śniadaniem.",
+    "english": "I always drink a glass of water before breakfast.",
+    "targetWord": "wody",
+    "frequencyRank": 26
+  },
+  {
+    "id": "daily-04",
+    "polish": "Muszę zadzwonić do siostry, zanim wyjdę z domu.",
+    "english": "I have to call my sister before I leave home.",
+    "targetWord": "muszę",
+    "frequencyRank": 8
+  },
+  {
+    "id": "daily-05",
+    "polish": "Gdybym miał więcej pieniędzy, kupiłbym większe mieszkanie.",
+    "english": "If I had more money, I would buy a bigger flat.",
+    "targetWord": "pieniędzy",
+    "frequencyRank": 23
+  },
+  {
+    "id": "daily-06",
+    "polish": "Wczoraj pomagałam sąsiadce nosić ciężkie torby.",
+    "english": "Yesterday I helped my female neighbour carry heavy bags.",
+    "targetWord": "sąsiadce",
+    "frequencyRank": 59
+  },
+  {
+    "id": "daily-07",
+    "polish": "Nie wiem, dlaczego ten autobus zawsze się spóźnia.",
+    "english": "I do not know why this bus is always late.",
+    "targetWord": "dlaczego",
+    "frequencyRank": 14
+  },
+  {
+    "id": "daily-08",
+    "polish": "Po kolacji pójdziemy na krótki spacer.",
+    "english": "After dinner we will go for a short walk.",
+    "targetWord": "pójdziemy",
+    "frequencyRank": 43
+  },
+  {
+    "id": "daily-09",
+    "polish": "Mój brat mieszka w Poznaniu od trzech lat.",
+    "english": "My brother has lived in Poznań for three years.",
+    "targetWord": "lat",
+    "frequencyRank": 12
+  },
+  {
+    "id": "daily-10",
+    "polish": "Chociaż padało, postanowiliśmy wyjść na spacer.",
+    "english": "Although it was raining, we decided to go for a walk.",
+    "targetWord": "chociaż",
+    "frequencyRank": 39
+  },
+  {
+    "id": "daily-11",
+    "polish": "Czy możesz zamknąć okno, bo jest mi zimno?",
+    "english": "Can you close the window because I am cold?",
+    "targetWord": "możesz",
+    "frequencyRank": 7
+  },
+  {
+    "id": "daily-12",
+    "polish": "Zostawiłam klucze na stole w kuchni.",
+    "english": "I left the keys on the table in the kitchen.",
+    "targetWord": "stole",
+    "frequencyRank": 47
+  },
+  {
+    "id": "work-01",
+    "polish": "Jutro mam spotkanie z nowym klientem.",
+    "english": "Tomorrow I have a meeting with a new client.",
+    "targetWord": "klientem",
+    "frequencyRank": 52
+  },
+  {
+    "id": "work-02",
+    "polish": "Szef poprosił mnie o przygotowanie krótkiego raportu.",
+    "english": "The boss asked me to prepare a short report.",
+    "targetWord": "mnie",
+    "frequencyRank": 6
+  },
+  {
+    "id": "work-03",
+    "polish": "Pracuję w tej firmie od dwóch miesięcy.",
+    "english": "I have worked at this company for two months.",
+    "targetWord": "pracuję",
+    "frequencyRank": 25
+  },
+  {
+    "id": "work-04",
+    "polish": "Nie mogłam wysłać wiadomości, ponieważ nie działał internet.",
+    "english": "I could not send the message because the internet was not working.",
+    "targetWord": "ponieważ",
+    "frequencyRank": 30
+  },
+  {
+    "id": "work-05",
+    "polish": "Czy mógłby pan powtórzyć ostatnie pytanie?",
+    "english": "Could you repeat the last question, sir?",
+    "targetWord": "powtórzyć",
+    "frequencyRank": 57
+  },
+  {
+    "id": "work-06",
+    "polish": "Zanim wyjdę z biura, skończę ten projekt.",
+    "english": "Before I leave the office, I will finish this project.",
+    "targetWord": "skończę",
+    "frequencyRank": 48
+  },
+  {
+    "id": "work-07",
+    "polish": "Moja koleżanka dostała awans po roku pracy.",
+    "english": "My female colleague received a promotion after a year of work.",
+    "targetWord": "dostała",
+    "frequencyRank": 37
+  },
+  {
+    "id": "work-08",
+    "polish": "Na rozmowę kwalifikacyjną trzeba przyjść punktualnie.",
+    "english": "You need to arrive on time for a job interview.",
+    "targetWord": "trzeba",
+    "frequencyRank": 16
+  },
+  {
+    "id": "work-09",
+    "polish": "Dzięki twojej pomocy udało nam się skończyć wcześniej.",
+    "english": "Thanks to your help, we managed to finish earlier.",
+    "targetWord": "pomocy",
+    "frequencyRank": 36
+  },
+  {
+    "id": "work-10",
+    "polish": "Gdybym znała odpowiedź, od razu bym ci powiedziała.",
+    "english": "If I knew the answer, I would tell you straight away.",
+    "targetWord": "znała",
+    "frequencyRank": 41
+  },
+  {
+    "id": "work-11",
+    "polish": "W przyszłym tygodniu będziemy pracować zdalnie.",
+    "english": "Next week we will be working remotely.",
+    "targetWord": "będziemy",
+    "frequencyRank": 20
+  },
+  {
+    "id": "work-12",
+    "polish": "Proszę przesłać dokumenty do końca tygodnia.",
+    "english": "Please send the documents by the end of the week.",
+    "targetWord": "tygodnia",
+    "frequencyRank": 32
+  },
+  {
+    "id": "health-01",
+    "polish": "Od rana boli mnie głowa i mam gorączkę.",
+    "english": "My head has hurt since the morning and I have a fever.",
+    "targetWord": "głowa",
+    "frequencyRank": 31
+  },
+  {
+    "id": "health-02",
+    "polish": "Lekarka powiedziała, że powinnam więcej odpoczywać.",
+    "english": "The doctor said that I should rest more.",
+    "targetWord": "powinnam",
+    "frequencyRank": 42
+  },
+  {
+    "id": "health-03",
+    "polish": "Umówiłem się do lekarza na najbliższy piątek.",
+    "english": "I made a doctor’s appointment for this coming Friday.",
+    "targetWord": "lekarza",
+    "frequencyRank": 34
+  },
+  {
+    "id": "health-04",
+    "polish": "Czy te tabletki trzeba brać przed jedzeniem?",
+    "english": "Do these tablets need to be taken before eating?",
+    "targetWord": "jedzeniem",
+    "frequencyRank": 50
+  },
+  {
+    "id": "health-05",
+    "polish": "Kiedy byłam chora, przyjaciółka robiła mi zakupy.",
+    "english": "When I was ill, my female friend did my shopping.",
+    "targetWord": "byłam",
+    "frequencyRank": 11
+  },
+  {
+    "id": "health-06",
+    "polish": "Nie mogę jeść orzechów, bo mam na nie alergię.",
+    "english": "I cannot eat nuts because I am allergic to them.",
+    "targetWord": "orzechów",
+    "frequencyRank": 60
+  },
+  {
+    "id": "health-07",
+    "polish": "Jeśli jutro poczuję się lepiej, wrócę do pracy.",
+    "english": "If I feel better tomorrow, I will return to work.",
+    "targetWord": "jeśli",
+    "frequencyRank": 9
+  },
+  {
+    "id": "health-08",
+    "polish": "Po badaniu lekarz zalecił mi regularne ćwiczenia.",
+    "english": "After the examination, the doctor recommended regular exercise to me.",
+    "targetWord": "mi",
+    "frequencyRank": 5
+  },
+  {
+    "id": "health-09",
+    "polish": "Od kilku dni staram się chodzić wcześniej spać.",
+    "english": "For a few days I have been trying to go to bed earlier.",
+    "targetWord": "wcześniej",
+    "frequencyRank": 29
+  },
+  {
+    "id": "health-10",
+    "polish": "W aptece zapytałam o lek na ból gardła.",
+    "english": "At the pharmacy I asked about medicine for a sore throat.",
+    "targetWord": "aptece",
+    "frequencyRank": 55
+  },
+  {
+    "id": "health-11",
+    "polish": "Gdybyś pił więcej wody, czułbyś się lepiej.",
+    "english": "If you drank more water, you would feel better.",
+    "targetWord": "lepiej",
+    "frequencyRank": 19
+  },
+  {
+    "id": "health-12",
+    "polish": "Na szczęście wyniki badań są już gotowe.",
+    "english": "Fortunately, the test results are already ready.",
+    "targetWord": "są",
+    "frequencyRank": 2
+  },
+  {
+    "id": "shopping-01",
+    "polish": "Czy mogę zapłacić kartą, czy tylko gotówką?",
+    "english": "Can I pay by card, or only in cash?",
+    "targetWord": "kartą",
+    "frequencyRank": 44
+  },
+  {
+    "id": "shopping-02",
+    "polish": "Szukam butów, które będą wygodne na długie spacery.",
+    "english": "I am looking for shoes that will be comfortable for long walks.",
+    "targetWord": "butów",
+    "frequencyRank": 49
+  },
+  {
+    "id": "shopping-03",
+    "polish": "Ta kurtka jest za mała, więc chciałabym ją wymienić.",
+    "english": "This jacket is too small, so I would like to exchange it.",
+    "targetWord": "więc",
+    "frequencyRank": 15
+  },
+  {
+    "id": "shopping-04",
+    "polish": "Ile kosztuje kilogram świeżych pomidorów?",
+    "english": "How much does a kilogram of fresh tomatoes cost?",
+    "targetWord": "pomidorów",
+    "frequencyRank": 56
+  },
+  {
+    "id": "shopping-05",
+    "polish": "Wczoraj kupiliśmy wszystko, czego potrzebowaliśmy na obiad.",
+    "english": "Yesterday we bought everything we needed for dinner.",
+    "targetWord": "kupiliśmy",
+    "frequencyRank": 40
+  },
+  {
+    "id": "shopping-06",
+    "polish": "Nie mam paragonu, ale płaciłam kartą.",
+    "english": "I do not have the receipt, but I paid by card.",
+    "targetWord": "paragonu",
+    "frequencyRank": 58
+  },
+  {
+    "id": "shopping-07",
+    "polish": "Poproszę pół kilo żółtego sera.",
+    "english": "I would like half a kilo of yellow cheese.",
+    "targetWord": "sera",
+    "frequencyRank": 46
+  },
+  {
+    "id": "shopping-08",
+    "polish": "Gdyby ten telefon był tańszy, kupiłbym go od razu.",
+    "english": "If this phone were cheaper, I would buy it straight away.",
+    "targetWord": "był",
+    "frequencyRank": 4
+  },
+  {
+    "id": "shopping-09",
+    "polish": "Przed zakupem warto porównać ceny w kilku sklepach.",
+    "english": "Before buying, it is worth comparing prices in a few shops.",
+    "targetWord": "warto",
+    "frequencyRank": 28
+  },
+  {
+    "id": "shopping-10",
+    "polish": "Czy macie ten sweter w innym kolorze?",
+    "english": "Do you have this jumper in another colour?",
+    "targetWord": "kolorze",
+    "frequencyRank": 51
+  },
+  {
+    "id": "shopping-11",
+    "polish": "Chciałabym wiedzieć, kiedy zaczyna się wyprzedaż.",
+    "english": "I would like to know when the sale starts.",
+    "targetWord": "kiedy",
+    "frequencyRank": 10
+  },
+  {
+    "id": "shopping-12",
+    "polish": "Jeżeli zamówisz dzisiaj, paczka dotrze przed weekendem.",
+    "english": "If you order today, the parcel will arrive before the weekend.",
+    "targetWord": "dzisiaj",
+    "frequencyRank": 24
+  },
+  {
+    "id": "travel-01",
+    "polish": "Przepraszam, czy ten pociąg jedzie do Warszawy?",
+    "english": "Excuse me, is this train going to Warsaw?",
+    "targetWord": "Warszawy",
+    "frequencyRank": 33
+  },
+  {
+    "id": "travel-02",
+    "polish": "Spóźniliśmy się na autobus, ponieważ były duże korki.",
+    "english": "We missed the bus because there was heavy traffic.",
+    "targetWord": "były",
+    "frequencyRank": 21
+  },
+  {
+    "id": "travel-03",
+    "polish": "Chciałbym zarezerwować pokój dla dwóch osób.",
+    "english": "I would like to book a room for two people.",
+    "targetWord": "osób",
+    "frequencyRank": 22
+  },
+  {
+    "id": "travel-04",
+    "polish": "Kiedy dotarliśmy na miejsce, było już ciemno.",
+    "english": "When we reached our destination, it was already dark.",
+    "targetWord": "było",
+    "frequencyRank": 3
+  },
+  {
+    "id": "travel-05",
+    "polish": "Jeśli pogoda się poprawi, pojedziemy nad morze.",
+    "english": "If the weather improves, we will go to the seaside.",
+    "targetWord": "morze",
+    "frequencyRank": 38
+  },
+  {
+    "id": "travel-06",
+    "polish": "Musieliśmy długo czekać na opóźniony samolot.",
+    "english": "We had to wait a long time for the delayed plane.",
+    "targetWord": "czekać",
+    "frequencyRank": 35
+  },
+  {
+    "id": "travel-07",
+    "polish": "Czy możesz pokazać mi drogę do najbliższego przystanku?",
+    "english": "Can you show me the way to the nearest stop?",
+    "targetWord": "drogę",
+    "frequencyRank": 53
+  },
+  {
+    "id": "travel-08",
+    "polish": "Zgubiłam bilet i nie wiedziałam, co zrobić.",
+    "english": "I lost my ticket and did not know what to do.",
+    "targetWord": "zrobić",
+    "frequencyRank": 17
+  },
+  {
+    "id": "travel-09",
+    "polish": "W zeszłym roku pierwszy raz podróżowałem za granicę.",
+    "english": "Last year I travelled abroad for the first time.",
+    "targetWord": "roku",
+    "frequencyRank": 13
+  },
+  {
+    "id": "travel-10",
+    "polish": "Zanim ruszymy, sprawdźmy, czy mamy wszystkie dokumenty.",
+    "english": "Before we set off, let us check whether we have all the documents.",
+    "targetWord": "mamy",
+    "frequencyRank": 1
+  },
+  {
+    "id": "travel-11",
+    "polish": "Na dworcu dowiedziałam się, że pociąg został odwołany.",
+    "english": "At the station I found out that the train had been cancelled.",
+    "targetWord": "dworcu",
+    "frequencyRank": 54
+  },
+  {
+    "id": "travel-12",
+    "polish": "Wolałabym jechać pociągiem niż prowadzić samochód.",
+    "english": "I would rather travel by train than drive a car.",
+    "targetWord": "pociągiem",
+    "frequencyRank": 27
+  }
+]</script>
+<script id="grammar-hints" type="application/json">{
+  "daily-01": "Genitive singular after the negated verb nie mam.",
+  "daily-02": "Past tense, non-masculine-personal plural: dzieci spały.",
+  "daily-03": "Genitive after a quantity: szklanka wody.",
+  "daily-04": "First-person singular of musieć; followed by an infinitive.",
+  "daily-05": "Genitive plural after więcej.",
+  "daily-06": "Dative singular: pomagać komu? sąsiadce.",
+  "daily-07": "Dlaczego introduces a question about a reason.",
+  "daily-08": "Future tense, first-person plural of pójść.",
+  "daily-09": "Genitive plural after od trzech: od trzech lat.",
+  "daily-10": "Chociaż introduces a contrast: although.",
+  "daily-11": "Second-person singular of móc; followed by an infinitive.",
+  "daily-12": "Locative singular after na for location: na stole.",
+  "work-01": "Instrumental singular after z meaning with.",
+  "work-02": "Accusative personal pronoun after poprosić kogoś.",
+  "work-03": "Present tense describes an activity continuing with od.",
+  "work-04": "Ponieważ introduces a reason: because.",
+  "work-05": "Infinitive after the polite conditional mógłby pan.",
+  "work-06": "Perfective future, first-person singular of skończyć.",
+  "work-07": "Past tense, feminine singular of dostać.",
+  "work-08": "Impersonal trzeba is followed by an infinitive.",
+  "work-09": "Dative singular after dzięki.",
+  "work-10": "Past-form verb in a conditional clause; feminine singular.",
+  "work-11": "First-person plural future of być, used with an infinitive.",
+  "work-12": "Genitive singular in the phrase do końca tygodnia.",
+  "health-01": "Nominative subject of boli: głowa boli.",
+  "health-02": "Feminine first-person form of powinien; followed by an infinitive.",
+  "health-03": "Genitive singular after do: do lekarza.",
+  "health-04": "Instrumental singular after przed.",
+  "health-05": "Past tense, feminine first-person singular of być.",
+  "health-06": "Genitive plural for the object of the negated verb jeść.",
+  "health-07": "Jeśli introduces a condition: if.",
+  "health-08": "Dative personal pronoun: zalecić coś komu? mi.",
+  "health-09": "Comparative adverb: earlier.",
+  "health-10": "Locative singular after w for location: apteka → aptece.",
+  "health-11": "Comparative adverb from dobrze: better.",
+  "health-12": "Present tense, third-person plural of być.",
+  "shopping-01": "Instrumental singular describes the means of payment.",
+  "shopping-02": "Genitive plural after szukać.",
+  "shopping-03": "Więc links a reason to its consequence: so.",
+  "shopping-04": "Genitive plural after kilogram.",
+  "shopping-05": "Past tense, first-person masculine-personal plural of kupić.",
+  "shopping-06": "Genitive singular after the negated verb nie mam.",
+  "shopping-07": "Genitive singular after a quantity: pół kilo sera.",
+  "shopping-08": "Past-form verb in a conditional clause; masculine singular.",
+  "shopping-09": "Impersonal warto is followed by an infinitive.",
+  "shopping-10": "Locative singular after w: kolor → kolorze.",
+  "shopping-11": "Kiedy introduces a question about time.",
+  "shopping-12": "Time adverb: today.",
+  "travel-01": "Genitive singular after do: Warszawa → Warszawy.",
+  "travel-02": "Past tense, non-masculine-personal plural: korki były.",
+  "travel-03": "Genitive plural after dla dwóch.",
+  "travel-04": "Past tense, neuter singular of być in an impersonal expression.",
+  "travel-05": "Accusative after nad when expressing a destination.",
+  "travel-06": "Infinitive after the past-tense modal musieliśmy.",
+  "travel-07": "Accusative singular: pokazać komuś co? drogę.",
+  "travel-08": "Infinitive after the question word co in this construction.",
+  "travel-09": "Locative singular in the time phrase w zeszłym roku.",
+  "travel-10": "Present tense, first-person plural of mieć.",
+  "travel-11": "Locative singular after na: dworzec → dworcu.",
+  "travel-12": "Instrumental singular describes the means of transport."
+}</script>
+<script id="sentence-topics" type="application/json">{"daily-01": "daily", "daily-02": "daily", "daily-03": "daily", "daily-04": "daily", "daily-05": "daily", "daily-06": "daily", "daily-07": "daily", "daily-08": "daily", "daily-09": "daily", "daily-10": "daily", "daily-11": "daily", "daily-12": "daily", "work-01": "work", "work-02": "work", "work-03": "work", "work-04": "work", "work-05": "work", "work-06": "work", "work-07": "work", "work-08": "work", "work-09": "work", "work-10": "work", "work-11": "work", "work-12": "work", "health-01": "health", "health-02": "health", "health-03": "health", "health-04": "health", "health-05": "health", "health-06": "health", "health-07": "health", "health-08": "health", "health-09": "health", "health-10": "health", "health-11": "health", "health-12": "health", "shopping-01": "shopping", "shopping-02": "shopping", "shopping-03": "shopping", "shopping-04": "shopping", "shopping-05": "shopping", "shopping-06": "shopping", "shopping-07": "shopping", "shopping-08": "shopping", "shopping-09": "shopping", "shopping-10": "shopping", "shopping-11": "shopping", "shopping-12": "shopping", "travel-01": "travel", "travel-02": "travel", "travel-03": "travel", "travel-04": "travel", "travel-05": "travel", "travel-06": "travel", "travel-07": "travel", "travel-08": "travel", "travel-09": "travel", "travel-10": "travel", "travel-11": "travel", "travel-12": "travel"}</script>
+<script id="cloze-core">/* Scheduler: each session starts with due reviews, oldest first, then at most 10
+   unseen sentences (Fast Track orders these by frequencyRank). A correct or
+   diacritic-only “almost” answer raises mastery to 1–5 and schedules 1/2/4/8/16
+   days ahead. A wrong answer resets mastery to 0, stays due, and re-enters after
+   up to three other queued cards. Free play changes neither mastery nor XP.
+   LEBWPOLISH uses its own storage key; existing app progress is never cleared. */
+(() => {
+  'use strict';
+  const DAY=86400000, KEY='lebw.cloze.b1.v1', DELAYS=[1,2,4,8,16];
+  const normalize=text=>String(text).normalize('NFC').trim().toLocaleLowerCase('pl').replace(/\s+/gu,' ');
+  const fold=text=>normalize(text).normalize('NFD').replace(/\p{M}/gu,'').replace(/ł/gu,'l');
+  function verdict(answer,target){return normalize(answer)===normalize(target)?'correct':fold(answer)===fold(target)?'almost':'wrong';}
+  function dayKey(now=Date.now()){const d=new Date(now);return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+  function previousDay(day){const [y,m,d]=day.split('-').map(Number);return dayKey(new Date(y,m-1,d-1,12).getTime());}
+  function streak(days,now=Date.now()){const active=day=>Number(days[day]?.attempts)>0;let day=dayKey(now),n=0;if(!active(day))day=previousDay(day);while(active(day)){n++;day=previousDay(day);}return n;}
+  function blankParts(sentence){const target=normalize(sentence.targetWord);for(const match of sentence.polish.matchAll(/[\p{L}\p{M}]+/gu)){if(normalize(match[0])===target)return [sentence.polish.slice(0,match.index),match[0],sentence.polish.slice(match.index+match[0].length)];}throw Error(`Target word is missing in ${sentence.id}.`);}
+  function validateSentences(input){
+    if(!Array.isArray(input)||!input.length||input.length>10000)throw Error('Paste an array containing 1–10,000 sentences.');
+    const ids=new Set();
+    return input.map((row,index)=>{
+      if(!row||typeof row!=='object')throw Error(`Row ${index+1} must be an object.`);
+      if(!['string','number'].includes(typeof row.id)||(typeof row.id==='number'&&!Number.isSafeInteger(row.id)))throw Error(`Row ${index+1}: id must be text or a safe integer.`);
+      const s={id:String(row.id??'').trim(),polish:row.polish,english:row.english,targetWord:row.targetWord,frequencyRank:row.frequencyRank};
+      if(!s.id||(['__proto__','constructor','prototype'].includes(s.id)||Object.prototype.hasOwnProperty.call(Object.prototype,s.id))||s.id.length>100||ids.has(s.id))throw Error(`Row ${index+1}: use a unique, non-empty id (up to 100 characters).`);
+      for(const field of ['polish','english'])if(typeof s[field]!=='string'||!s[field].trim()||s[field].length>1500)throw Error(`Row ${index+1}: ${field} must contain 1–1500 characters.`);
+      if(typeof s.targetWord!=='string'||!/^[\p{L}\p{M}]+$/u.test(s.targetWord.trim()))throw Error(`Row ${index+1}: targetWord must be one word, without punctuation.`);
+      s.targetWord=s.targetWord.trim();s.polish=s.polish.trim();s.english=s.english.trim();
+      if(!Number.isSafeInteger(s.frequencyRank)||s.frequencyRank<1||s.frequencyRank>1000000000)throw Error(`Row ${index+1}: frequencyRank must be a positive integer.`);
+      const occurrences=[...s.polish.matchAll(/[\p{L}\p{M}]+/gu)].filter(m=>normalize(m[0])===normalize(s.targetWord)).length;
+      if(occurrences!==1)throw Error(`Row ${index+1}: targetWord must occur exactly once, as a complete word in polish.`);
+      if(typeof row.grammarHint==='string')s.grammarHint=row.grammarHint.slice(0,240);
+      if(typeof row.topic==='string')s.topic=row.topic.slice(0,40);
+      ids.add(s.id);return s;
+    });
+  }
+  function fresh(sentences,now=Date.now()) {return {version:1,sentences:validateSentences(sentences),cards:{},stats:{attempts:0,correct:0,almost:0,xp:0,days:{}},settings:{theme:'light',mode:'typing',fastTrack:true,autoNext:false},session:null,updatedAt:now};}
+  function plan(state,now=Date.now(),limit=10){
+    const reviews=state.sentences.filter(s=>state.cards[s.id]?.introduced&&state.cards[s.id].due<=now).sort((a,b)=>state.cards[a.id].due-state.cards[b.id].due||a.frequencyRank-b.frequencyRank);
+    let unseen=state.sentences.filter(s=>!state.cards[s.id]?.introduced);
+    if(state.settings.fastTrack)unseen.sort((a,b)=>a.frequencyRank-b.frequencyRank||a.id.localeCompare(b.id));
+    return {reviews:reviews.map(s=>s.id),newIds:unseen.slice(0,limit).map(s=>s.id)};
+  }
+  function createSession(state,now=Date.now(),free=false){
+    const p=plan(state,now);let queue=free?state.sentences.filter(s=>state.cards[s.id]?.introduced).sort((a,b)=>(state.cards[a.id].level-state.cards[b.id].level)||a.frequencyRank-b.frequencyRank).slice(0,20).map(s=>s.id):[...p.reviews,...p.newIds];
+    return queue.length?{id:`run-${now}`,queue,originalCount:queue.length,newIds:free?[]:p.newIds,feedback:null,correctIds:[],answered:0,accepted:0,xp:0,free,startedAt:now}:null;
+  }
+  function options(sentence,library,random=Math.random){
+    const targets=[...new Map(library.filter(s=>fold(s.targetWord)!==fold(sentence.targetWord)).map(s=>[fold(s.targetWord),s.targetWord])).values()];
+    for(let i=targets.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[targets[i],targets[j]]=[targets[j],targets[i]];}
+    const result=[sentence.targetWord,...targets.slice(0,3)];
+    for(let i=result.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[result[i],result[j]]=[result[j],result[i]];}return result;
+  }
+  function answer(state,typed,mode,now=Date.now()){
+    const session=state.session;if(!session||!session.queue.length||session.feedback)return null;
+    const sentence=state.sentences.find(s=>s.id===session.queue[0]);if(!sentence)return null;
+    const result=verdict(typed,sentence.targetWord),accepted=result!=='wrong';
+    const already=session.correctIds.includes(sentence.id);let xp=0;
+    if(!session.free){
+      const old=state.cards[sentence.id]||{level:0,introduced:false,due:0};const level=accepted?Math.min(5,old.level+1):0;
+      state.cards[sentence.id]={level,introduced:true,due:accepted?now+DELAYS[level-1]*DAY:now,lastReviewed:now};
+      if(accepted&&!already)xp=mode==='choice'?10:result==='almost'?15:20;
+      state.stats.attempts++;if(accepted)state.stats.correct++;if(result==='almost')state.stats.almost++;state.stats.xp+=xp;
+      const day=dayKey(now),daily=state.stats.days[day]||{attempts:0,correct:0,xp:0};daily.attempts++;if(accepted)daily.correct++;daily.xp+=xp;state.stats.days[day]=daily;
+    }
+    session.answered++;if(accepted)session.accepted++;session.xp+=xp;
+    if(accepted){if(!already)session.correctIds.push(sentence.id);session.queue=session.queue.filter((id,i)=>i===0||id!==sentence.id);}
+    else if(!session.queue.slice(1).includes(sentence.id))session.queue.splice(Math.min(4,session.queue.length),0,sentence.id);
+    session.feedback={result,typed:String(typed).slice(0,120),xp};state.updatedAt=now;return session.feedback;
+  }
+  function advance(state){if(!state.session?.feedback)return false;state.session.queue.shift();state.session.feedback=null;return true;}
+  function validateBackup(raw){
+    const envelope=typeof raw==='string'?JSON.parse(raw):raw;const input=envelope?.kind==='lebw-cloze-backup'?envelope.state:envelope;
+    if(!input||input.version!==1)throw Error('This is not a supported LEBWPOLISH Cloze backup.');
+    const clean=fresh(input.sentences);const ids=new Set(clean.sentences.map(s=>s.id));
+    const integer=(n,max=1e9)=>Number.isSafeInteger(n)&&n>=0&&n<=max;
+    if(!input.stats||!['attempts','correct','almost','xp'].every(k=>integer(input.stats[k]))||input.stats.correct>input.stats.attempts||input.stats.almost>input.stats.correct)throw Error('Backup statistics are invalid.');
+    clean.stats={attempts:input.stats.attempts,correct:input.stats.correct,almost:input.stats.almost,xp:input.stats.xp,days:{}};
+    for(const [day,d] of Object.entries(input.stats.days||{})){
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(day)||!d||!['attempts','correct','xp'].every(k=>integer(d[k]))||d.correct>d.attempts)throw Error('Backup calendar is invalid.');
+      clean.stats.days[day]={attempts:d.attempts,correct:d.correct,xp:d.xp};
+    }
+    for(const [id,card] of Object.entries(input.cards||{})){
+      if(!ids.has(id)||!card||!integer(card.level,5)||typeof card.introduced!=='boolean'||!Number.isFinite(card.due)||card.due<0||card.due>8640000000000000)throw Error('Backup review schedule is invalid.');
+      clean.cards[id]={level:card.level,introduced:card.introduced,due:card.due,lastReviewed:Number.isFinite(card.lastReviewed)?card.lastReviewed:0};
+    }
+    clean.settings={theme:input.settings?.theme==='dark'?'dark':'light',mode:input.settings?.mode==='choice'?'choice':'typing',fastTrack:input.settings?.fastTrack!==false,autoNext:input.settings?.autoNext===true};
+    // Restoring/importing resumes schedules and totals; a half-finished quiz is not imported.
+    clean.session=null;clean.updatedAt=Number.isFinite(input.updatedAt)?input.updatedAt:Date.now();return clean;
+  }
+  globalThis.ClozeCore={DAY,KEY,DELAYS,normalize,fold,verdict,dayKey,previousDay,streak,blankParts,validateSentences,fresh,plan,createSession,options,answer,advance,validateBackup};
+})();
+</script>
+<script id="cloze-ui">(() => {
+'use strict';
+const C=globalThis.ClozeCore,STARTER=JSON.parse(document.getElementById('starter-data').textContent),HINTS=JSON.parse(document.getElementById('grammar-hints').textContent),TOPICS=JSON.parse(document.getElementById('sentence-topics').textContent);
+const $=id=>document.getElementById(id),e=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const icon=name=>`<svg class="icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const embedded=window.parent!==window&&new URLSearchParams(location.search).get('embedded')==='1';
+if(embedded)document.documentElement.classList.add('embedded');
+let draftAnswer='';
+let state=C.fresh(STARTER),screen='play',ready=!embedded,saving='guest',account=false,lastRaw='',autoTimer=null,charsOpen=false,choices=[],choiceId='',pendingBackup=null,search='',topic='all',notice='',recoveryRaw=null;
+const labels={daily:'Daily life',work:'Work',health:'Health',shopping:'Shopping',travel:'Travel'};
+const topicOf=s=>s.topic||labels[TOPICS[s.id]]||'Imported';
+function parseSaved(raw){
+  const input=JSON.parse(raw),clean=C.validateBackup(input),s=input.session,ids=new Set(clean.sentences.map(x=>x.id));
+  if(s&&Array.isArray(s.queue)&&s.queue.length<30000&&s.queue.every(id=>ids.has(id))&&Array.isArray(s.correctIds)&&s.correctIds.every(id=>ids.has(id))&&['answered','accepted','xp','originalCount','startedAt'].every(k=>Number.isFinite(s[k])&&s[k]>=0)) {
+    clean.session={id:String(s.id||'resume'),queue:s.queue.slice(),correctIds:s.correctIds.slice(),newIds:Array.isArray(s.newIds)?s.newIds.filter(id=>ids.has(id)):[],answered:s.answered,accepted:s.accepted,xp:s.xp,originalCount:s.originalCount,startedAt:s.startedAt,free:s.free===true,feedback:s.feedback&&['correct','almost','wrong'].includes(s.feedback.result)?{result:s.feedback.result,typed:String(s.feedback.typed||'').slice(0,120),xp:Number(s.feedback.xp)||0}:null};
+  }
+  return clean;
+}
+function load(raw){if(!raw){state=C.fresh(STARTER);if(matchMedia('(prefers-color-scheme: dark)').matches)state.settings.theme='dark';return;}state=parseSaved(raw);lastRaw=raw;}
+if(!embedded){try{load(localStorage.getItem(C.KEY));}catch(error){try{recoveryRaw=localStorage.getItem(C.KEY);}catch{}notice='Saved progress could not be read. Your previous save has not been overwritten. You can download a recovery copy below.';saving='error';}}
+function save(){
+  state.updatedAt=Date.now();lastRaw=JSON.stringify(state);
+  if(embedded){saving=account?'syncing':'guest';parent.postMessage({type:'LEBW_CLOZE_SAVE',raw:lastRaw},location.origin);}
+  else try{localStorage.setItem(C.KEY,lastRaw);saving='guest';}catch{saving='error';notice='Browser saving is unavailable or full. Export a backup before closing this tab.';}
+  renderChrome();
+}
+function renderChrome(){
+  document.documentElement.dataset.theme=state.settings.theme;
+  $('theme-toggle').innerHTML=icon(state.settings.theme==='dark'?'sun':'moon')+`<span class="theme-word">${state.settings.theme==='dark'?'Light':'Dark'} mode</span>`;
+  $('theme-toggle').setAttribute('aria-label',`Switch to ${state.settings.theme==='dark'?'light':'dark'} mode`);
+  $('header-streak').innerHTML=icon('flame')+`${C.streak(state.stats.days)}<span class="streak-word"> day streak</span>`;
+  const level=Math.floor(state.stats.xp/100)+1,part=state.stats.xp%100;
+  $('xp-card').innerHTML=`<div class="xp-title"><b>Level ${level}</b><span>${state.stats.xp.toLocaleString()} Cloze XP</span></div><progress max="100" value="${part}" aria-label="XP towards the next level"></progress><small>${100-part} XP to your next level · practice, not an exam score</small>`;
+  document.querySelectorAll('[data-screen]').forEach(button=>{if(button.dataset.screen===screen)button.setAttribute('aria-current','page');else button.removeAttribute('aria-current');});
+  $('save-status').textContent=!ready?'Connecting to your learning profile…':saving==='error'?(account?'Account sync unavailable. Keep this tab open or export a backup.':'Not saved. Export a backup before leaving.'):(account?(saving==='saved'?'Cloze progress saved to your account.':'Saving Cloze progress to your account…'):'Guest progress stays in this browser on this device. Export a backup to keep a copy.');
+  const status=$('system-notice');status.hidden=!notice;status.className=`notice${saving==='error'?' error':''}`;status.textContent=notice;
+  if(recoveryRaw){const button=document.createElement('button');button.className='text-button';button.textContent='Download previous save for recovery';button.addEventListener('click',()=>download(recoveryRaw,'lebw-cloze-recovery.json'));status.append(document.createElement('br'),button);}
+}
+function stopTimer(){clearTimeout(autoTimer);autoTimer=null;}
+function speak(){
+  if(!('speechSynthesis'in window)){announce('This browser does not support speech. You can read the full sentence aloud instead.');return;}
+  const s=currentSentence();if(!s)return;
+  speechSynthesis.cancel();const utterance=new SpeechSynthesisUtterance(s.polish),voice=speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith('pl'));
+  if(voice)utterance.voice=voice;utterance.lang='pl-PL';utterance.rate=.85;
+  utterance.onerror=()=>announce('The Polish audio could not play. Check your installed voices or try another browser.');
+  announce(voice?'Playing device-generated Polish audio.':'No Polish voice is installed yet. Your browser will try its pl-PL default.');speechSynthesis.speak(utterance);
+}
+function announce(text){const node=$('audio-status');if(node)node.textContent=text;else{notice=text;renderChrome();}}
+function currentSentence(){return state.sentences.find(s=>s.id===state.session?.queue[0]);}
+function newRun(free=false){stopTimer();state.session=C.createSession(state,Date.now(),free);choices=[];choiceId='';screen='play';save();render(true);}
+function render(focus=false){
+  stopTimer();renderChrome();
+  if(!ready){$('main').innerHTML='<section class="card empty" role="status">Loading your saved sentence practice…</section>';return;}
+  if(screen==='progress')renderProgress();else if(screen==='library')renderLibrary();else if(state.session?.queue.length)renderQuiz(focus);else if(state.session)renderSummary();else renderHome();
+  requestAnimationFrame(reportHeight);
+}
+function renderHome(){
+ const p=C.plan(state),seen=Object.values(state.cards).filter(c=>c.introduced).length,next=Object.values(state.cards).filter(c=>c.introduced&&c.due>Date.now()).sort((a,b)=>a.due-b.due)[0];
+ const today=state.stats.days[C.dayKey()]?.correct||0;
+ $('main').innerHTML=`<div class="grid"><div><section class="card hero"><span class="kicker">YOUR NEXT SMALL WIN</span><h2>Find the word.<br>Keep the sentence.</h2><p>Read a real-life sentence, fill the gap, then meet the words again just when it is time to practise.</p><div class="actions"><button class="primary" id="start-run" ${!p.reviews.length&&!p.newIds.length?'disabled':''}>${icon('play')}${p.reviews.length?'Start my reviews':p.newIds.length?'Start a 10-new-sentence run':'All caught up'}</button></div><small>${p.reviews.length} due reviews first · up to ${p.newIds.length} new sentences · no lost lives</small>${!p.reviews.length&&!p.newIds.length&&next?`<small>Next review: ${e(new Date(next.due).toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'}))}</small>`:''}</section><div class="stat-row"><div class="mini-stat"><strong>${p.reviews.length}</strong><span>REVIEWS READY</span></div><div class="mini-stat"><strong>${seen} / ${state.sentences.length}</strong><span>SENTENCES STARTED</span></div><div class="mini-stat"><strong>${today} / 10</strong><span>TODAY’S ACCEPTED ANSWERS</span></div></div></div><aside class="card"><span class="kicker">SMALL STEPS. REAL POLISH.</span><h3 style="margin-top:14px">A loop that helps it stick.</h3><div class="flow"><div class="flow-step"><span class="step-num">01</span><div><b>Notice the context</b><p>The English hint helps you understand the sentence.</p></div></div><div class="flow-step"><span class="step-num">02</span><div><b>Recall one useful word</b><p>Type it for 20 XP, or use four choices for 10 XP. Missing accents earn 15 XP in typing.</p></div></div><div class="flow-step"><span class="step-num">03</span><div><b>Return at the right time</b><p>Correct answers grow from 1 to 16 days apart. Tricky words return during this run.</p></div></div></div><label class="setting"><span>Fast Track priority</span><input type="checkbox" id="fast-track" ${state.settings.fastTrack?'checked':''}></label><p class="small-note">Starter frequency ranks are estimates for ordering practice, not measured corpus frequencies. Imported ranks can replace that ordering for new content.</p><button class="text-button" id="free-run" ${!seen?'disabled':''}>${icon('refresh')} Free play with learned sentences</button><p class="small-note" style="margin-top:4px">Free play is unlimited; it does not change review dates or award XP.</p></aside></div>`;
+ $('start-run').onclick=()=>newRun();$('free-run').onclick=()=>newRun(true);$('fast-track').onchange=event=>{state.settings.fastTrack=event.target.checked;save();render();};
+}
+function renderQuiz(focus){
+ const s=currentSentence(),session=state.session;if(!s){state.session=null;save();render();return;}
+ const parts=C.blankParts(s),f=session.feedback,mode=state.settings.mode,card=state.cards[s.id],isNew=!card?.introduced;
+ if(choiceId!==s.id){choices=C.options(s,state.sentences);choiceId=s.id;draftAnswer='';}
+ if(state.settings.mode==='choice'&&choices.length!==4){state.settings.mode='typing';save();notice='Four-choice mode needs four distinct target words. Typing mode is available.';render(true);return;}
+ const grammar=s.grammarHint||HINTS[s.id]||'Use the exact word form shown: its ending depends on this sentence.';
+ const count=session.correctIds.length,original=session.originalCount;
+ let answerUI=mode==='typing'?`<form id="answer-form"><div class="quiz-label"><label for="answer">Missing Polish word</label><span class="key-hint">${f?'Read it aloud once.':'Type from memory'}</span></div><div class="input-row"><input class="answer-input" id="answer" lang="pl" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" maxlength="100" placeholder="Your Polish word…" ${f?'disabled':''} value="${e(f?f.typed:draftAnswer)}"><button class="primary" type="submit" ${f?'disabled':''}>Check ${icon('arrow')}</button></div><div class="form-footer"><button class="icon-button" type="button" id="toggle-chars" aria-expanded="${charsOpen}" ${f?'disabled':''}>ą ę ł · Polish letters</button><span class="key-hint"><kbd>Enter</kbd> to ${f?'continue':'check'}</span></div><div class="characters" id="polish-characters" ${charsOpen&&!f?'':'hidden'}>${[...'ąćęłńóśźż'].map(c=>`<button type="button" data-char="${c}" aria-label="Insert ${c}">${c}</button>`).join('')}</div></form>`:`<div class="quiz-label"><span style="font-size:12px;font-weight:800">Choose the missing word</span><span class="key-hint">Keys 1–4</span></div><div class="choice-grid">${choices.map((word,i)=>`<button class="choice ${f&&C.normalize(word)===C.normalize(s.targetWord)?'right':''} ${f&&f.result==='wrong'&&C.normalize(word)===C.normalize(f.typed)?'selected-wrong':''}" data-choice="${i}" ${f?'disabled':''}><small>${i+1}</small><span lang="pl">${e(word)}</span></button>`).join('')}</div>`;
+ let feedback='';if(f){const accepted=f.result!=='wrong';feedback=`<section class="feedback ${f.result}" id="feedback" tabindex="-1" aria-live="polite"><div class="feedback-title"><span>${icon(f.result==='wrong'?'close':'check')} ${f.result==='correct'?'Dobrze! You found it.':f.result==='almost'?'Almost — add the Polish letters.':'Let’s make this one stick.'}</span><span>${f.xp?`+${f.xp} XP`:session.free?'Practice':'No points lost'}</span></div><p>${f.result==='almost'?`Accepted. Correct spelling: <b lang="pl">${e(parts[1])}</b>.`:f.result==='wrong'?`The missing word is <b lang="pl">${e(parts[1])}</b>. It will return later in this run.`:'Now say the whole sentence once.'}</p><p class="full-sentence" lang="pl">${e(parts[0])}<mark>${e(parts[1])}</mark>${e(parts[2])}</p><p>${e(grammar)}</p><p>${session.free?'Free play: review dates and XP stay unchanged.':accepted?`Mastery ${state.cards[s.id].level}/5 · next review in ${C.DELAYS[state.cards[s.id].level-1]} ${C.DELAYS[state.cards[s.id].level-1]===1?'day':'days'}.`:'Mastery reset to 0. Mistakes are part of learning.'}</p><button class="primary" id="continue">${session.queue.length===1?'Finish this run':'Next sentence'} ${icon('arrow')}</button>${state.settings.autoNext?`<p class="key-hint">Auto-next in ${accepted?4:7} seconds. You can switch it off in Run settings.</p>`:''}</section>`;}
+ $('main').innerHTML=`<div class="session-layout"><section class="card quiz-card"><div class="quiz-meta"><span class="topic">${e(topicOf(s))}</span><span>${session.free?'FREE PLAY':isNew?'NEW SENTENCE':'REVIEW'} · ${card?.level||0}/5 MASTERY</span></div><div class="run-progress"><progress value="${count}" max="${original}" aria-label="Sentences completed this run"></progress><span>${count} / ${original} complete</span></div>${session.free?'<p class="session-banner">A relaxed practice run. Your review schedule and XP stay unchanged.</p>':''}<div class="sentence" lang="pl">${e(parts[0])}<span class="blank" aria-label="missing word">···</span>${e(parts[2])}</div><p class="translation" lang="en">${e(s.english)}</p>${answerUI}${feedback}<div class="form-footer"><button class="icon-button" id="speak">${icon('volume')} Speak it · full sentence</button><button class="text-button" id="finish-early">Finish for now</button></div><p class="small-note" id="audio-status" role="status"></p></section><aside class="quiz-tools"><section class="card small-card"><h3>Run settings</h3><label class="setting"><span>Answer mode</span><select id="answer-mode"><option value="typing" ${mode==='typing'?'selected':''}>Type the word</option><option value="choice" ${mode==='choice'?'selected':''}>Four choices</option></select></label><label class="setting"><span>Auto-next after feedback</span><input type="checkbox" id="auto-next" ${state.settings.autoNext?'checked':''}></label><p class="small-note">Capital letters and extra spaces do not matter. Missing Polish accents count as “almost” and still advance mastery.</p></section><section class="card small-card"><h3>Your small wins</h3><div class="session-stat"><span>Run XP</span><b>${session.xp}</b></div><div class="session-stat"><span>Accepted answers</span><b>${session.accepted} / ${session.answered}</b></div><div class="session-stat"><span>Still in this run</span><b>${session.queue.length-(f?1:0)}</b></div><p class="small-note">One correct answer at a time. You can stop whenever you need.</p></section></aside></div>`;
+ if($('answer'))$('answer').oninput=event=>{draftAnswer=event.target.value;};
+ if($('answer-form'))$('answer-form').onsubmit=event=>{event.preventDefault();submit($('answer').value);};
+ if($('toggle-chars'))$('toggle-chars').onclick=()=>{charsOpen=!charsOpen;$('polish-characters').hidden=!charsOpen;$('toggle-chars').setAttribute('aria-expanded',String(charsOpen));if(charsOpen)$('answer').focus();reportHeight();};
+ document.querySelectorAll('[data-char]').forEach(button=>button.onclick=()=>{const input=$('answer'),start=input.selectionStart??input.value.length,end=input.selectionEnd??start;input.value=input.value.slice(0,start)+button.dataset.char+input.value.slice(end);draftAnswer=input.value;input.focus();input.setSelectionRange(start+1,start+1);});
+ document.querySelectorAll('[data-choice]').forEach(button=>button.onclick=()=>submit(choices[Number(button.dataset.choice)]));
+ $('answer-mode').onchange=event=>{if(event.target.value==='choice'&&choices.length!==4){announce('Four-choice mode needs four distinct target words in the library.');event.target.value='typing';return;}state.settings.mode=event.target.value;save();render(true);};
+ $('auto-next').onchange=event=>{state.settings.autoNext=event.target.checked;save();render();};
+ $('speak').onclick=speak;$('finish-early').onclick=()=>{stopTimer();state.session.queue=[];state.session.feedback=null;save();render();};
+ if(f){$('continue').onclick=next;requestAnimationFrame(()=>{if(focus)$('feedback')?.focus();});if(state.settings.autoNext&&!document.hidden)autoTimer=setTimeout(next,f.result==='wrong'?7000:4000);}
+ else if(focus&&mode==='typing')requestAnimationFrame(()=>$('answer')?.focus());
+}
+function submit(value){if(!ready||!value.trim()||state.session?.feedback)return;const result=C.answer(state,value,state.settings.mode);if(!result)return;save();render(true);}
+function next(){stopTimer();if(C.advance(state)){draftAnswer='';choices=[];choiceId='';save();render(true);}}
+function renderSummary(){const run=state.session,p=C.plan(state);$('main').innerHTML=`<section class="card summary">${icon('trophy')}<span class="kicker" style="display:block;margin-bottom:12px">A SMALL WIN, WELL EARNED</span><h2>You showed up for your Polish.</h2><p>${run.correctIds.length} of ${run.originalCount} sentences completed · ${run.accepted} accepted answers in ${run.answered} attempts.<br>${run.free?'A free-play run, with no schedule changes.':`You earned ${run.xp} Cloze XP. Your review dates are saved.`}</p><p>Take one sentence into your day. Say it, change a detail, or use it in a conversation.</p><div class="actions"><button class="primary" id="another-run" ${!p.reviews.length&&!p.newIds.length?'disabled':''}>${p.reviews.length?'Review remaining words':'Another small run'} ${icon('arrow')}</button><button class="secondary" id="show-progress">See my progress</button><button class="subtle" id="done-now">Done for now</button></div><p class="small-note">${p.reviews.length} reviews due · ${p.newIds.length} new sentences available next run. No need to do them all now.</p></section>`;$('another-run').onclick=()=>newRun();$('show-progress').onclick=()=>{screen='progress';render();};$('done-now').onclick=()=>{state.session=null;save();render();};}
+function renderProgress(){
+ const stats=state.stats,cards=Object.values(state.cards),mastered=new Set(state.sentences.filter(s=>state.cards[s.id]?.level===5).map(s=>C.normalize(s.targetWord))).size,accuracy=stats.attempts?Math.round(stats.correct/stats.attempts*100):0,distribution=Array.from({length:6},(_,level)=>cards.filter(c=>c.introduced&&c.level===level).length),started=cards.filter(c=>c.introduced).length;
+ const today=new Date(),start=new Date(today.getFullYear(),today.getMonth(),today.getDate()-27,12);let calendar='';
+ for(let i=0;i<28;i++){const d=new Date(start);d.setDate(start.getDate()+i);const key=C.dayKey(d.getTime()),info=stats.days[key],active=!!info?.attempts;calendar+=`<div class="day ${active?'active':''} ${key===C.dayKey()?'today':''}" title="${e(d.toLocaleDateString())}: ${info?.attempts||0} attempts" aria-label="${e(d.toLocaleDateString())}: ${info?.attempts||0} attempts">${d.getDate()}</div>`;}
+ const dayNames=Array.from({length:7},(_,i)=>{const d=new Date(start);d.setDate(start.getDate()+i);return `<div class="calendar-label">${e(d.toLocaleDateString(undefined,{weekday:'short'}))}</div>`;}).join('');
+ $('main').innerHTML=`<div class="progress-grid"><div class="big-stat">${icon('book')}<b>${mastered}</b><span>Words mastered<br>Unique target forms at mastery 5</span></div><div class="big-stat">${icon('target')}<b>${accuracy}%</b><span>Accepted-answer accuracy<br>${stats.correct} / ${stats.attempts} attempts, including ${stats.almost} “almost”</span></div><div class="big-stat">${icon('flame')}<b>${C.streak(stats.days)}</b><span>Current daily streak<br>Practise today to keep your rhythm</span></div><div class="big-stat">${icon('trophy')}<b>${stats.xp}</b><span>Total Cloze XP<br>Level ${Math.floor(stats.xp/100)+1} · ${started} sentences started</span></div></div><div class="grid"><section class="card"><span class="kicker">SHOWING UP COUNTS</span><h2 style="margin-top:12px">Your last four weeks</h2><p class="small-note" style="margin-top:10px">Any scored practice attempt counts. Free play is a relaxed extra. Outlined cells show practice; the double outline marks today.</p><div class="calendar" aria-label="Practice calendar for the last 28 days">${dayNames}${calendar}</div></section><section class="card"><span class="kicker">GROWING RECALL</span><h2 style="margin-top:12px">Mastery garden</h2><div class="distribution">${distribution.map((n,i)=>`<div class="distribution-row"><span>Level ${i}${i===5?' · ready':''}</span><div class="bar"><i style="width:${started?n/started*100:0}%"></i></div><b>${n}</b></div>`).join('')}</div><p class="small-note">Level 0 needs another look. Levels 1–5 return after 1, 2, 4, 8, and 16 days. These are practice milestones, not B1 exam scores.</p></section></div><section class="card" style="margin-top:22px"><h3>Keep a copy of your progress.</h3><p class="help">Export your sentences, mastery, review dates, statistics, and settings. A backup can be restored in another browser. Restoring replaces this game’s data only.</p><div class="actions"><button class="primary" id="export-backup">${icon('download')} Export backup</button><label class="secondary file-label">${icon('upload')} Choose backup<input type="file" id="backup-file" accept=".json,application/json" aria-label="Choose a Cloze progress backup"></label></div><div id="backup-preview"></div></section>`;
+ $('export-backup').onclick=exportBackup;$('backup-file').onchange=previewBackup;renderBackupPreview();
+}
+function renderLibrary(){
+ $('main').innerHTML=`<div class="library-toolbar"><input type="search" class="search" id="library-search" placeholder="Find a word or sentence…" aria-label="Search sentence library" value="${e(search)}"><select class="search" style="flex:0 1 170px" id="topic-filter" aria-label="Filter sentence topic"><option value="all">All topics</option>${[...new Set(state.sentences.map(topicOf))].map(t=>`<option value="${e(t)}" ${topic===t?'selected':''}>${e(t)}</option>`).join('')}</select><button class="secondary" id="export-sentences">${icon('download')} Export sentences</button></div><div class="grid"><section class="card"><span class="kicker">YOUR SENTENCE LIBRARY</span><h2 style="margin-top:12px">Useful words, in context.</h2><p class="small-note" style="margin-top:10px">${state.sentences.length} sentences. Ordered by frequencyRank. Starter ranks are illustrative priorities; import corpus ranks for measured frequency.</p><div class="library-list" id="library-list"></div></section><section class="card"><span class="kicker">GROW YOUR PLAYGROUND</span><h2 style="margin-top:12px">Paste more sentences.</h2><p class="small-note" style="margin-top:12px">Import a JSON array. IDs must be unique, and targetWord must occur exactly once as a whole word in polish. Identical IDs are skipped; conflicting IDs are rejected. Existing progress is preserved.</p><pre class="import-hint">${e(JSON.stringify([{id:'custom-001',polish:'Czekam na twoją odpowiedź.',english:'I am waiting for your answer.',targetWord:'odpowiedź',frequencyRank:120,grammarHint:'Accusative singular after czekać na.'}],null,2))}</pre><label class="sr-only" for="sentence-import">Paste sentence JSON</label><textarea class="import-area" id="sentence-import" maxlength="2000000" spellcheck="false" placeholder="Paste your JSON array here…"></textarea><div class="actions"><button class="primary" id="import-sentences">${icon('upload')} Add sentences</button></div><p class="small-note" id="import-result" role="status"></p><p class="small-note">Optional fields: grammarHint and topic. For Tatoeba, convert your selected sentence/translation pairs into this format and check their licensing and attribution requirements. This app does not fetch or claim to include Tatoeba content.</p></section></div>`;
+ $('library-search').oninput=event=>{search=event.target.value;renderLibraryList();};$('topic-filter').onchange=event=>{topic=event.target.value;renderLibraryList();};$('export-sentences').onclick=()=>download(JSON.stringify(state.sentences,null,2),'lebw-polish-sentences.json');$('import-sentences').onclick=importSentences;renderLibraryList();
+}
+function renderLibraryList(){const found=state.sentences.filter(s=>(topic==='all'||topicOf(s)===topic)&&C.fold(`${s.polish} ${s.english} ${s.targetWord}`).includes(C.fold(search))).sort((a,b)=>a.frequencyRank-b.frequencyRank);$('library-list').innerHTML=found.length?found.map(s=>`<article class="library-item"><p lang="pl">${e(s.polish)}</p><small>${e(s.english)}</small><div class="meta-line"><span>${e(topicOf(s))} · priority ${s.frequencyRank}</span><span>${e(s.targetWord)} · mastery ${state.cards[s.id]?.level||0}/5</span></div></article>`).join(''):'<p class="empty">No matching sentences. Try another word or topic.</p>';reportHeight();}
+function importSentences(){const result=$('import-result');try{const incoming=C.validateSentences(JSON.parse($('sentence-import').value)),existing=new Map(state.sentences.map(s=>[s.id,s]));let added=0,skipped=0;for(const s of incoming){const old=existing.get(s.id);if(old){if(['polish','english','targetWord','frequencyRank'].some(k=>old[k]!==s[k]))throw Error(`ID “${s.id}” already belongs to another sentence. Give the new sentence a different ID.`);skipped++;}else added++;}if(state.sentences.length+added>10000)throw Error('This library can hold up to 10,000 sentences.');state.sentences.push(...incoming.filter(s=>!existing.has(s.id)));save();result.textContent=`${added} added; ${skipped} identical entries skipped. Your existing progress is unchanged.`;$('sentence-import').value='';renderLibraryList();}catch(error){result.textContent=`Nothing imported. ${error.message}`;}}
+function download(text,name){const blob=new Blob([text],{type:'application/json;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportBackup(){download(JSON.stringify({kind:'lebw-cloze-backup',version:1,exportedAt:new Date().toISOString(),state},null,2),`lebw-cloze-backup-${C.dayKey()}.json`);}
+async function previewBackup(event){const file=event.target.files[0];if(!file)return;try{if(file.size>5000000)throw Error('Choose a backup smaller than 5 MB.');pendingBackup=C.validateBackup(await file.text());renderBackupPreview();}catch(error){pendingBackup=null;$('backup-preview').textContent=`Backup not loaded. ${error.message}`;}}
+function renderBackupPreview(){if(!pendingBackup)return;$('backup-preview').innerHTML=`<div class="restore-review"><b>Review this backup before restoring</b><p>${pendingBackup.sentences.length} sentences · ${pendingBackup.stats.attempts} attempts · ${pendingBackup.stats.xp} XP.<br>This replaces only Cloze game data. Export your current game first if you want to keep both.</p><div class="actions"><button class="primary" id="confirm-restore">Restore this backup</button><button class="secondary" id="cancel-restore">Cancel</button></div></div>`;$('confirm-restore').onclick=()=>{stopTimer();state=pendingBackup;pendingBackup=null;choices=[];choiceId='';recoveryRaw=null;notice='Backup restored. Your other LEBWPOLISH activities were not changed.';save();render();};$('cancel-restore').onclick=()=>{pendingBackup=null;$('backup-preview').replaceChildren();};reportHeight();}
+function reportHeight(){if(embedded)parent.postMessage({type:'LEBW_CLOZE_HEIGHT',height:Math.ceil(document.body.getBoundingClientRect().height)},location.origin);}
+$('theme-toggle').onclick=()=>{state.settings.theme=state.settings.theme==='dark'?'light':'dark';save();renderChrome();};
+document.querySelectorAll('[data-screen]').forEach(button=>button.onclick=()=>{screen=button.dataset.screen;window.speechSynthesis?.cancel();render();$('main').focus();});
+document.addEventListener('keydown',event=>{if(event.repeat||event.isComposing||screen!=='play'||!ready)return;const tag=event.target.tagName;if(['TEXTAREA','SELECT'].includes(tag)||event.target.closest('nav'))return;if(state.session?.feedback&&event.key==='Enter'&&!['BUTTON','A','INPUT'].includes(tag)){event.preventDefault();next();return;}if(state.settings.mode==='choice'&&state.session?.queue.length&&!state.session.feedback&&/^[1-4]$/.test(event.key)&&tag!=='INPUT'){event.preventDefault();submit(choices[Number(event.key)-1]);}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){stopTimer();window.speechSynthesis?.cancel();}else if(screen==='play'&&state.session?.feedback)render();});
+window.addEventListener('pagehide',()=>{stopTimer();window.speechSynthesis?.cancel();});
+window.addEventListener('message',event=>{
+ if(!embedded||event.source!==parent||event.origin!==location.origin)return;
+ const message=event.data;if(!message||typeof message!=='object')return;
+ if(message.type==='LEBW_CLOZE_INIT'||message.type==='LEBW_CLOZE_STATE'){
+   account=message.account===true;saving=message.status||'saved';
+   const changed=message.raw!==lastRaw||!ready;
+   if(changed){try{load(message.raw);notice='';}catch{notice='The account’s Cloze save could not be read. Export a recovery copy before starting over.';recoveryRaw=message.raw;saving='error';}}
+   ready=true;if(changed)render();else renderChrome();
+ }else if(message.type==='LEBW_CLOZE_STATUS'){account=message.account===true;saving=message.status||'saved';renderChrome();}
+});
+if(embedded){parent.postMessage({type:'LEBW_CLOZE_READY'},location.origin);}else window.addEventListener('storage',event=>{if(event.key===C.KEY&&event.newValue&&event.newValue!==lastRaw){try{load(event.newValue);notice='Loaded the latest Cloze save from another tab.';render();}catch{notice='Another tab wrote an unreadable save. Your current run is still available for export.';renderChrome();}}});
+if('ResizeObserver'in window)new ResizeObserver(reportHeight).observe(document.body);
+render();
+})();
+</script>
+</body></html>

@@ -53,20 +53,20 @@ export const EVENTS = {
 
 // ─── Badge auto-award definitions ────────────────────────────────────────────
 const BADGES = [
-  { id: 'first_spin',    label: 'First Spin',    icon: '🎰', condition: (s) => (s.totalSpins        || 0) >= 1  },
-  { id: 'on_fire',       label: 'On Fire',        icon: '🔥', condition: (s) => (s.currentStreak     || 0) >= 3  },
-  { id: 'centurion',     label: 'Centurion',      icon: '⚔️', condition: (s) => (s.totalCorrect      || 0) >= 100 },
-  { id: 'wordsmith',     label: 'Wordsmith',      icon: '📖', condition: (s) => (s.vocabAdded        || 0) >= 25 },
-  { id: 'duel_master',   label: 'Duel Master',    icon: '🏆', condition: (s) => (s.duelWins          || 0) >= 5  },
+  { id: 'first_spin',    label: 'First Spin',    icon: "[icon:game]", condition: (s) => (s.totalSpins        || 0) >= 1  },
+  { id: 'on_fire',       label: 'On Fire',        icon: "[icon:flame]", condition: (s) => (s.currentStreak     || 0) >= 3  },
+  { id: 'centurion',     label: 'Centurion',      icon: "[icon:shield]", condition: (s) => (s.totalCorrect      || 0) >= 100 },
+  { id: 'wordsmith',     label: 'Wordsmith',      icon: "[icon:book]", condition: (s) => (s.vocabAdded        || 0) >= 25 },
+  { id: 'duel_master',   label: 'Duel Master',    icon: "[icon:trophy]", condition: (s) => (s.duelWins          || 0) >= 5  },
   { id: 'perfectionist', label: 'Perfectionist',  icon: '✦',  condition: (s) => (s.nohintCorrect     || 0) >= 10 },
-  { id: 'ghost_hunter',  label: 'Ghost Hunter',   icon: '👻', condition: (s) => (s.phantomCorrect    || 0) >= 20 },
-  { id: 'storyteller',   label: 'Storyteller',    icon: '📺', condition: (s) => (s.chaptersComplete  || 0) >= 3  },
-  { id: 'linguist',      label: 'Linguist',       icon: '🧠', condition: (s) => (s.wordsLearned      || 0) >= 10 },
-  { id: 'polyglot',      label: 'Polyglot',       icon: '🌍', condition: (s) => (s.wordsLearned      || 0) >= 50 },
-  { id: 'dedicated',     label: 'Dedicated',      icon: '📅', condition: (s) => (s.totalLogins       || 0) >= 7  },
-  { id: 'comeback',      label: 'Comeback Kid',   icon: '💪', condition: (s) => (s.totalLogins       || 0) >= 3  },
-  { id: 'explorer',      label: 'Explorer',       icon: '🗺️', condition: (s) => (s.totalPageVisits   || 0) >= 50 },
-  { id: 'time_lord',     label: 'Time Lord',      icon: '⏱️', condition: (s) => (s.totalSessionMinutes||0) >= 60 },
+  { id: 'ghost_hunter',  label: 'Ghost Hunter',   icon: "[icon:moon]", condition: (s) => (s.phantomCorrect    || 0) >= 20 },
+  { id: 'storyteller',   label: 'Storyteller',    icon: "[icon:screen]", condition: (s) => (s.chaptersComplete  || 0) >= 3  },
+  { id: 'linguist',      label: 'Linguist',       icon: "[icon:brain]", condition: (s) => (s.wordsLearned      || 0) >= 10 },
+  { id: 'polyglot',      label: 'Polyglot',       icon: "[icon:globe]", condition: (s) => (s.wordsLearned      || 0) >= 50 },
+  { id: 'dedicated',     label: 'Dedicated',      icon: "[icon:calendar]", condition: (s) => (s.totalLogins       || 0) >= 7  },
+  { id: 'comeback',      label: 'Comeback Kid',   icon: "[icon:shield]", condition: (s) => (s.totalLogins       || 0) >= 3  },
+  { id: 'explorer',      label: 'Explorer',       icon: "[icon:map]", condition: (s) => (s.totalPageVisits   || 0) >= 50 },
+  { id: 'time_lord',     label: 'Time Lord',      icon: "[icon:clock]", condition: (s) => (s.totalSessionMinutes||0) >= 60 },
 ];
 
 // ─── Hook ────────────────────────────────────────────────────────────────────

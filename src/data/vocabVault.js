@@ -1,6 +1,6 @@
 export const VOCAB_VAULT = [
   {
-    id: 'Emotions_B1', label: 'Psychology', icon: '🧠',
+    id: 'Emotions_B1', label: 'Psychology', icon: "[icon:brain]",
     concept: "Advanced Emotions",
     lesson: "B1 speakers move beyond basic states. You don't just feel 'happy' (wesoły); you express degrees of satisfaction, gratitude, and concern to sound more native.",
     sections: [
@@ -15,7 +15,7 @@ export const VOCAB_VAULT = [
     tip: "Use 'Wdzięczny' followed by the preposition 'za' + Accusative (e.g., Wdzięczny za pomoc)."
   },
   {
-    id: 'Digital_B1', label: 'Modern Life', icon: '💻',
+    id: 'Digital_B1', label: 'Modern Life', icon: "[icon:screen]",
     concept: "The Digital World",
     lesson: "To function in a Polish office or remote environment, you must master technical verbs that describe digital interactions beyond just 'kliknąć'.",
     sections: [
@@ -30,7 +30,7 @@ export const VOCAB_VAULT = [
     tip: "Most digital verbs like 'Udostępniać' are imperfective; use 'Udostępnić' if you are referring to a single, completed post."
   },
   {
-    id: 'Debate_B1', label: 'Diplomacy', icon: '⚖️',
+    id: 'Debate_B1', label: 'Diplomacy', icon: "[icon:scales]",
     concept: "Conflict & Agreement",
     lesson: "B1 proficiency is defined by your ability to navigate disagreements. You need 'softeners' to express your opinion without being confrontational.",
     sections: [
@@ -45,7 +45,7 @@ export const VOCAB_VAULT = [
     tip: "Starting with 'Moim zdaniem' (In my opinion) or 'Wydaje mi się' allows you to disagree while staying respectful in Polish culture."
   },
   {
-    id: 'Wellness_B1', label: 'Survival', icon: '🏥',
+    id: 'Wellness_B1', label: 'Survival', icon: "[icon:building]",
     concept: "Health & Wellness",
     lesson: "Moving beyond 'I am sick'. At this level, you must describe specific symptoms and preventive measures to doctors or colleagues.",
     sections: [
@@ -60,7 +60,7 @@ export const VOCAB_VAULT = [
     tip: "To say 'I have a cold', use 'Mam przeziębienie' or simply 'Jestem przeziębiony/a'."
   },
   {
-    id: 'Ecology_B1', label: 'Social Issues', icon: '🌱',
+    id: 'Ecology_B1', label: 'Social Issues', icon: "[icon:leaf]",
     concept: "Environment & Ecology",
     lesson: "Ecology is a standard B1 exam topic. You need the vocabulary to discuss climate change and your daily 'green' habits.",
     sections: [
@@ -75,7 +75,7 @@ export const VOCAB_VAULT = [
     tip: "In Poland, 'Segregować' specifically refers to the act of dividing glass, plastic, and paper into different bins."
   },
   {
-    id: 'Logistics_B1', label: 'Travel', icon: '✈️',
+    id: 'Logistics_B1', label: 'Travel', icon: "[icon:plane]",
     concept: "Travel & Logistics",
     lesson: "Travel at B1 isn't just about buying a ticket; it's about managing logistics when things go wrong, like delays or cancellations.",
     sections: [
@@ -90,7 +90,7 @@ export const VOCAB_VAULT = [
     tip: "Use 'Przesiąść się' when you have a connecting flight or train (a 'przesiadka')."
   },
   {
-    id: 'Finance_B1', label: 'Economy', icon: '💳',
+    id: 'Finance_B1', label: 'Economy', icon: "[icon:wallet]",
     concept: "Banking & Finance",
     lesson: "Essential for residents. You need to understand the difference between a simple payment and a bank transfer or mortgage.",
     sections: [
@@ -105,7 +105,7 @@ export const VOCAB_VAULT = [
     tip: "The word 'Przelew' is also used colloquially to ask if someone has sent your salary yet."
   },
   {
-    id: 'Skills_B1', label: 'Career', icon: '🎓',
+    id: 'Skills_B1', label: 'Career', icon: "[icon:sparkles]",
     concept: "Education & Skills",
     lesson: "B1 students focus on mastery. Use specific verbs to describe how you perfect your skills or master a new language.",
     sections: [
@@ -120,7 +120,7 @@ export const VOCAB_VAULT = [
     tip: "'Opanować' comes from 'Pan' (Master/Lord) — literally 'to become the master' of a subject."
   },
   {
-    id: 'Law_B1', label: 'Politics', icon: '⚖️',
+    id: 'Law_B1', label: 'Politics', icon: "[icon:scales]",
     concept: "Society & Law",
     lesson: "To engage with Polish news or legal requirements, you must understand your rights (prawa) and your duties (obowiązki).",
     sections: [
@@ -135,7 +135,7 @@ export const VOCAB_VAULT = [
     tip: "The prefix 'bez-' means 'without'. 'Bezrobocie' is literally the state of being 'without work'."
   },
   {
-    id: 'Character_B1', label: 'Identity', icon: '🎭',
+    id: 'Character_B1', label: 'Identity', icon: "[icon:sparkles]",
     concept: "Description & Character",
     lesson: "Move beyond 'miły' (nice). Describe personality with nuance to tell stories or explain why you trust or dislike someone.",
     sections: [

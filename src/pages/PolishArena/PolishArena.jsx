@@ -1,3 +1,5 @@
+import IconText from "../../components/IconText";
+import { useLearningPersistence } from '../../hooks/useLearningStorage';
 import React, { useState, useCallback, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import HubScreen from './HubScreen';
@@ -11,112 +13,172 @@ import { db } from '../../firebase';
 import { doc, onSnapshot } from 'firebase/firestore';
 
 /* ─── Static data ───────────────────────────────────────────────────────── */
-const NAV_ITEMS = [
-  { id: 'hub',     icon: '🏠', label: 'Arena Hub'    },
-  { id: 'slot',    icon: '🎰', label: 'Spin & Learn', pip: 'New' },
-  { id: 'phantom', icon: '👻', label: 'Phantom Words' },
-  { id: 'duel',    icon: '⚔️',  label: 'Duel Mode'    },
-  { id: 'story',   icon: '📺', label: 'Story Mode'   },
-];
-
-const DAILY_CHALLENGES = [
-  { label: 'Win a Duel',           progress: 'Completed', total: 1,  done: 1,  xp: 25 },
-  { label: '10 correct in Spin',   progress: '7 / 10',    total: 10, done: 7,  xp: 40 },
-  { label: 'Survive Phantom Mode', progress: '0 / 1',     total: 1,  done: 0,  xp: 60 },
-];
-
-const LEADERBOARD = [
-  { rank: 1, initials: 'AK', name: 'anna_k',   xp: 1240, you: false },
-  { rank: 2, initials: 'MP', name: 'marek_pl', xp: 980,  you: false },
-  { rank: 3, initials: 'ZW', name: 'zia_w',    xp: 870,  you: false },
-  { rank: 5, initials: 'YO', name: 'you',      xp: 640,  you: true  },
-];
-
-const RECENT_ACTIVITY = [
-  { icon: '🎰', name: 'Spin & Learn — Round 4',    sub: '3 words correct · 2 minutes ago', xp: 30 },
-  { icon: '⚔️',  name: 'Duel vs. Marek_PL',         sub: 'Victory · 5–3 · 14 min ago',      xp: 50 },
-  { icon: '📺', name: 'Story — Chapter 2 complete', sub: 'All choices correct · Yesterday', xp: 80 },
-];
-
-const RANK_CLASS = { 1: 'gold', 2: 'silver', 3: 'bronze' };
+const NAV_ITEMS = [{
+  id: 'hub',
+  icon: "[icon:home]",
+  label: 'Arena Hub'
+}, {
+  id: 'slot',
+  icon: "[icon:game]",
+  label: 'Spin & Learn',
+  pip: 'New'
+}, {
+  id: 'phantom',
+  icon: "[icon:moon]",
+  label: 'Phantom Words'
+}, {
+  id: 'duel',
+  icon: "[icon:shield]",
+  label: 'Duel Mode'
+}, {
+  id: 'story',
+  icon: "[icon:screen]",
+  label: 'Story Mode'
+}];
+const DAILY_CHALLENGES = [];
+const LEADERBOARD = [];
+const RECENT_ACTIVITY = [];
+const RANK_CLASS = {
+  1: 'gold',
+  2: 'silver',
+  3: 'bronze'
+};
 const XP_TO_NEXT = 1000;
-
-const BADGE_DEFS = [
-  { id: 'first_spin',    label: 'First Spin',   icon: '🎰' },
-  { id: 'on_fire',       label: 'On Fire',       icon: '🔥' },
-  { id: 'centurion',     label: 'Centurion',     icon: '⚔️'  },
-  { id: 'wordsmith',     label: 'Wordsmith',     icon: '📖' },
-  { id: 'duel_master',   label: 'Duel Master',   icon: '🏆' },
-  { id: 'perfectionist', label: 'Perfectionist', icon: '✦'  },
-  { id: 'ghost_hunter',  label: 'Ghost Hunter',  icon: '👻' },
-  { id: 'storyteller',   label: 'Storyteller',   icon: '📺' },
-];
+const BADGE_DEFS = [{
+  id: 'first_spin',
+  label: 'First Spin',
+  icon: "[icon:game]"
+}, {
+  id: 'on_fire',
+  label: 'On Fire',
+  icon: "[icon:flame]"
+}, {
+  id: 'centurion',
+  label: 'Centurion',
+  icon: "[icon:shield]"
+}, {
+  id: 'wordsmith',
+  label: 'Wordsmith',
+  icon: "[icon:book]"
+}, {
+  id: 'duel_master',
+  label: 'Duel Master',
+  icon: "[icon:trophy]"
+}, {
+  id: 'perfectionist',
+  label: 'Perfectionist',
+  icon: '✦'
+}, {
+  id: 'ghost_hunter',
+  label: 'Ghost Hunter',
+  icon: "[icon:moon]"
+}, {
+  id: 'storyteller',
+  label: 'Storyteller',
+  icon: "[icon:screen]"
+}];
 
 /* ─── Main component ────────────────────────────────────────────────────── */
 export default function PolishArena() {
-  const { user } = useAuth();
-  const tracker  = useProgressTracker();
-
-  const [screen,     setScreen]     = useState('hub');
-  const [stats,      setStats]      = useState({ streak: 7, xp: 640, wins: 3, ghosts: 2 });
-  const [liveStats,  setLiveStats]  = useState(null);
-  const [toast,      setToast]      = useState({ hub: '', slot: '', phantom: '', duel: '', story: '' });
+  const {loadLocal, saveLocal} = useLearningPersistence();
+  const {
+    user
+  } = useAuth();
+  const tracker = useProgressTracker();
+  const [screen, setScreen] = useState('hub');
+  const [stats, setStats] = useState(() => loadLocal('lebw.arena.stats', {
+    streak: 0,
+    xp: 0,
+    wins: 0,
+    ghosts: 0
+  }));
+  const [liveStats, setLiveStats] = useState(null);
+  const [toast, setToast] = useState({
+    hub: '',
+    slot: '',
+    phantom: '',
+    duel: '',
+    story: ''
+  });
   const [badgeToast, setBadgeToast] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEffect(() => {
+    saveLocal('lebw.arena.stats', stats);
+  }, [stats]);
 
   /* ── Firebase live stats ── */
   useEffect(() => {
     if (!user) return;
     const ref = doc(db, 'users', user.uid, 'stats', 'aggregate');
-    return onSnapshot(ref, (snap) => {
+    return onSnapshot(ref, snap => {
       if (snap.exists()) setLiveStats(snap.data());
     });
   }, [user]);
 
   /* ── Toast helper ── */
   const showToast = useCallback((src, msg) => {
-    setToast(t => ({ ...t, [src]: msg }));
-    setTimeout(() => setToast(t => ({ ...t, [src]: '' })), 2400);
+    setToast(t => ({
+      ...t,
+      [src]: msg
+    }));
+    setTimeout(() => setToast(t => ({
+      ...t,
+      [src]: ''
+    })), 2400);
   }, []);
 
   /* ── XP gain ── */
   const gainXP = useCallback(async (amt, src = 'hub') => {
-    setStats(s => ({ ...s, xp: s.xp + amt }));
+    setStats(s => ({
+      ...s,
+      xp: s.xp + amt
+    }));
     showToast(src, `+${amt} XP earned!`);
     await tracker.logXp(amt, src);
   }, [showToast, tracker]);
 
   /* ── Game result ── */
   const trackResult = useCallback(async (game, result, xp = 0, hintsUsed = 0, extra = {}) => {
-    await tracker.logGameResult({ game, result, xp, hintsUsed, extra });
-    if (result === 'win') setStats(s => ({ ...s, wins: s.wins + 1 }));
+    await tracker.logGameResult({
+      game,
+      result,
+      xp: 0,
+      hintsUsed,
+      extra
+    });
+    if (result === 'win') setStats(s => ({
+      ...s,
+      wins: s.wins + 1
+    }));
   }, [tracker]);
-
-  const navigate = (id) => { setScreen(id); setSidebarOpen(false); };
-
-  const displayXp     = liveStats?.totalXp        ?? stats.xp;
-  const displayStreak = liveStats?.currentStreak  ?? stats.streak;
-  const displayWins   = liveStats?.duelWins       ?? stats.wins;
-  const earnedBadges  = liveStats?.earnedBadges   ?? [];
-  const xpPct         = Math.min(100, Math.round((displayXp / XP_TO_NEXT) * 100));
+  const navigate = id => {
+    setScreen(id);
+    setSidebarOpen(false);
+  };
+  const displayXp = liveStats?.totalXp ?? stats.xp;
+  const displayStreak = liveStats?.currentStreak ?? stats.streak;
+  const displayWins = liveStats?.duelWins ?? stats.wins;
+  const earnedBadges = liveStats?.earnedBadges ?? [];
+  const xpPct = Math.min(100, Math.round(displayXp / XP_TO_NEXT * 100));
 
   /* ─── Sidebar ─────────────────────────────────────────────────────────── */
-  const Sidebar = () => (
-    <>
+  const Sidebar = () => <>
       <AnimatePresence>
-        {sidebarOpen && (
-          <motion.div
-            key="overlay"
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setSidebarOpen(false)}
-            style={{
-              display: 'none',   /* shown via CSS below 1024px */
-              position: 'fixed', inset: 0, zIndex: 99,
-              background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)',
-            }}
-            className="pa-sidebar-overlay"
-          />
-        )}
+        {sidebarOpen && <motion.div key="overlay" initial={{
+        opacity: 0
+      }} animate={{
+        opacity: 1
+      }} exit={{
+        opacity: 0
+      }} onClick={() => setSidebarOpen(false)} style={{
+        display: 'none',
+        /* shown via CSS below 1024px */
+        position: 'fixed',
+        inset: 0,
+        zIndex: 99,
+        background: 'rgba(0,0,0,0.6)',
+        backdropFilter: 'blur(6px)'
+      }} className="pa-sidebar-overlay" />}
       </AnimatePresence>
 
       <aside className={`pa-sidebar ${sidebarOpen ? 'open' : ''}`}>
@@ -128,56 +190,53 @@ export default function PolishArena() {
 
         {/* Nav modes */}
         <div className="pa-sidebar-section-label">Modes</div>
-        {NAV_ITEMS.map(item => (
-          <button
-            key={item.id}
-            className={`pa-nav-item ${screen === item.id ? 'active' : ''}`}
-            onClick={() => navigate(item.id)}
-          >
-            <span className="pa-nav-icon">{item.icon}</span>
-            <span className="pa-nav-label">{item.label}</span>
-            {item.pip && <span className="pa-nav-pip">{item.pip}</span>}
-          </button>
-        ))}
+        {NAV_ITEMS.map(item => <button key={item.id} className={`pa-nav-item ${screen === item.id ? 'active' : ''}`} onClick={() => navigate(item.id)}>
+            <span className="pa-nav-icon"><IconText>{item.icon}</IconText></span>
+            <span className="pa-nav-label"><IconText>{item.label}</IconText></span>
+            {item.pip && <span className="pa-nav-pip"><IconText>{item.pip}</IconText></span>}
+          </button>)}
 
         {/* Live stats */}
-        {liveStats && (
-          <div className="pa-sidebar-live">
+        {liveStats && <div className="pa-sidebar-live">
             <div className="pa-sl-label">Live Stats</div>
             <div className="pa-sl-grid">
-              {[
-                { val: liveStats.totalRounds   || 0, key: 'Rounds'  },
-                { val: liveStats.totalCorrect  || 0, key: 'Correct' },
-                { val: liveStats.postsPublished|| 0, key: 'Posts'   },
-                { val: liveStats.vocabAdded    || 0, key: 'Words'   },
-              ].map(s => (
-                <div key={s.key} className="pa-sl-item">
-                  <span className="pa-sl-val">{s.val}</span>
-                  <span className="pa-sl-key">{s.key}</span>
-                </div>
-              ))}
+              {[{
+            val: liveStats.totalRounds || 0,
+            key: 'Rounds'
+          }, {
+            val: liveStats.totalCorrect || 0,
+            key: 'Correct'
+          }, {
+            val: liveStats.postsPublished || 0,
+            key: 'Posts'
+          }, {
+            val: liveStats.vocabAdded || 0,
+            key: 'Words'
+          }].map(s => <div key={s.key} className="pa-sl-item">
+                  <span className="pa-sl-val"><IconText>{s.val}</IconText></span>
+                  <span className="pa-sl-key"><IconText>{s.key}</IconText></span>
+                </div>)}
             </div>
-          </div>
-        )}
+          </div>}
 
         {/* XP footer */}
         <div className="pa-sidebar-footer">
           <div className="pa-sf-label">Level 4 → 5</div>
           <div className="pa-xp-bar-wrap">
-            <div className="pa-xp-bar" style={{ width: `${xpPct}%` }} />
+            <div className="pa-xp-bar" style={{
+            width: `${xpPct}%`
+          }} />
           </div>
           <div className="pa-xp-row">
-            <span className="pa-xp-num">{displayXp.toLocaleString()} XP</span>
-            <span className="pa-xp-max">{XP_TO_NEXT.toLocaleString()}</span>
+            <span className="pa-xp-num"><IconText>{displayXp.toLocaleString()}</IconText> XP</span>
+            <span className="pa-xp-max"><IconText>{XP_TO_NEXT.toLocaleString()}</IconText></span>
           </div>
         </div>
       </aside>
-    </>
-  );
+    </>;
 
   /* ─── Right Panel ─────────────────────────────────────────────────────── */
-  const Panel = () => (
-    <aside className="pa-panel">
+  const Panel = () => <aside className="pa-panel">
       {/* Word of the Day */}
       <div className="pa-wod-card">
         <div className="pa-wod-label">Word of the Day</div>
@@ -192,203 +251,291 @@ export default function PolishArena() {
         <div className="pa-panel-title">Badges</div>
         <div className="pa-badge-grid">
           {BADGE_DEFS.map(b => {
-            const earned = earnedBadges.includes(b.id);
-            return (
-              <div key={b.id} className={`pa-badge ${earned ? 'earned' : 'locked'}`} title={b.label}>
-                <span className="pa-badge-icon">{b.icon}</span>
-                <span className="pa-badge-lbl">{b.label}</span>
-              </div>
-            );
-          })}
+          const earned = earnedBadges.includes(b.id);
+          return <div key={b.id} className={`pa-badge ${earned ? 'earned' : 'locked'}`} title={b.label}>
+                <span className="pa-badge-icon"><IconText>{b.icon}</IconText></span>
+                <span className="pa-badge-lbl"><IconText>{b.label}</IconText></span>
+              </div>;
+        })}
         </div>
       </div>
 
-      {/* Daily Challenges */}
+      {/* Your next challenge */}
       <div className="pa-panel-section">
-        <div className="pa-panel-title">Daily Challenges</div>
-        <div className="pa-challenge-list">
-          {DAILY_CHALLENGES.map(c => (
-            <div className="pa-challenge" key={c.label}>
+        <div className="pa-panel-title">Your next challenge</div>
+        <div className="pa-challenge-list"><p style={{
+          color: "#94a3b8",
+          fontSize: 12
+        }}>Try one sentence round and one word review. No race, just practice.</p>
+          {DAILY_CHALLENGES.map(c => <div className="pa-challenge" key={c.label}>
               <div className={`pa-ch-check ${c.done >= c.total ? 'done' : ''}`}>
-                {c.done >= c.total && '✓'}
+                <IconText>{c.done >= c.total && '✓'}</IconText>
               </div>
               <div className="pa-ch-info">
-                <div className="pa-ch-name">{c.label}</div>
+                <div className="pa-ch-name"><IconText>{c.label}</IconText></div>
                 <div className="pa-ch-bar-wrap">
-                  <div className="pa-ch-bar" style={{ width: `${Math.min(100, (c.done / c.total) * 100)}%` }} />
+                  <div className="pa-ch-bar" style={{
+                width: `${Math.min(100, c.done / c.total * 100)}%`
+              }} />
                 </div>
-                <div className="pa-ch-prog">{c.progress}</div>
+                <div className="pa-ch-prog"><IconText>{c.progress}</IconText></div>
               </div>
-              <div className="pa-ch-xp">+{c.xp}</div>
-            </div>
-          ))}
+              <div className="pa-ch-xp">+<IconText>{c.xp}</IconText></div>
+            </div>)}
         </div>
       </div>
 
       {/* Leaderboard */}
       <div className="pa-panel-section">
         <div className="pa-panel-title">Leaderboard — This Week</div>
-        <div className="pa-leader-list">
-          {LEADERBOARD.map(entry => (
-            <div className={`pa-leader-row ${entry.you ? 'you' : ''}`} key={entry.name}>
-              <div className={`pa-leader-rank ${RANK_CLASS[entry.rank] ?? ''}`}>{entry.rank}</div>
-              <div className={`pa-leader-av ${entry.you ? 'you' : ''}`}>{entry.initials}</div>
-              <div className={`pa-leader-name ${entry.you ? 'you' : ''}`}>{entry.name}</div>
-              <div className={`pa-leader-xp ${entry.you ? 'you' : ''}`}>{entry.xp.toLocaleString()}</div>
-            </div>
-          ))}
+        <div className="pa-leader-list"><p style={{
+          color: "#94a3b8",
+          fontSize: 12
+        }}>Build your own progress. Duel mode uses a computer opponent.</p>
+          {LEADERBOARD.map(entry => <div className={`pa-leader-row ${entry.you ? 'you' : ''}`} key={entry.name}>
+              <div className={`pa-leader-rank ${RANK_CLASS[entry.rank] ?? ''}`}><IconText>{entry.rank}</IconText></div>
+              <div className={`pa-leader-av ${entry.you ? 'you' : ''}`}><IconText>{entry.initials}</IconText></div>
+              <div className={`pa-leader-name ${entry.you ? 'you' : ''}`}><IconText>{entry.name}</IconText></div>
+              <div className={`pa-leader-xp ${entry.you ? 'you' : ''}`}><IconText>{entry.xp.toLocaleString()}</IconText></div>
+            </div>)}
         </div>
       </div>
 
       {/* Quick Start */}
       <div className="pa-panel-section">
-        <button className="pa-qs-btn primary"   onClick={() => navigate('duel')}>Quick Start — Duel</button>
+        <button className="pa-qs-btn primary" onClick={() => navigate('duel')}>Quick Start — Duel</button>
         <button className="pa-qs-btn secondary" onClick={() => navigate('slot')}>Practice Vocabulary</button>
       </div>
-    </aside>
-  );
+    </aside>;
 
   /* ─── Stats strip (replaces TopBar — no separate navbar created) ─────── */
-  const StatsStrip = () => (
-    <div className="pa-stats-strip">
+  const StatsStrip = () => <div className="pa-stats-strip">
       {/* Mobile hamburger — only visible <1024px */}
       <button className="pa-hamburger" onClick={() => setSidebarOpen(o => !o)} aria-label="Menu">
         <span className={sidebarOpen ? 'open' : ''} /><span /><span className={sidebarOpen ? 'open' : ''} />
       </button>
 
       <div className="pa-strip-stats">
-        {[
-          { icon: '🔥', val: displayStreak, lbl: 'Streak', cls: 'fire'   },
-          { icon: '⭐', val: displayXp,     lbl: 'XP',     cls: 'purple' },
-          { icon: '⚔️',  val: displayWins,   lbl: 'Wins',   cls: 'gold'   },
-          { icon: '👻', val: stats.ghosts,  lbl: 'Ghosts', cls: 'ghost'  },
-        ].map(({ icon, val, lbl, cls }) => (
-          <div className="pa-tstat" key={lbl}>
-            <span className="pa-tstat-icon">{icon}</span>
+        {[{
+        icon: "[icon:flame]",
+        val: displayStreak,
+        lbl: 'Streak',
+        cls: 'fire'
+      }, {
+        icon: "[icon:star]",
+        val: displayXp,
+        lbl: 'XP',
+        cls: 'purple'
+      }, {
+        icon: "[icon:shield]",
+        val: displayWins,
+        lbl: 'Wins',
+        cls: 'gold'
+      }, {
+        icon: "[icon:moon]",
+        val: stats.ghosts,
+        lbl: 'Ghosts',
+        cls: 'ghost'
+      }].map(({
+        icon,
+        val,
+        lbl,
+        cls
+      }) => <div className="pa-tstat" key={lbl}>
+            <span className="pa-tstat-icon"><IconText>{icon}</IconText></span>
             <div>
-              <div className={`pa-tstat-val ${cls}`}>{val.toLocaleString()}</div>
-              <div className="pa-tstat-lbl">{lbl}</div>
+              <div className={`pa-tstat-val ${cls}`}><IconText>{val.toLocaleString()}</IconText></div>
+              <div className="pa-tstat-lbl"><IconText>{lbl}</IconText></div>
             </div>
-          </div>
-        ))}
+          </div>)}
       </div>
-    </div>
-  );
+    </div>;
 
   /* ─── Hub content ─────────────────────────────────────────────────────── */
-  const HubCenter = () => (
-    <div className="pa-hub-center">
+  const HubCenter = () => <div className="pa-hub-center">
       <div className="pa-content-header">
         <div className="pa-ch-eyebrow">Good morning, learner</div>
         <div className="pa-ch-title">Choose Your Mode</div>
         <div className="pa-ch-sub">Pick a training style and start earning XP</div>
       </div>
 
-      {liveStats && (
-        <div className="pa-live-row">
-          {[
-            { label: 'Total XP',       val: (liveStats.totalXp          || 0).toLocaleString(), icon: '⭐' },
-            { label: 'Rounds Played',  val: (liveStats.totalRounds       || 0).toLocaleString(), icon: '🎮' },
-            { label: 'Correct',        val: (liveStats.totalCorrect      || 0).toLocaleString(), icon: '✓'  },
-            { label: 'Words Written',  val: (liveStats.totalWordsWritten || 0).toLocaleString(), icon: '✍️' },
-          ].map(s => (
-            <div key={s.label} className="pa-live-stat">
-              <span className="pa-ls-icon">{s.icon}</span>
-              <span className="pa-ls-val">{s.val}</span>
-              <span className="pa-ls-lbl">{s.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {liveStats && <div className="pa-live-row">
+          {[{
+        label: 'Total XP',
+        val: (liveStats.totalXp || 0).toLocaleString(),
+        icon: "[icon:star]"
+      }, {
+        label: 'Rounds Played',
+        val: (liveStats.totalRounds || 0).toLocaleString(),
+        icon: "[icon:game]"
+      }, {
+        label: 'Correct',
+        val: (liveStats.totalCorrect || 0).toLocaleString(),
+        icon: '✓'
+      }, {
+        label: 'Words Written',
+        val: (liveStats.totalWordsWritten || 0).toLocaleString(),
+        icon: "[icon:pen]"
+      }].map(s => <div key={s.label} className="pa-live-stat">
+              <span className="pa-ls-icon"><IconText>{s.icon}</IconText></span>
+              <span className="pa-ls-val"><IconText>{s.val}</IconText></span>
+              <span className="pa-ls-lbl"><IconText>{s.label}</IconText></span>
+            </div>)}
+        </div>}
 
       <div className="pa-mode-grid">
-        {[
-          { id: 'slot',    icon: '🎰', accent: 'indigo', tag: 'Vocabulary',  name: 'Spin & Learn',  desc: 'Three random words spin into a sentence — translate it before time runs out.', pip: 'New',  pipCls: 'new' },
-          { id: 'phantom', icon: '👻', accent: 'red',    tag: 'Survival',    name: 'Phantom Words', desc: 'Rare, tricky words haunt you. One wrong answer and the ghost wins.',          pip: 'Hard', pipCls: 'hot' },
-          { id: 'duel',    icon: '⚔️',  accent: 'amber',  tag: 'Competitive', name: 'Duel Mode',     desc: 'Race a rival in real-time. First to 5 correct answers takes the match.' },
-          { id: 'story',   icon: '📺', accent: 'teal',   tag: 'Narrative',   name: 'Story Mode',    desc: 'Navigate a story with branching choices — your Polish determines the plot.' },
-        ].map(m => (
-          <div className={`pa-mode-card accent-${m.accent}`} key={m.id} onClick={() => navigate(m.id)}>
-            <span className="pa-mode-icon">{m.icon}</span>
-            <div className={`pa-mode-tag tag-${m.accent}`}>{m.tag}</div>
-            <div className="pa-mode-name">{m.name}</div>
-            <div className="pa-mode-desc">{m.desc}</div>
-            {m.pip && <div className={`pa-mode-pip pip-${m.pipCls}`}>{m.pip}</div>}
-          </div>
-        ))}
+        {[{
+        id: 'slot',
+        icon: "[icon:game]",
+        accent: 'indigo',
+        tag: 'Vocabulary',
+        name: 'Spin & Learn',
+        desc: 'Spin a sentence, notice the pattern, and translate it into English.',
+        pip: 'New',
+        pipCls: 'new'
+      }, {
+        id: 'phantom',
+        icon: "[icon:moon]",
+        accent: 'red',
+        tag: 'Survival',
+        name: 'Phantom Words',
+        desc: 'Rare, tricky words haunt you. Recall their meaning, then try another round.',
+        pip: 'Hard',
+        pipCls: 'hot'
+      }, {
+        id: 'duel',
+        icon: "[icon:shield]",
+        accent: 'amber',
+        tag: 'Competitive',
+        name: 'Duel Mode',
+        desc: 'Play a computer opponent. First to 5 correct answers takes the match.'
+      }, {
+        id: 'story',
+        icon: "[icon:screen]",
+        accent: 'teal',
+        tag: 'Narrative',
+        name: 'Story Mode',
+        desc: 'Navigate a story with branching choices — your Polish determines the plot.'
+      }].map(m => <div className={`pa-mode-card accent-${m.accent}`} key={m.id} role="button" tabIndex={0} onKeyDown={e => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          navigate(m.id);
+        }
+      }} onClick={() => navigate(m.id)}>
+            <span className="pa-mode-icon"><IconText>{m.icon}</IconText></span>
+            <div className={`pa-mode-tag tag-${m.accent}`}><IconText>{m.tag}</IconText></div>
+            <div className="pa-mode-name"><IconText>{m.name}</IconText></div>
+            <div className="pa-mode-desc"><IconText>{m.desc}</IconText></div>
+            {m.pip && <div className={`pa-mode-pip pip-${m.pipCls}`}><IconText>{m.pip}</IconText></div>}
+          </div>)}
       </div>
 
-      <div className="pa-section-label">Recent Activity</div>
-      <div className="pa-activity-list">
-        {RECENT_ACTIVITY.map(a => (
-          <div className="pa-activity-row" key={a.name}>
-            <div className="pa-act-icon">{a.icon}</div>
+      <div className="pa-section-label">Your next small win</div>
+      <div className="pa-activity-list"><p style={{
+        color: "#94a3b8",
+        fontSize: 13,
+        lineHeight: 1.7
+      }}>Try a short round, then use one new phrase aloud. Your XP starts with your own practice.</p>
+        {RECENT_ACTIVITY.map(a => <div className="pa-activity-row" key={a.name}>
+            <div className="pa-act-icon"><IconText>{a.icon}</IconText></div>
             <div className="pa-act-info">
-              <div className="pa-act-name">{a.name}</div>
-              <div className="pa-act-sub">{a.sub}</div>
+              <div className="pa-act-name"><IconText>{a.name}</IconText></div>
+              <div className="pa-act-sub"><IconText>{a.sub}</IconText></div>
             </div>
-            <div className="pa-act-xp">+{a.xp} XP</div>
-          </div>
-        ))}
+            <div className="pa-act-xp">+<IconText>{a.xp}</IconText> XP</div>
+          </div>)}
       </div>
-    </div>
-  );
+    </div>;
 
   /* ─── Toasts ──────────────────────────────────────────────────────────── */
-  const XpToast = ({ msg }) => (
-    <AnimatePresence>
-      {msg && (
-        <motion.div
-          key={msg}
-          initial={{ opacity: 0, y: -10, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: -8, scale: 0.95 }}
-          style={{
-            position: 'fixed', top: 80, right: 20, zIndex: 9000,
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            color: '#fff',
-            fontFamily: "'Playfair Display', serif", fontStyle: 'italic',
-            fontSize: 15, fontWeight: 700,
-            padding: '10px 20px', borderRadius: 20,
-            boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
-            pointerEvents: 'none',
-          }}
-        >
-          {msg}
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
-
-  const BadgeToast = () => (
-    <AnimatePresence>
-      {badgeToast && (
-        <motion.div
-          initial={{ opacity: 0, y: 16, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 12 }}
-          style={{
-            position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-            zIndex: 9999, display: 'flex', alignItems: 'center', gap: 14,
-            background: '#0d1526', border: '1px solid rgba(245,158,11,0.35)',
-            padding: '14px 22px', borderRadius: 20,
-            boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
-            pointerEvents: 'none', whiteSpace: 'nowrap',
-          }}
-        >
-          <span style={{ fontSize: 28 }}>{badgeToast.icon}</span>
+  const XpToast = ({
+    msg
+  }) => <AnimatePresence>
+      {msg && <motion.div key={msg} initial={{
+      opacity: 0,
+      y: -10,
+      scale: 0.9
+    }} animate={{
+      opacity: 1,
+      y: 0,
+      scale: 1
+    }} exit={{
+      opacity: 0,
+      y: -8,
+      scale: 0.95
+    }} style={{
+      position: 'fixed',
+      top: 80,
+      right: 20,
+      zIndex: 9000,
+      background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+      color: '#fff',
+      fontFamily: "'Playfair Display', serif",
+      fontStyle: 'italic',
+      fontSize: 15,
+      fontWeight: 700,
+      padding: '10px 20px',
+      borderRadius: 20,
+      boxShadow: '0 8px 24px rgba(99,102,241,0.4)',
+      pointerEvents: 'none'
+    }}>
+          <IconText>{msg}</IconText>
+        </motion.div>}
+    </AnimatePresence>;
+  const BadgeToast = () => <AnimatePresence>
+      {badgeToast && <motion.div initial={{
+      opacity: 0,
+      y: 16,
+      scale: 0.9
+    }} animate={{
+      opacity: 1,
+      y: 0,
+      scale: 1
+    }} exit={{
+      opacity: 0,
+      y: 12
+    }} style={{
+      position: 'fixed',
+      bottom: 24,
+      left: '50%',
+      transform: 'translateX(-50%)',
+      zIndex: 9999,
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      background: '#0d1526',
+      border: '1px solid rgba(245,158,11,0.35)',
+      padding: '14px 22px',
+      borderRadius: 20,
+      boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+      pointerEvents: 'none',
+      whiteSpace: 'nowrap'
+    }}>
+          <span style={{
+        fontSize: 28
+      }}><IconText>{badgeToast.icon}</IconText></span>
           <div>
-            <div style={{ fontSize: 9, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.2em', color: '#f59e0b', marginBottom: 3 }}>Badge Unlocked!</div>
-            <div style={{ fontFamily: "'Playfair Display', serif", fontStyle: 'italic', fontSize: 15, color: '#f0f0ff', fontWeight: 700 }}>{badgeToast.label}</div>
+            <div style={{
+          fontSize: 9,
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.2em',
+          color: '#f59e0b',
+          marginBottom: 3
+        }}>Badge Unlocked!</div>
+            <div style={{
+          fontFamily: "'Playfair Display', serif",
+          fontStyle: 'italic',
+          fontSize: 15,
+          color: '#f0f0ff',
+          fontWeight: 700
+        }}><IconText>{badgeToast.label}</IconText></div>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
-  );
+        </motion.div>}
+    </AnimatePresence>;
 
   /* ─── Render ──────────────────────────────────────────────────────────── */
-  return (
-    <>
+  return <>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=Space+Grotesk:wght@400;500;600;700;800&display=swap');
 
@@ -798,58 +945,29 @@ export default function PolishArena() {
           <Sidebar />
 
           <main className="pa-content">
-            {screen === 'hub' && (
-              <>
+            {screen === 'hub' && <>
                 <XpToast msg={toast.hub} />
                 <HubCenter />
-              </>
-            )}
-            {screen === 'slot' && (
-              <>
+              </>}
+            {screen === 'slot' && <>
                 <XpToast msg={toast.slot} />
-                <SlotScreen
-                  onBack={() => navigate('hub')}
-                  onXpGain={(amt) => gainXP(amt, 'slot')}
-                  onResult={(result, xp, hintsUsed) => trackResult('slot', result, xp, hintsUsed)}
-                  toast={toast.slot}
-                />
-              </>
-            )}
-            {screen === 'phantom' && (
-              <>
+                <SlotScreen onBack={() => navigate('hub')} onXpGain={amt => gainXP(amt, 'slot')} onResult={(result, xp, hintsUsed) => trackResult('slot', result, xp, hintsUsed)} toast={toast.slot} />
+              </>}
+            {screen === 'phantom' && <>
                 <XpToast msg={toast.phantom} />
-                <PhantomScreen
-                  onBack={() => navigate('hub')}
-                  onXpGain={(amt) => gainXP(amt, 'phantom')}
-                  onResult={(result, xp) => trackResult('phantom', result, xp)}
-                  toast={toast.phantom}
-                />
-              </>
-            )}
-            {screen === 'duel' && (
-              <>
+                <PhantomScreen onBack={() => navigate('hub')} onXpGain={amt => gainXP(amt, 'phantom')} onResult={(result, xp) => trackResult('phantom', result, xp)} toast={toast.phantom} />
+              </>}
+            {screen === 'duel' && <>
                 <XpToast msg={toast.duel} />
-                <DuelScreen
-                  onBack={() => navigate('hub')}
-                  onXpGain={(amt) => gainXP(amt, 'duel')}
-                  onWin={() => { setStats(s => ({ ...s, wins: s.wins + 1 })); trackResult('duel', 'win', 0); }}
-                  onLoss={() => trackResult('duel', 'loss', 0)}
-                  toast={toast.duel}
-                />
-              </>
-            )}
-            {screen === 'story' && (
-              <>
+                <DuelScreen onBack={() => navigate('hub')} onXpGain={amt => gainXP(amt, 'duel')} onWin={() => trackResult('duel', 'win', 0)} onLoss={() => trackResult('duel', 'loss', 0)} toast={toast.duel} />
+              </>}
+            {screen === 'story' && <>
                 <XpToast msg={toast.story} />
-                <StoryScreen
-                  onBack={() => navigate('hub')}
-                  onXpGain={(amt) => gainXP(amt, 'story')}
-                  onChapterComplete={(chapter, xp) => tracker.logChapterComplete({ chapter, xp })}
-                  totalXp={displayXp}
-                  toast={toast.story}
-                />
-              </>
-            )}
+                <StoryScreen onBack={() => navigate('hub')} onXpGain={amt => gainXP(amt, 'story')} onChapterComplete={(chapter, xp) => tracker.logChapterComplete({
+              chapter,
+              xp
+            })} totalXp={displayXp} toast={toast.story} />
+              </>}
           </main>
 
           <Panel />
@@ -857,6 +975,5 @@ export default function PolishArena() {
 
         <BadgeToast />
       </div>
-    </>
-  );
+    </>;
 }
