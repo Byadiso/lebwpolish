@@ -5,9 +5,9 @@ export default defineConfig({
  plugins:[react(),tailwindcss()],
  build:{rollupOptions:{output:{manualChunks(id){
   if(!id.includes('node_modules'))return;
-  if(id.includes('@firebase/firestore'))return 'firebase-firestore';
-  if(id.includes('@firebase/auth'))return 'firebase-auth';
-  if(id.includes('firebase'))return 'firebase-core';
+  // Keep Firebase entry points and shared internals together. Splitting the
+  // wrappers from @firebase/* creates circular chunks and startup TDZ errors.
+  if(id.includes('firebase'))return 'firebase';
   if(id.includes('framer-motion')||id.includes('motion-dom')||id.includes('motion-utils'))return 'motion';
  }}}}
 });

@@ -236,6 +236,7 @@ Cloze backup export is not a full Firebase-account export. Other account progres
 | `npm run preview` | Serve the production build locally for inspection. |
 | `npm test` | Run Node regression tests for progress, scheduling, imports, and route integrity. |
 | `npm run test:render` | Check initial server-rendered public screens and icon output. |
+| `npm run test:production` | Build and execute the emitted Firebase chunk to check SDK initialization. |
 | `npm run lint` | Run ESLint across the configured source files. Legacy findings remain. |
 
 There is no `npm start` script in the current project.
