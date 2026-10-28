@@ -328,13 +328,6 @@ LEBWPOLISH provides a growing practice foundation across listening, reading, gra
 
 Build preparation with authentic listening, longer conversations, full-length timed sample papers, and feedback on writing and speaking. Official resources are available from [certyfikatpolski.pl](https://certyfikatpolski.pl/); the B1 Compass links to its exam structure and sample tasks.
 
-## Further documentation
-
-- [Installation and update guide](UPDATE-GUIDE.md)
-- [Account-linked progress and synchronization](ACCOUNT-PROGRESS.md)
-- [Cloze game guide and scheduler](CLOZE-GUIDE.md)
-- [Application review and validation scope](APP-REVIEW.md)
-
 ## Author and content
 
 Created by **Desire BYAMUNGU**.
