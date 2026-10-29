@@ -2,7 +2,7 @@ import IconText from "../components/IconText";
 // src/pages/Signup.jsx
 import { useState, useEffect, useRef } from "react";
 import { auth, db } from "../firebase";
-import { activateStudent } from "../lib/activateStudent";
+import { activateStudent } from "../lib/Activatestudent";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 const REDIRECT_PATH = "/learn";
