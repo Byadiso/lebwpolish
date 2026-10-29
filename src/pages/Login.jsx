@@ -1,12 +1,40 @@
 import IconText from "../components/IconText";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { auth, db } from "../firebase";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { activateStudent } from "../lib/Activatestudent";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 const ADMIN_EMAIL = "byadiso@gmail.com";
 const SUPPORT_EMAIL = "nganatech@gmail.com";
+const REDIRECT_PATH = "/learn";
+
+/* ── Error mapping ───────────────────────────────────────────────────────── */
+const getErrorMessage = (err, isAdminLogin) => {
+  switch (err.code) {
+    case "app/invalid-key":
+      return "Incorrect email or access key. Check your details and try again.";
+    case "auth/email-already-in-use":
+      return "This account already exists with a different access key. Please contact the admin to reset it.";
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return isAdminLogin ? "Incorrect email or password. Please try again." : "Incorrect email or access key. Check your details and try again.";
+    case "auth/invalid-email":
+      return "That email address doesn't look right. Please check it.";
+    case "auth/user-disabled":
+      return "This account has been disabled. Please contact the admin.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please wait a few minutes and try again.";
+    case "auth/network-request-failed":
+    case "unavailable":
+      return "Network problem. Please check your connection and try again.";
+    case "permission-denied":
+      return "Access check is temporarily unavailable. Please contact the admin.";
+    default:
+      return "Sign in failed. Please try again, or contact the admin if it keeps happening.";
+  }
+};
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const ArrowIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -36,36 +64,43 @@ export default function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
+  const redirectTimer = useRef(null);
   const isAdmin = email.trim().toLowerCase() === ADMIN_EMAIL;
   const passLabel = isAdmin ? "Password" : "Access key";
   const passPlaceholder = isAdmin ? "Your password" : "6-digit access key";
+
+  // Clear pending redirect if the component unmounts
+  useEffect(() => () => clearTimeout(redirectTimer.current), []);
   const handleLogin = async e => {
     e.preventDefault();
+    if (loading) return;
     setLoading(true);
     setError("");
     const normalizedEmail = email.trim().toLowerCase();
     const normalizedPass = pass.trim();
+    const isAdminLogin = normalizedEmail === ADMIN_EMAIL;
     try {
-      if (normalizedEmail === ADMIN_EMAIL) {
+      if (isAdminLogin) {
         await signInWithEmailAndPassword(auth, normalizedEmail, normalizedPass);
       } else {
-        const q = query(collection(db, "pending_users"), where("email", "==", normalizedEmail), where("passcode", "==", normalizedPass));
-        const snapshot = await getDocs(q);
-        if (snapshot.empty) throw new Error("Invalid email or access key.");
+        // Active students sign in directly. If that fails, the key may be a
+        // first-time key still in pending_users, so activate the account instead
+        // (creates the Auth account and moves pending_users -> users).
         try {
           await signInWithEmailAndPassword(auth, normalizedEmail, normalizedPass);
         } catch (signInErr) {
-          if (signInErr.code === "auth/user-not-found" || signInErr.code === "auth/invalid-credential") {
-            await createUserWithEmailAndPassword(auth, normalizedEmail, normalizedPass);
-          } else {
-            throw signInErr;
-          }
+          const canActivate = ["auth/user-not-found", "auth/invalid-credential", "auth/wrong-password"].includes(signInErr.code);
+          if (!canActivate) throw signInErr;
+          await activateStudent(auth, db, normalizedEmail, normalizedPass);
         }
       }
       setSuccess(true);
-      setTimeout(() => navigate("/space"), 1300);
+      redirectTimer.current = setTimeout(() => navigate(REDIRECT_PATH, {
+        replace: true
+      }), 1300);
     } catch (err) {
-      setError(err.message.includes("access key") ? "Incorrect email or access key. Check your details and try again." : "Sign in failed. Please check your connection and try again.");
+      console.error("Login failed:", err.code, err.message);
+      setError(getErrorMessage(err, isAdminLogin));
       setLoading(false);
     }
   };
@@ -150,7 +185,7 @@ export default function Login() {
                 }} exit={{
                   opacity: 0,
                   height: 0
-                }} className="flex items-start gap-2.5 px-4 py-3.5 bg-red-50 border border-red-100 rounded-2xl">
+                }} className="flex items-start gap-2.5 px-4 py-3.5 bg-red-50 border border-red-100 rounded-2xl" role="alert">
                         <span className="text-red-500 shrink-0 mt-px"><IconText>[icon:warning]</IconText></span>
                         <p className="text-[11px] font-bold text-red-700 leading-snug"><IconText>{error}</IconText></p>
                       </motion.div>}
@@ -161,7 +196,7 @@ export default function Login() {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                       Email address
                     </label>
-                    <input required type="email" placeholder="name@example.com" value={email} onChange={e => {
+                    <input required type="email" autoComplete="email" placeholder="name@example.com" value={email} onChange={e => {
                   setEmail(e.target.value);
                   setError("");
                 }} className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/8 focus:bg-white transition-all" />
@@ -179,11 +214,11 @@ export default function Login() {
                         </span>}
                     </div>
                     <div className="relative">
-                      <input required type={showPass ? "text" : "password"} placeholder={passPlaceholder} value={pass} onChange={e => {
+                      <input required type={showPass ? "text" : "password"} autoComplete="current-password" placeholder={passPlaceholder} value={pass} onChange={e => {
                     setPass(e.target.value);
                     setError("");
                   }} className="w-full px-4 py-3.5 pr-12 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold text-sm placeholder:text-slate-300 placeholder:font-normal focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/8 focus:bg-white transition-all" />
-                      <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" tabIndex={-1}>
+                      <button type="button" onClick={() => setShowPass(s => !s)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" tabIndex={-1} aria-label={showPass ? "Hide" : "Show"}>
                         <EyeIcon open={showPass} />
                       </button>
                     </div>

@@ -1,11 +1,34 @@
 import IconText from "../components/IconText";
 // src/pages/Signup.jsx
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { auth, db } from "../firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { activateStudent } from "../lib/activateStudent";
 import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+const REDIRECT_PATH = "/learn";
+
+/* ── Error mapping ───────────────────────────────────────────────────────── */
+const getSignupError = err => {
+  switch (err.code) {
+    case "app/invalid-key":
+      return "Invalid email or access key. If you've already activated your account, log in instead.";
+    case "auth/email-already-in-use":
+      return "This account already exists with a different access key. Please contact the admin to reset it.";
+    case "auth/weak-password":
+      return "Access key must be at least 6 characters.";
+    case "auth/invalid-email":
+      return "That email address doesn't look right. Please check it.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please wait a few minutes and try again.";
+    case "auth/network-request-failed":
+    case "unavailable":
+      return "Network problem. Please check your connection and try again.";
+    case "permission-denied":
+      return "Activation couldn't be completed (permissions). Please contact the admin.";
+    default:
+      return "Something went wrong. Check your connection and try again.";
+  }
+};
 
 /* ── Icons ───────────────────────────────────────────────────────────────── */
 const CopyIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -27,57 +50,59 @@ const MailIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="15" height
 /* ── Component ───────────────────────────────────────────────────────────── */
 export default function Signup() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
+  const [accessKey, setAccessKey] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // reveals the access key field
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  const isAuthorizedEmail = email.toLowerCase() === "byadiso@gmail.com";
+  const redirectTimer = useRef(null);
+  const isValidEmail = /^\S+@\S+\.\S+$/.test(email.trim());
+
+  // Clear pending redirect if the component unmounts
+  useEffect(() => () => clearTimeout(redirectTimer.current), []);
   const copyEmail = () => {
     navigator.clipboard.writeText("nganatech@gmail.com");
     setCopied(true);
     setTimeout(() => setCopied(false), 2200);
   };
 
-  // When user blurs the email field, reveal password if authorised
+  // When user blurs the email field, reveal the access key field if the email looks valid
   const handleEmailBlur = () => {
-    if (isAuthorizedEmail) setShowPassword(true);
+    if (isValidEmail) setShowPassword(true);
   };
   const handleSignup = async e => {
     e.preventDefault();
-    if (!isAuthorizedEmail) {
-      setError("This email isn't on the invite list. Request access below.");
+    if (loading) return;
+    const normalizedEmail = email.trim().toLowerCase();
+    const normalizedKey = accessKey.trim();
+    if (!isValidEmail) {
+      setError("Please enter a valid email address.");
+      return;
+    }
+
+    // First step ("Check my invite"): just reveal the access key field
+    if (!showPassword) {
+      setShowPassword(true);
+      return;
+    }
+    if (!normalizedKey) {
+      setError("Enter the access key you received.");
       return;
     }
     setError("");
     setLoading(true);
     try {
-      const q = query(collection(db, "users"), where("email", "==", email.toLowerCase()));
-      const querySnapshot = await getDocs(q);
-      if (querySnapshot.empty) {
-        setError("Email not found in our records. Please contact the administrator.");
-        setLoading(false);
-        return;
-      }
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const userDocId = querySnapshot.docs[0].id;
-      await updateDoc(doc(db, "users", userDocId), {
-        uid: userCredential.user.uid,
-        status: "active",
-        activatedAt: new Date().toISOString()
-      });
+      // Verifies the invite, creates the account, moves pending_users -> users
+      await activateStudent(auth, db, normalizedEmail, normalizedKey);
       setSuccess(true);
-      setTimeout(() => navigate("/space"), 1400);
+      redirectTimer.current = setTimeout(() => navigate(REDIRECT_PATH, {
+        replace: true
+      }), 1400);
     } catch (err) {
-      if (err.message.includes("auth/email-already-in-use")) {
-        setError("This account is already active. Log in to continue.");
-      } else if (err.message.includes("auth/weak-password")) {
-        setError("Password must be at least 6 characters.");
-      } else {
-        setError("Something went wrong. Check your connection and try again.");
-      }
+      console.error("Activation failed:", err.code, err.message);
+      setError(getSignupError(err));
     } finally {
       setLoading(false);
     }
@@ -129,7 +154,7 @@ export default function Signup() {
                 Activate your account
               </h2>
               <p className="text-sm text-slate-500 font-medium leading-relaxed">
-                LebwPol is invite-only. Enter your invited email address to set up your profile and start training.
+                LebwPol is invite-only. Enter your invited email address and the access key you received to activate your profile and start training.
               </p>
             </div>
 
@@ -154,7 +179,7 @@ export default function Signup() {
                     <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
                       Invited email address
                     </label>
-                    <input type="email" placeholder="your@email.com" value={email} onChange={e => {
+                    <input type="email" autoComplete="email" placeholder="your@email.com" value={email} onChange={e => {
                   setEmail(e.target.value);
                   setError("");
                   setShowPassword(false);
@@ -170,13 +195,13 @@ export default function Signup() {
                   }} exit={{
                     opacity: 0,
                     height: 0
-                  }} className={`text-[10px] font-black uppercase tracking-widest px-1 ${isAuthorizedEmail ? "text-emerald-600" : "text-slate-400"}`}>
-                          <IconText>{isAuthorizedEmail ? "✓ Email recognised" : "Not on the invite list yet"}</IconText>
+                  }} className={`text-[10px] font-black uppercase tracking-widest px-1 ${isValidEmail ? "text-emerald-600" : "text-slate-400"}`}>
+                          <IconText>{isValidEmail ? "✓ Now enter your access key" : "Enter a valid email address"}</IconText>
                         </motion.p>}
                     </AnimatePresence>
                   </div>
 
-                  {/* Password — reveals when email is authorised */}
+                  {/* Access key — reveals when the email is valid */}
                   <AnimatePresence>
                     {showPassword && <motion.div initial={{
                   opacity: 0,
@@ -189,9 +214,12 @@ export default function Signup() {
                   height: 0
                 }} className="flex flex-col gap-1.5 overflow-hidden">
                         <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
-                          Create a password
+                          Access key
                         </label>
-                        <input type="password" placeholder="Min. 6 characters" value={password} onChange={e => setPassword(e.target.value)} required autoFocus className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/8 transition-all" />
+                        <input type="password" inputMode="numeric" autoComplete="off" placeholder="6-digit access key" value={accessKey} onChange={e => {
+                    setAccessKey(e.target.value);
+                    setError("");
+                  }} required autoFocus className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-slate-900 font-semibold text-sm placeholder:text-slate-300 focus:outline-none focus:border-red-500 focus:ring-4 focus:ring-red-500/8 transition-all" />
                       </motion.div>}
                   </AnimatePresence>
 
@@ -205,7 +233,7 @@ export default function Signup() {
                   y: 0
                 }} exit={{
                   opacity: 0
-                }} className="flex items-start gap-2.5 px-4 py-3.5 bg-red-50 border border-red-100 rounded-2xl">
+                }} className="flex items-start gap-2.5 px-4 py-3.5 bg-red-50 border border-red-100 rounded-2xl" role="alert">
                         <span className="text-red-500 mt-0.5 shrink-0"><IconText>[icon:warning]</IconText></span>
                         <p className="text-[11px] font-bold text-red-700 leading-snug"><IconText>{error}</IconText></p>
                       </motion.div>}
@@ -223,7 +251,7 @@ export default function Signup() {
                   }} className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full inline-block" />
                         Activating…
                       </span> : <>
-                        <IconText>{isAuthorizedEmail && showPassword ? "Activate account" : "Check my invite"}</IconText>
+                        <IconText>{showPassword ? "Activate account" : "Check my invite"}</IconText>
                         <ArrowIcon />
                       </>}
                   </button>
