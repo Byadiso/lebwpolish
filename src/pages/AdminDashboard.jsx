@@ -6,6 +6,18 @@ import { collection, addDoc, serverTimestamp, query, where, getDocs, onSnapshot,
 import { motion, AnimatePresence } from "framer-motion";
 const POLISH_CITIES = ["Warszawa", "Kraków", "Wrocław", "Łódź", "Poznań", "Gdańsk", "Szczecin", "Bydgoszcz", "Lublin", "Białystok"];
 const ADMIN_EMAIL = "byadiso@gmail.com";
+
+// Cryptographically secure 6-digit access key
+const generateAccessKey = () => {
+  const arr = new Uint32Array(1);
+  crypto.getRandomValues(arr);
+  return (100000 + (arr[0] % 900000)).toString();
+};
+
+// Rejects if a promise hangs (Firestore never errors when the network is blocked)
+const withTimeout = (promise, ms = 15000) => Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(Object.assign(new Error("TIMEOUT"), {
+  code: "timeout"
+})), ms))]);
 const AdminDashboard = () => {
   const {
     user,
@@ -21,6 +33,9 @@ const AdminDashboard = () => {
   const [studentEmail, setStudentEmail] = useState("");
   const [assignedLevel, setAssignedLevel] = useState("A1");
   const [generatedKey, setGeneratedKey] = useState("");
+  const [keyLoading, setKeyLoading] = useState(false); // separate from shared `loading`
+  const [usersLoaded, setUsersLoaded] = useState(false);
+  const [keyMsg, setKeyMsg] = useState(""); // inline message inside the Key Generator card
   const [searchEmail, setSearchEmail] = useState("");
   const [targetUser, setTargetUser] = useState(null);
   const [newName, setNewName] = useState("");
@@ -52,6 +67,10 @@ const AdminDashboard = () => {
         id: d.id,
         ...d.data()
       })).sort((a, b) => (b.createdAt?.seconds || 0) - (a.createdAt?.seconds || 0)));
+      setUsersLoaded(true);
+    }, err => {
+      console.error("pending_users listener failed:", err.code, err.message);
+      showStatus(`Cannot read users: ${err.code}`, "error");
     });
     const unsubDrills = onSnapshot(collection(db, "drills"), s => {
       setDrills(s.docs.map(d => ({
@@ -150,14 +169,43 @@ const AdminDashboard = () => {
   };
   const handleCreateStudent = async e => {
     e.preventDefault();
-    setLoading(true);
-    const accessKey = Math.floor(100000 + Math.random() * 900000).toString();
+    const emailLower = studentEmail.trim().toLowerCase();
+    console.log("[KeyGen] submit fired", {
+      email: emailLower,
+      keyLoading,
+      usersLoaded,
+      knownUsers: pendingUsers.length,
+      authUser: user?.email
+    });
+    const keyFail = text => {
+      console.warn("[KeyGen] stopped:", text);
+      setKeyMsg(text);
+      showStatus(text, "error");
+    };
+    setKeyMsg("");
+    if (keyLoading) {
+      console.warn("[KeyGen] stopped: previous request still running");
+      return;
+    }
+    if (!emailLower) {
+      keyFail("Enter a student email.");
+      return;
+    }
+    setKeyLoading(true);
     try {
-      const emailLower = studentEmail.trim().toLowerCase();
-      const q = query(collection(db, "pending_users"), where("email", "==", emailLower));
-      const existing = await getDocs(q);
-      if (!existing.empty) return showStatus("User already in system.", "error");
-      await addDoc(collection(db, "pending_users"), {
+      // Duplicate check uses the live list already in memory (no extra network call)
+      if (!usersLoaded) {
+        keyFail("User list not loaded yet (check Firestore read rules for pending_users).");
+        return;
+      }
+      const existingUser = pendingUsers.find(u => (u.email || "").toLowerCase() === emailLower);
+      if (existingUser) {
+        keyFail(`User already in system (${existingUser.claimed ? "claimed" : "pending key"}). Delete them in User Matrix to regenerate.`);
+        return;
+      }
+      const accessKey = generateAccessKey();
+      console.log("[KeyGen] writing to Firestore...");
+      await withTimeout(addDoc(collection(db, "pending_users"), {
         email: emailLower,
         level: assignedLevel,
         passcode: accessKey,
@@ -167,14 +215,22 @@ const AdminDashboard = () => {
         xp: 0,
         streak: 0,
         createdAt: serverTimestamp()
-      });
+      }));
+      console.log("[KeyGen] saved");
       setGeneratedKey(accessKey);
       setStudentEmail("");
       showStatus("Access Key Generated!");
     } catch (error) {
-      showStatus("Write rejected.", "error");
+      console.error("[KeyGen] failed:", error.code, error.message);
+      if (error.code === "timeout") {
+        keyFail("Timed out. Check connection/ad-blocker, and User Matrix before retrying.");
+      } else if (error.code === "permission-denied") {
+        keyFail("Permission denied. Check Firestore rules.");
+      } else {
+        keyFail(`Failed: ${error.code || error.message || "unknown error"}`);
+      }
     } finally {
-      setLoading(false);
+      setKeyLoading(false);
     }
   };
   const handleSearchUser = async e => {
@@ -249,7 +305,7 @@ const AdminDashboard = () => {
             x: 0
           }} exit={{
             opacity: 0
-          }} className={`px-6 py-3 rounded-xl border-2 shadow-lg ${message.type === "error" ? "bg-red-50 border-red-200 text-red-600" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}>
+          }} className={`fixed top-4 right-4 z-50 px-6 py-3 rounded-xl border-2 shadow-lg ${message.type === "error" ? "bg-red-50 border-red-200 text-red-600" : "bg-emerald-50 border-emerald-200 text-emerald-700"}`}>
                 <p className="font-bold text-xs uppercase tracking-tight"><IconText>{message.text}</IconText></p>
               </motion.div>}
           </AnimatePresence>
@@ -356,10 +412,14 @@ const AdminDashboard = () => {
                 </h3>
                 {!generatedKey ? <form onSubmit={handleCreateStudent} className="space-y-3">
                     <input required type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} className="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl font-bold text-xs outline-none focus:border-indigo-500" placeholder="Student email..." />
-                    <button className="w-full py-3 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] hover:bg-indigo-600">Generate</button>
+                    <button type="submit" disabled={keyLoading} className="w-full py-3 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] hover:bg-indigo-600 disabled:opacity-50">{keyLoading ? "Generating..." : "Generate"}</button>
+                    {keyMsg && <p className="text-[10px] font-bold uppercase tracking-tight text-red-600 text-center"><IconText>{keyMsg}</IconText></p>}
                   </form> : <div className="text-center">
                     <div className="text-3xl font-black bg-indigo-50 py-4 rounded-xl mb-3 tracking-[0.2em] text-indigo-700"><IconText>{generatedKey}</IconText></div>
-                    <button onClick={() => setGeneratedKey("")} className="text-indigo-600 font-black text-[9px] uppercase hover:underline">Reset</button>
+                    <div className="flex justify-center gap-4">
+                      <button onClick={() => navigator.clipboard.writeText(generatedKey).then(() => showStatus("Key copied!")).catch(() => showStatus("Copy failed.", "error"))} className="text-indigo-600 font-black text-[9px] uppercase hover:underline">Copy</button>
+                      <button onClick={() => setGeneratedKey("")} className="text-indigo-600 font-black text-[9px] uppercase hover:underline">Reset</button>
+                    </div>
                   </div>}
               </div>
             </div>
