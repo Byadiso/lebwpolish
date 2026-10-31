@@ -1,0 +1,22 @@
+.lebw-music-toggle {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: max(18px, env(safe-area-inset-bottom));
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 15px;
+  border: 1px solid rgba(255,255,255,.25);
+  border-radius: 999px;
+  background: #172b45;
+  color: white;
+  font: 600 13px/1.2 system-ui, sans-serif;
+  box-shadow: 0 5px 22px rgba(0,0,0,.23);
+  cursor: pointer;
+}
+.lebw-music-toggle:hover { background: #294765; }
+.lebw-music-toggle:focus-visible { outline: 3px solid #f4ba55; outline-offset: 3px; }
+.lebw-music-toggle > span:first-child { font-size: 19px; }
+.lebw-music-hint { font-size: 11px; opacity: .8; }
+@media (max-width: 480px) { .lebw-music-toggle { bottom: max(12px, env(safe-area-inset-bottom)); right: 12px; padding: 9px 12px; } }
