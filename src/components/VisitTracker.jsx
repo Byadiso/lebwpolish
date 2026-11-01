@@ -25,7 +25,7 @@ function persist(force = false) {
   const { database, uid, signedInUserId } = writer;
   const payload = { visitorId, sessionId, userId: uid, signedInUserId: signedInUserId || '',
     visitorType: signedInUserId ? 'authenticated' : 'guest', startedAt, lastSeenAt: Date.now(),
-    activeMs: Math.round(counters.activeMs), paths: { ...counters.paths },
+    activeMs: Math.round(counters.activeMs), paths: Object.entries(counters.paths).map(([path, count]) => ({ path, count })),
     pageCount: Object.values(counters.paths).reduce((a,b) => a+b,0) };
   pending = pending.catch(() => {}).then(() => set(ref(database, `visit_sessions/${sessionId}`), payload))
     .catch(e => console.warn('Analytics write unavailable:', e.code || e.message));

@@ -44,8 +44,8 @@ export default function PrivacyPolicy() {
         <article className="privacy-content">
           <div className="privacy-intro"><div className="privacy-intro-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></div><div><strong>Transparency matters.</strong><p>We collect usage information to understand and improve the learning experience. This notice describes the current implementation, including guest tracking.</p></div></div>
           {sections.map((section,i)=><section id={`privacy-${i}`} className="privacy-section" key={section.title}><div className="privacy-section-number">{String(i+1).padStart(2,'0')}</div><div><h2>{section.title}</h2>{section.paragraphs.map(p=><p key={p}>{p}</p>)}</div></section>)}
-          <div className="privacy-contact"><h2>Questions about your data?</h2><p>Contact the LEBWPOLISH team to ask about your information or privacy rights.</p><a href="mailto:nganatech@gmail.com">nganatech@gmail.com <span aria-hidden="true">↗</span></a></div>
-          
+          <div className="privacy-contact"><h2>Questions about your data?</h2><p>Contact the LEBWPOLISH team to ask about your information or privacy rights.</p><a href="mailto:byadiso@gmail.com">byadiso@gmail.com <span aria-hidden="true">↗</span></a></div>
+          <p className="privacy-disclaimer">Implementation note: This page describes the current analytics implementation. Before public deployment, confirm the data controller’s identity, legal basis, retention period, international transfer disclosures, and whether prior consent is required for analytics storage or access under applicable law.</p>
         </article>
       </div>
     </div>
