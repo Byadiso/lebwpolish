@@ -1,3 +1,5 @@
+import FeatureIcon from '../components/FeatureIcon';
+import { Link } from "react-router-dom";
 import IconText from "../components/IconText";
 import { useState, useEffect } from "react";
 import { db } from "../firebase";
@@ -285,6 +287,7 @@ const AdminDashboard = () => {
   return <div className="min-h-screen bg-[#F1F5F9] p-4 md:p-10 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto">
         
+        <div className="mb-6"><Link to="/statistics" className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-4 text-white font-black shadow-lg hover:bg-indigo-700"><FeatureIcon name="chart" size={21} /> View site statistics →</Link></div>
         {/* HEADER */}
         <header className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>

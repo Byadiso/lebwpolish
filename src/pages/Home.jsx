@@ -324,6 +324,7 @@ export default function Home() {
           </a><IconText>{" "}</IconText>
           · 2026
         </p>
+        <Link to="/privacy" className="text-xs font-bold text-slate-500 hover:text-red-600 transition-colors focus-visible:outline-2 focus-visible:outline-red-600 focus-visible:outline-offset-4">Privacy Policy</Link>
       </footer>
 
       {/* ── HOW IT WORKS MODAL ── */}

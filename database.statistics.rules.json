@@ -1,0 +1,9 @@
+{
+  "visit_sessions": {
+    ".read": "auth != null && auth.token.email === 'byadiso@gmail.com' && auth.token.email_verified === true",
+    "$sessionId": {
+      ".write": "auth != null && ((!data.exists() && newData.child('userId').val() === auth.uid && newData.child('sessionId').val() === $sessionId) || (data.exists() && data.child('userId').val() === auth.uid && newData.exists() && newData.child('userId').val() === auth.uid && newData.child('sessionId').val() === $sessionId))",
+      ".validate": "newData.hasChildren(['visitorId','sessionId','userId','signedInUserId','visitorType','startedAt','lastSeenAt','activeMs','paths','pageCount']) && newData.child('activeMs').isNumber() && newData.child('activeMs').val() >= 0 && newData.child('pageCount').isNumber() && newData.child('pageCount').val() >= 0 && newData.child('visitorType').isString() && (newData.child('visitorType').val() === 'guest' || newData.child('visitorType').val() === 'authenticated')"
+    }
+  }
+}
