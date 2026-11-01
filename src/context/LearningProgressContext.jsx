@@ -5,6 +5,7 @@ import { useAuth } from './AuthContext';
 import { applyLearningOperation, LearningStore } from '../lib/learningSync';
 import { LearningContext } from './LearningStateContext';
 import { useLearningStorage } from '../hooks/useLearningStorage';
+import LearningLoader from '../components/LearningLoader';
 function browserStorage(){try{return window.localStorage;}catch{return {getItem:()=>null,setItem:()=>{throw Error('Storage unavailable');},removeItem:()=>{}};}}
 function AccountProgress({uid,children}) {
  const [store]=useState(()=>new LearningStore({uid,storage:browserStorage()}));
@@ -35,7 +36,7 @@ function AccountProgress({uid,children}) {
   connect();const online=()=>{connect();store.retry();};window.addEventListener('online',online);
   return()=>{active=false;clearTimeout(timer);stop();window.removeEventListener('online',online);store.detachRemote();};
  },[uid,store]);
- return <LearningContext.Provider value={store}>{store.ready?children:<main className="refresh-root"><h1 className="text-2xl font-black">{store.status==='error'?'Account progress could not load.':'Loading your account progress…'}</h1>{store.status==='error'&&<><p className="my-5">Check your connection and Firebase access, then retry. Your browser’s guest progress is kept separate.</p><button className="refresh-button" onClick={store.retry}>Retry account sync</button><button className="refresh-secondary ml-3" onClick={() => auth?.signOut().catch(() => store.unavailable())}>Sign out and practise as guest</button></>}</main>}</LearningContext.Provider>;
+ return <LearningContext.Provider value={store}>{store.ready?children:store.status!=='error'?<LearningLoader title="Loading your progress" detail="Syncing your learning journey so you can pick up right where you left off." />:<main className="refresh-root"><h1 className="text-2xl font-black">{store.status==='error'?'Account progress could not load.':'Loading your account progress…'}</h1>{store.status==='error'&&<><p className="my-5">Check your connection and Firebase access, then retry. Your browser’s guest progress is kept separate.</p><button className="refresh-button" onClick={store.retry}>Retry account sync</button><button className="refresh-secondary ml-3" onClick={() => auth?.signOut().catch(() => store.unavailable())}>Sign out and practise as guest</button></>}</main>}</LearningContext.Provider>;
 }
 export function LearningProgressProvider({children}) {
  const {user}=useAuth();return <AccountProgress key={user?.uid||'guest'} uid={user?.uid||null}>{children}</AccountProgress>;

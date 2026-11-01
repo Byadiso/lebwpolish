@@ -1,0 +1,18 @@
+// MERGE this match block into your EXISTING firestore.rules inside
+// match /databases/{database}/documents. Do not replace existing rules.
+// The app currently recognizes the administrator by email. For stronger
+// authorization, migrate to a server-issued admin custom claim.
+match /visit_sessions/{sessionId} {
+  allow create: if request.auth != null
+    && request.resource.data.sessionId == sessionId
+    && request.resource.data.userId == request.auth.uid
+    && request.resource.data.keys().hasOnly(['visitorId','sessionId','userId','signedInUserId','startedAt','lastSeenAt','activeMs','paths','pageCount']);
+  allow update: if request.auth != null
+    && resource.data.userId == request.auth.uid
+    && request.resource.data.userId == resource.data.userId
+    && request.resource.data.sessionId == resource.data.sessionId;
+  allow read: if request.auth != null
+    && request.auth.token.email == 'byadiso@gmail.com'
+    && request.auth.token.email_verified == true;
+  allow delete: if false;
+}

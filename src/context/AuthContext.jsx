@@ -1,3 +1,4 @@
+import LearningLoader from '../components/LearningLoader';
 // src/context/AuthContext.jsx
 import { createContext, useContext, useEffect, useState } from "react"; // 1. Added useContext
 import { auth, db } from "../firebase";
@@ -39,6 +40,6 @@ export const AuthProvider = ({
     profile,
     loading
   }}>
-      {loading ? <div className="app-loading" role="status">Opening your learning space…</div> : children}
+      {loading ? <LearningLoader title="Opening your learning space" detail="Preparing your personalized Polish learning experience." /> : children}
     </AuthContext.Provider>;
 };

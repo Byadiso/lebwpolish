@@ -23,7 +23,10 @@ export default function Statistics() {
     const visitors = new Set(selected.map(s => s.visitorId));
     const signedIn = new Set(selected.filter(s => s.signedInUserId).map(s => s.signedInUserId));
     const guests = selected.filter(s => !s.signedInUserId).length; const loggedIn = selected.length - guests; const paths = {};
-    selected.forEach(s => Object.entries(s.paths || {}).forEach(([path, count]) => { paths[path] = (paths[path] || 0) + count; }));
+    selected.forEach(s => {
+      const entries = Array.isArray(s.paths) ? s.paths.map(item => [item.path, item.count]) : Object.entries(s.paths || {});
+      entries.forEach(([path, count]) => { if (typeof path === 'string' && Number.isFinite(Number(count))) paths[path] = (paths[path] || 0) + Number(count); });
+    });
     const total = selected.reduce((sum,s) => sum + (s.activeMs || 0), 0);
     const days = {};
     selected.forEach(s => { const day = new Date(s.startedAt).toLocaleDateString('en-CA'); days[day] = (days[day] || 0) + 1; });
