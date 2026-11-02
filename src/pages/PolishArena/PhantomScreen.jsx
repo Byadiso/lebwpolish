@@ -603,8 +603,8 @@ export default function PhantomScreen({
                       Context
                     </p>
                     <p style={{
-                    fontFamily: "'Playfair Display', serif",
-                    fontStyle: 'italic',
+                    fontFamily: "'DM Sans', sans-serif",
+                    fontStyle: 'normal',
                     fontSize: '0.88rem',
                     color: T.muted,
                     lineHeight: 1.65

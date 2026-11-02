@@ -1,9 +1,10 @@
 import IconText from "../components/IconText";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { activateStudent } from "../lib/Activatestudent";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 const ADMIN_EMAIL = "byadiso@gmail.com";
 const SUPPORT_EMAIL = "nganatech@gmail.com";
@@ -64,13 +65,17 @@ export default function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const navigate = useNavigate();
-  const redirectTimer = useRef(null);
+  const { user, loading: authLoading } = useAuth();
+  const location = useLocation();
+  const destination = location.state?.from?.pathname?.startsWith("/") && !location.state.from.pathname.startsWith("//") && !["/login", "/signup", "/guest"].includes(location.state.from.pathname) ? location.state.from.pathname : REDIRECT_PATH;
   const isAdmin = email.trim().toLowerCase() === ADMIN_EMAIL;
   const passLabel = isAdmin ? "Password" : "Access key";
   const passPlaceholder = isAdmin ? "Your password" : "6-digit access key";
 
-  // Clear pending redirect if the component unmounts
-  useEffect(() => () => clearTimeout(redirectTimer.current), []);
+  // Also handles an already authenticated visitor opening /login directly.
+  useEffect(() => {
+    if (!authLoading && user && !user.isAnonymous) navigate(destination, { replace: true });
+  }, [authLoading, user, destination, navigate]);
   const handleLogin = async e => {
     e.preventDefault();
     if (loading) return;
@@ -95,9 +100,8 @@ export default function Login() {
         }
       }
       setSuccess(true);
-      redirectTimer.current = setTimeout(() => navigate(REDIRECT_PATH, {
-        replace: true
-      }), 1300);
+      // Navigate immediately; a timeout could be cancelled on an auth-state rerender.
+      navigate(destination, { replace: true });
     } catch (err) {
       console.error("Login failed:", err.code, err.message);
       setError(getErrorMessage(err, isAdminLogin));
