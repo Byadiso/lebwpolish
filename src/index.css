@@ -68,3 +68,17 @@ textarea {
     scroll-behavior: auto !important;
   }
 }
+
+/* Readability: preserve expressive serif headings, but not learner reading text. */
+p[style*="Playfair Display"],
+blockquote[style*="Playfair Display"],
+article p[style*="Georgia"] {
+  font-family: 'DM Sans', sans-serif !important;
+  font-style: normal !important;
+  line-height: 1.7;
+}
+/* Interactive reading passages must use the same legible body typography. */
+.font-serif.italic:is(p, blockquote, div) {
+  font-family: 'DM Sans', sans-serif !important;
+  font-style: normal !important;
+}

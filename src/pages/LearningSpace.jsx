@@ -1,4 +1,5 @@
 import IconText from "../components/IconText";
+import { spaceAlias } from '../utils/spaceAlias';
 import { useState, useEffect, useRef } from 'react';
 import { db } from '../firebase';
 import { collection, query, onSnapshot, addDoc, serverTimestamp, orderBy, doc, setDoc, updateDoc, deleteDoc, arrayUnion, arrayRemove, limit, increment } from 'firebase/firestore';
@@ -88,6 +89,7 @@ export default function LearningSpace() {
   const vocabInputRef = useRef(null);
   const editPostRef = useRef(null);
   const isAdmin = user?.email === ADMIN_EMAIL;
+  const mySpaceAlias = spaceAlias(user?.uid);
   const effectiveLevel = profile?.level || (isAdmin ? "C1" : "A1");
   const totalXp = profile?.xp || 0;
   const currentLevel = getLevel(totalXp);
@@ -193,8 +195,7 @@ export default function LearningSpace() {
         vocabulary: vocabList,
         wordCount,
         missionType: activeMission.label,
-        author: profile?.cityName || (isAdmin ? "Instruktor" : "Student"),
-        authorEmail: user.email,
+        author: mySpaceAlias,
         authorLevel: effectiveLevel,
         uid: user.uid,
         likes: [],
@@ -295,7 +296,7 @@ export default function LearningSpace() {
     if (!commentText.trim()) return;
     await addDoc(collection(db, "global_posts", postId, "comments"), {
       content: commentText,
-      author: profile?.cityName || (isAdmin ? "Admin" : "User"),
+      author: mySpaceAlias,
       uid: user.uid,
       isCorrection,
       timestamp: serverTimestamp()
@@ -348,6 +349,24 @@ export default function LearningSpace() {
 
         *, *::before, *::after { box-sizing: border-box; }
 
+        /* Community introduction follows the site's editorial light/red visual language.
+           Existing arena cards, fonts, editor and Firestore logic remain untouched. */
+        .ls-page-intro { background: #fafafa; color: #0f172a; border-bottom: 1px solid #e2e8f0; position: relative; }
+        .ls-page-intro::before { content: ''; display: block; height: 4px; background: #dc2626; }
+        .ls-page-intro-inner { max-width: 1320px; margin: auto; padding: 48px 24px 44px; }
+        .ls-page-kicker { display: flex; align-items: center; gap: 9px; font-size: 10px; letter-spacing: .22em; font-weight: 800; color: #b91c1c; margin-bottom: 19px; }
+        .ls-kicker-dot { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; }
+        .ls-page-intro-grid { display: flex; justify-content: space-between; align-items: end; gap: 28px; }
+        .ls-page-intro h1 { font-family: 'DM Sans', sans-serif; font-weight: 800; letter-spacing: -.055em; font-size: clamp(38px, 6vw, 66px); line-height: 1.07; margin: 0 0 14px; }
+        .ls-page-intro h1 em { font-family: 'Playfair Display', serif; color: #dc2626; font-weight: 700; }
+        .ls-page-intro .ls-alias-note { margin-top: 16px; padding: 12px 15px; background: #fff; border: 1px solid #e2e8f0; border-left: 3px solid #dc2626; border-radius: 10px; font-size: 13px; }
+        .ls-alias-note strong { color: #b91c1c; }
+        .ls-alias-note span { color: #64748b; }
+        .ls-page-intro p { max-width: 630px; color: #64748b; font-size: 15px; line-height: 1.7; margin: 0; }
+        .ls-page-intro-aside { display: flex; flex-direction: column; gap: 9px; text-align: right; border-left: 1px solid #e2e8f0; padding-left: 26px; flex-shrink: 0; }
+        .ls-intro-overline { font-size: 10px; color: #dc2626; letter-spacing: .12em; font-weight: 800; }
+        .ls-intro-subline { font-size: 12px; color: #64748b; }
+        @media (max-width: 720px) { .ls-page-intro-inner { padding: 34px 20px; } .ls-page-intro-grid { display: block; } .ls-page-intro-aside { display: none; } }
         /* ── Root wrapper (no min-height override, no fixed positioning) ── */
         .ls-root {
           background: #020617;
@@ -424,7 +443,7 @@ export default function LearningSpace() {
         .ls-main {
           max-width: 1320px;
           margin: 0 auto;
-          padding: 32px 20px;
+          padding: 36px 20px 60px;
           display: grid;
           grid-template-columns: 1fr;
           gap: 32px;
@@ -644,10 +663,12 @@ export default function LearningSpace() {
         }
         .ls-post-content {
           font-size: 16px;
-          line-height: 1.75;
-          color: rgba(240,240,255,0.88);
-          font-style: italic;
-          font-family: 'Playfair Display', serif;
+          line-height: 1.85;
+          color: rgba(240,240,255,0.94);
+          font-style: normal;
+          font-family: 'DM Sans', sans-serif;
+          font-weight: 400;
+          overflow-wrap: anywhere;
           padding: 18px 20px;
           border-left: 3px solid rgba(99,102,241,0.35);
           background: rgba(255,255,255,0.02);
@@ -1032,6 +1053,23 @@ export default function LearningSpace() {
         </div>}
 
       {/* ── Main layout ── */}
+      <section className="ls-page-intro" aria-labelledby="ls-page-title">
+        <div className="ls-page-intro-inner">
+          <div className="ls-page-kicker"><span className="ls-kicker-dot" /> LEBWPOLISH / COMMUNITY</div>
+          <div className="ls-page-intro-grid">
+            <div>
+              <h1 id="ls-page-title">Your writing <em>space.</em></h1>
+              <p>Practice Polish in good company. Choose a prompt, share your thoughts, and grow with feedback from fellow learners.</p>
+              {user && <p className="ls-alias-note">Your private writing identity: <strong>{mySpaceAlias}</strong> <span>· Your real name and email are not shown on posts.</span></p>}
+            </div>
+            <div className="ls-page-intro-aside">
+              <span className="ls-intro-overline">WRITE · CONNECT · IMPROVE</span>
+              <span className="ls-intro-subline">A place to put your Polish into words.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div className="ls-root">
       <main className="ls-main">
 
         {/* ════ LEFT COLUMN ════ */}
@@ -1374,10 +1412,10 @@ export default function LearningSpace() {
                 gap: '12px'
               }}>
                     <div className="ls-post-avatar" style={{
-                  background: p.authorEmail === ADMIN_EMAIL ? 'linear-gradient(135deg, #6366f1, #34d399)' : 'linear-gradient(135deg, #1a1a2e, #2a2a3e)',
-                  border: `1px solid ${p.authorEmail === ADMIN_EMAIL ? 'rgba(99,102,241,0.4)' : 'rgba(255,255,255,0.07)'}`
+                  background: 'linear-gradient(135deg, #1a1a2e, #2a2a3e)',
+                  border: '1px solid rgba(255,255,255,0.07)'
                 }}>
-                      <IconText>{p.author.charAt(0)}</IconText>
+                      <IconText>{spaceAlias(p.uid).charAt(0)}</IconText>
                     </div>
                     <div>
                       <div style={{
@@ -1393,7 +1431,7 @@ export default function LearningSpace() {
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontFamily: "'DM Sans', sans-serif"
-                    }}><IconText>{p.author}</IconText></span>
+                    }}><IconText>{spaceAlias(p.uid)}</IconText></span>
                         <span style={{
                       fontSize: '9px',
                       fontWeight: 700,
@@ -1522,7 +1560,7 @@ export default function LearningSpace() {
                     color: '#c4b5fd',
                     fontFamily: "'DM Sans', sans-serif"
                   }}>
-                            <IconText>{c.author}</IconText> {c.isCorrection && <span style={{
+                            <IconText>{spaceAlias(c.uid)}</IconText> {c.isCorrection && <span style={{
                       color: '#ef4444',
                       fontSize: '9px'
                     }}><IconText>[icon:pen] POPRAWKA</IconText></span>}
@@ -1841,5 +1879,6 @@ export default function LearningSpace() {
           </div>
         </aside>
       </main>
+      </div>
     </>;
 }

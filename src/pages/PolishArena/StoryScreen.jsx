@@ -205,8 +205,8 @@ function ChoiceCard({
     }}>
         {/* Polish line */}
         <p style={{
-        fontFamily: "'Playfair Display', serif",
-        fontStyle: 'italic',
+        fontFamily: "'DM Sans', sans-serif",
+        fontStyle: 'normal',
         fontWeight: 700,
         fontSize: '1.05rem',
         color: '#f1f5f9',
@@ -658,10 +658,10 @@ export default function StoryScreen({
             }}>
                   {/* Narration */}
                   <p style={{
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: 'italic',
+                fontFamily: "'DM Sans', sans-serif",
+                fontStyle: 'normal',
                 fontSize: '0.95rem',
-                color: 'rgba(148,163,184,0.55)',
+                color: '#cbd5e1',
                 lineHeight: 1.75,
                 marginBottom: 20
               }}>
@@ -689,8 +689,8 @@ export default function StoryScreen({
                       She says
                     </p>
                     <p style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontStyle: 'italic',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontStyle: 'normal',
                   fontWeight: 700,
                   fontSize: '1.05rem',
                   color: '#e2e8f0',

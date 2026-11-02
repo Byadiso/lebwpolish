@@ -333,7 +333,7 @@ export default function GrammarGauntlet({
                   <h5 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em]">The Logic</h5>
                   <div className="h-px flex-1 bg-indigo-500/20" />
                 </div>
-                <p className="text-xl md:text-2xl text-slate-100 font-serif italic leading-relaxed text-center px-4">
+                <p className="text-xl md:text-2xl text-slate-100 font-sans not-italic leading-relaxed text-center px-4">
                   "<IconText>{activeLesson.lesson}</IconText>"
                 </p>
               </section>
