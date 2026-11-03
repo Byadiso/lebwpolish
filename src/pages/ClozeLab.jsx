@@ -28,5 +28,5 @@ export default function ClozeLab(){
  },[]);
  const raw=storage.getItem(KEY),status=storage.status;
  useEffect(()=>{send();},[raw,status]);
- return <main style={{background:'#fafafa',minHeight:'100vh'}}><div style={{maxWidth:1100,margin:'auto',padding:'16px 24px 0',fontSize:12}}><Link to="/explore" className="text-red-600 font-bold">← Explore all activities</Link></div><iframe ref={frame} title="Polish B1 sentence practice" src="/cloze-b1.html?embedded=1" onLoad={()=>send('LEBW_CLOZE_INIT')} sandbox="allow-scripts allow-same-origin allow-downloads" style={{display:'block',width:'100%',height:1050,border:0}}/></main>;
+ return <main style={{background:'#fafafa',minHeight:'100vh'}}><div style={{maxWidth:1100,margin:'auto',padding:'16px 24px 0',fontSize:12}}><Link to="/explore" className="text-red-600 font-bold">← Explore all activities</Link></div><iframe ref={frame} title="Polish B1 sentence practice" src="/cloze-b1.html?embedded=1" onLoad={()=>send('LEBW_CLOZE_INIT')} sandbox="allow-scripts allow-same-origin allow-downloads allow-forms" style={{display:'block',width:'100%',height:1050,border:0}}/></main>;
 }
