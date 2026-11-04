@@ -5,185 +5,1907 @@
   "audioUrl": "/songs/sanah_szampan.mp3",
   "fullLyrics": [
     {
-      "startTime": 0,
-      "original": "Kochanie mnie to jak pory roku, po miesiącach mroku słońce świeci zza chmur.",
-      "translation": "Loving me is like the seasons; after months of darkness, the sun shines from behind the clouds.",
+      "startTime": 12.65,
+      "original": "Kochanie mnie to jak pory roku,",
+      "translation": "Loving me is like the seasons.",
       "words": [
-        {"pl": "Kochanie", "en": "Loving", "type": "Gerund"},
-        {"pl": "mnie", "en": "me", "type": "Pronoun"},
-        {"pl": "to", "en": "is", "type": "Particle"},
-        {"pl": "jak", "en": "like", "type": "Adverb"},
-        {"pl": "pory", "en": "seasons", "type": "Noun"},
-        {"pl": "roku", "en": "of the year", "type": "Noun"},
-        {"pl": "po", "en": "after", "type": "Preposition"},
-        {"pl": "miesiącach", "en": "months", "type": "Noun"},
-        {"pl": "mroku", "en": "darkness", "type": "Noun"},
-        {"pl": "słońce", "en": "sun", "type": "Noun"},
-        {"pl": "świeci", "en": "shines", "type": "Verb"},
-        {"pl": "zza", "en": "from behind", "type": "Preposition"},
-        {"pl": "chmur", "en": "clouds", "type": "Noun"}
+        {
+          "pl": "Kochanie",
+          "en": "Loving",
+          "type": "Gerund"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "to",
+          "en": "is",
+          "type": "Particle"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "pory",
+          "en": "seasons",
+          "type": "Noun"
+        },
+        {
+          "pl": "roku",
+          "en": "of the year",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 8,
-      "original": "Kochanie mnie to poza do skoku, nad przepaścią głęboką, potem już tylko w dół.",
-      "translation": "Loving me is a pose for a jump, over a deep abyss, then only downwards.",
+      "startTime": 15.51,
+      "original": "po miesiącach mroku słońce świeci zza chmur.",
+      "translation": "After months of darkness, the sun shines from behind the clouds.",
       "words": [
-        {"pl": "poza", "en": "pose", "type": "Noun"},
-        {"pl": "do", "en": "for", "type": "Preposition"},
-        {"pl": "skoku", "en": "jump", "type": "Noun"},
-        {"pl": "nad", "en": "over", "type": "Preposition"},
-        {"pl": "przepaścią", "en": "abyss", "type": "Noun"},
-        {"pl": "głęboką", "en": "deep", "type": "Adjective"},
-        {"pl": "potem", "en": "afterwards", "type": "Adverb"},
-        {"pl": "tylko", "en": "only", "type": "Particle"},
-        {"pl": "w", "en": "in/to", "type": "Preposition"},
-        {"pl": "dół", "en": "down", "type": "Noun"}
+        {
+          "pl": "po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "miesiącach",
+          "en": "months",
+          "type": "Noun"
+        },
+        {
+          "pl": "mroku",
+          "en": "darkness",
+          "type": "Noun"
+        },
+        {
+          "pl": "słońce",
+          "en": "sun",
+          "type": "Noun"
+        },
+        {
+          "pl": "świeci",
+          "en": "shines",
+          "type": "Verb"
+        },
+        {
+          "pl": "zza",
+          "en": "from behind",
+          "type": "Preposition"
+        },
+        {
+          "pl": "chmur",
+          "en": "clouds",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 16,
-      "original": "Kochanie mnie jak zima w pergoli, mróz, co ci przyfasoli, a ty liczysz na cud.",
-      "translation": "Loving me is like winter in a pergola, frost that punches you, and you hope for a miracle.",
+      "startTime": 18.63,
+      "original": "Kochanie mnie to poza do skoku,",
+      "translation": "Loving me is a pose before a jump.",
       "words": [
-        {"pl": "zima", "en": "winter", "type": "Noun"},
-        {"pl": "w", "en": "in", "type": "Preposition"},
-        {"pl": "pergoli", "en": "pergola", "type": "Noun"},
-        {"pl": "mróz", "en": "frost", "type": "Noun"},
-        {"pl": "co", "en": "that", "type": "Pronoun"},
-        {"pl": "ci", "en": "you", "type": "Pronoun"},
-        {"pl": "przyfasoli", "en": "will punch", "type": "Verb (Future)"},
-        {"pl": "liczysz", "en": "you count", "type": "Verb"},
-        {"pl": "na", "en": "for", "type": "Preposition"},
-        {"pl": "cud", "en": "miracle", "type": "Noun"}
+        {
+          "pl": "Kochanie",
+          "en": "Loving",
+          "type": "Gerund"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "to",
+          "en": "is",
+          "type": "Particle"
+        },
+        {
+          "pl": "poza",
+          "en": "pose",
+          "type": "Noun"
+        },
+        {
+          "pl": "do",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "skoku",
+          "en": "jump",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 24,
-      "original": "Uciekam, ale idę powoli, może ktoś mnie dogoni, ale dosyć mam szkód.",
-      "translation": "I'm running away, but walking slowly, maybe someone catches me, but I've had enough damage.",
+      "startTime": 21.42,
+      "original": "nad przepaścią głęboką, potem już tylko w dół.",
+      "translation": "Over a deep abyss, then only downwards.",
       "words": [
-        {"pl": "Uciekam", "en": "I escape", "type": "Verb"},
-        {"pl": "ale", "en": "but", "type": "Conjunction"},
-        {"pl": "idę", "en": "I go", "type": "Verb"},
-        {"pl": "powoli", "en": "slowly", "type": "Adverb"},
-        {"pl": "może", "en": "maybe", "type": "Adverb"},
-        {"pl": "ktoś", "en": "someone", "type": "Pronoun"},
-        {"pl": "dogoni", "en": "will catch up", "type": "Verb"},
-        {"pl": "dosyć", "en": "enough", "type": "Adverb"},
-        {"pl": "mam", "en": "I have", "type": "Verb"},
-        {"pl": "szkód", "en": "damages", "type": "Noun"}
+        {
+          "pl": "nad",
+          "en": "over",
+          "type": "Preposition"
+        },
+        {
+          "pl": "przepaścią",
+          "en": "abyss",
+          "type": "Noun"
+        },
+        {
+          "pl": "głęboką",
+          "en": "deep",
+          "type": "Adjective"
+        },
+        {
+          "pl": "potem",
+          "en": "afterwards",
+          "type": "Adverb"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tylko",
+          "en": "only",
+          "type": "Particle"
+        },
+        {
+          "pl": "w",
+          "en": "in/to",
+          "type": "Preposition"
+        },
+        {
+          "pl": "dół",
+          "en": "down",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 32,
-      "original": "Słyszę, jak ptak o tym śpiewa, kwiaty, trawa, cały świat, i potoki, i drzewa gawędzą sobie tak.",
-      "translation": "I hear how a bird sings about it, flowers, grass, the whole world, and streams and trees chat like that.",
+      "startTime": 24.77,
+      "original": "Kochanie mnie jak zima w pergoli,",
+      "translation": "Loving me is like winter in a pergola.",
       "words": [
-        {"pl": "Słyszę", "en": "I hear", "type": "Verb"},
-        {"pl": "ptak", "en": "bird", "type": "Noun"},
-        {"pl": "cały", "en": "whole", "type": "Adjective"},
-        {"pl": "świat", "en": "world", "type": "Noun"},
-        {"pl": "potoki", "en": "streams", "type": "Noun"},
-        {"pl": "drzewa", "en": "trees", "type": "Noun"},
-        {"pl": "gawędzą", "en": "chat", "type": "Verb"},
-        {"pl": "sobie", "en": "to themselves", "type": "Pronoun"}
+        {
+          "pl": "Kochanie",
+          "en": "Loving",
+          "type": "Gerund"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "zima",
+          "en": "winter",
+          "type": "Noun"
+        },
+        {
+          "pl": "w",
+          "en": "in/to",
+          "type": "Preposition"
+        },
+        {
+          "pl": "pergoli",
+          "en": "pergola",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 40,
-      "original": "Ona nie grosza warta, puść ją wolno, bo brak już słów. Do tyłu nie zerkaj, bo zamienisz się w soli słup.",
-      "translation": "She's not worth a penny, let her go, because words are gone. Don't look back, or you'll turn into a pillar of salt.",
+      "startTime": 27.09,
+      "original": "mróz, co ci przyfasoli, a ty liczysz na cud.",
+      "translation": "Frost that punches you, while you hope for a miracle.",
       "words": [
-        {"pl": "grosza", "en": "penny", "type": "Noun"},
-        {"pl": "warta", "en": "worth", "type": "Adjective"},
-        {"pl": "puść", "en": "let go", "type": "Verb"},
-        {"pl": "wolno", "en": "free", "type": "Adverb"},
-        {"pl": "zerkaj", "en": "glance/look", "type": "Verb"},
-        {"pl": "zamienisz", "en": "will change", "type": "Verb"},
-        {"pl": "soli", "en": "of salt", "type": "Noun"},
-        {"pl": "słup", "en": "pillar/post", "type": "Noun"}
+        {
+          "pl": "mróz",
+          "en": "frost",
+          "type": "Noun"
+        },
+        {
+          "pl": "co",
+          "en": "that",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "ci",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "przyfasoli",
+          "en": "will punch",
+          "type": "Verb (Future)"
+        },
+        {
+          "pl": "a",
+          "en": "and/but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "ty",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "liczysz",
+          "en": "you count",
+          "type": "Verb"
+        },
+        {
+          "pl": "na",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "cud",
+          "en": "miracle",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 48,
-      "original": "Smaczna jak bułka tarta, słucha Mozarta i kocha róż. Mówią miłość jest ślepa, a ty za dużo widziałeś już.",
-      "translation": "Tasty like breadcrumbs, she listens to Mozart and loves pink. They say love is blind, and you've seen too much.",
+      "startTime": 30.73,
+      "original": "Uciekam, ale idę powoli,",
+      "translation": "I run away, but I walk slowly.",
       "words": [
-        {"pl": "smaczna", "en": "tasty", "type": "Adjective"},
-        {"pl": "bułka", "en": "roll", "type": "Noun"},
-        {"pl": "tarta", "en": "grated", "type": "Adjective"},
-        {"pl": "słucha", "en": "listens", "type": "Verb"},
-        {"pl": "kocha", "en": "loves", "type": "Verb"},
-        {"pl": "róż", "en": "pink", "type": "Noun"},
-        {"pl": "ślepa", "en": "blind", "type": "Adjective"},
-        {"pl": "widziałeś", "en": "you saw", "type": "Verb"}
+        {
+          "pl": "Uciekam",
+          "en": "I escape",
+          "type": "Verb"
+        },
+        {
+          "pl": "ale",
+          "en": "but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "idę",
+          "en": "I go",
+          "type": "Verb"
+        },
+        {
+          "pl": "powoli",
+          "en": "slowly",
+          "type": "Adverb"
+        }
       ]
     },
     {
-      "startTime": 58,
-      "original": "Kochanie mnie to jak ze storczykiem, bo się wiąże z ryzykiem, padnie drugiego dnia.",
-      "translation": "Loving me is like an orchid, because it involves risk, it will drop on the second day.",
+      "startTime": 33.67,
+      "original": "może ktoś mnie dogoni, ale dosyć mam szkód.",
+      "translation": "Maybe someone will catch me, but I have had enough harm.",
       "words": [
-        {"pl": "storczykiem", "en": "orchid", "type": "Noun"},
-        {"pl": "wiąże", "en": "binds/connects", "type": "Verb"},
-        {"pl": "ryzykiem", "en": "risk", "type": "Noun"},
-        {"pl": "padnie", "en": "will fall/die", "type": "Verb"},
-        {"pl": "drugiego", "en": "second", "type": "Adjective"},
-        {"pl": "dnia", "en": "day", "type": "Noun"}
+        {
+          "pl": "może",
+          "en": "maybe",
+          "type": "Adverb"
+        },
+        {
+          "pl": "ktoś",
+          "en": "someone",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "dogoni",
+          "en": "will catch up",
+          "type": "Verb"
+        },
+        {
+          "pl": "ale",
+          "en": "but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "dosyć",
+          "en": "enough",
+          "type": "Adverb"
+        },
+        {
+          "pl": "mam",
+          "en": "I have",
+          "type": "Verb"
+        },
+        {
+          "pl": "szkód",
+          "en": "damages",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 66,
-      "original": "Kochanie mnie jak walka z nawykiem, nie pozbędziesz się mykiem, a ta batalia trwa.",
-      "translation": "Loving me is like a fight with a habit, you won't get rid of it with a trick, and this battle goes on.",
+      "startTime": 36.44,
+      "original": "Słyszę, jak ptak o tym śpiewa,",
+      "translation": "I hear a bird singing about it.",
       "words": [
-        {"pl": "walka", "en": "fight", "type": "Noun"},
-        {"pl": "nawykiem", "en": "habit", "type": "Noun"},
-        {"pl": "pozbędziesz", "en": "will get rid of", "type": "Verb"},
-        {"pl": "mykiem", "en": "with a trick", "type": "Noun (Slang)"},
-        {"pl": "batalia", "en": "battle", "type": "Noun"},
-        {"pl": "trwa", "en": "lasts/continues", "type": "Verb"}
+        {
+          "pl": "Słyszę",
+          "en": "I hear",
+          "type": "Verb"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "ptak",
+          "en": "bird",
+          "type": "Noun"
+        },
+        {
+          "pl": "o",
+          "en": "about",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tym",
+          "en": "this/that",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "śpiewa",
+          "en": "sings",
+          "type": "Verb"
+        }
       ]
     },
     {
-      "startTime": 74,
-      "original": "Więc upadam i się ratuję krzykiem, cichym, ciemnym kącikiem, potem już cicho sza.",
-      "translation": "So I fall and save myself with a scream, a quiet dark corner, then quiet hush.",
+      "startTime": 38.37,
+      "original": "kwiaty, trawa, cały świat,",
+      "translation": "Flowers, grass, the whole world.",
       "words": [
-        {"pl": "upadam", "en": "I fall", "type": "Verb"},
-        {"pl": "ratuję", "en": "I save", "type": "Verb"},
-        {"pl": "krzykiem", "en": "scream", "type": "Noun"},
-        {"pl": "cichym", "en": "quiet", "type": "Adjective"},
-        {"pl": "kącikiem", "en": "corner", "type": "Noun"},
-        {"pl": "sza", "en": "hush", "type": "Interjection"}
+        {
+          "pl": "kwiaty",
+          "en": "flowers",
+          "type": "Noun"
+        },
+        {
+          "pl": "trawa",
+          "en": "grass",
+          "type": "Noun"
+        },
+        {
+          "pl": "cały",
+          "en": "whole",
+          "type": "Adjective"
+        },
+        {
+          "pl": "świat",
+          "en": "world",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 82,
-      "original": "Czy za błędy mogę przelać ci blikiem? Ja mam problem z cennikiem, dobrze wie, kto mnie zna.",
-      "translation": "Can I pay for my mistakes via Blik? I have a problem with the price list, whoever knows me knows well.",
+      "startTime": 42.93,
+      "original": "i potoki, i drzewa gawędzą sobie tak.",
+      "translation": "And streams and trees chat like this.",
       "words": [
-        {"pl": "błędy", "en": "mistakes", "type": "Noun"},
-        {"pl": "przelać", "en": "transfer", "type": "Verb"},
-        {"pl": "blikiem", "en": "Blik", "type": "Noun"},
-        {"pl": "cennikiem", "en": "price list", "type": "Noun"},
-        {"pl": "dobrze", "en": "well", "type": "Adverb"},
-        {"pl": "zna", "en": "knows", "type": "Verb"}
+        {
+          "pl": "i",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "potoki",
+          "en": "streams",
+          "type": "Noun"
+        },
+        {
+          "pl": "drzewa",
+          "en": "trees",
+          "type": "Noun"
+        },
+        {
+          "pl": "gawędzą",
+          "en": "chat",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to themselves",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tak",
+          "en": "like this",
+          "type": "Adverb"
+        }
       ]
     },
     {
-      "startTime": 90,
-      "original": "Poradzisz sobie sam, zadałam za dużo ran. Jest wiele na tym globie, już po dobie będzie raj.",
-      "translation": "You will manage on your own, I've caused too many wounds. There are many on this globe, after a day it will be paradise.",
+      "startTime": 48.43,
+      "original": "Ona nie grosza warta,",
+      "translation": "She is not worth a penny.",
       "words": [
-        {"pl": "poradzisz", "en": "will manage", "type": "Verb"},
-        {"pl": "sam", "en": "alone/self", "type": "Adjective"},
-        {"pl": "zadałam", "en": "I inflicted", "type": "Verb (Past)"},
-        {"pl": "ran", "en": "wounds", "type": "Noun"},
-        {"pl": "globie", "en": "globe", "type": "Noun"},
-        {"pl": "dobie", "en": "24 hours", "type": "Noun"},
-        {"pl": "raj", "en": "paradise", "type": "Noun"}
+        {
+          "pl": "Ona",
+          "en": "she",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "grosza",
+          "en": "penny",
+          "type": "Noun"
+        },
+        {
+          "pl": "warta",
+          "en": "worth",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 51.45,
+      "original": "puść ją wolno, bo brak już słów.",
+      "translation": "Let her go, for there are no words left.",
+      "words": [
+        {
+          "pl": "puść",
+          "en": "let go",
+          "type": "Verb"
+        },
+        {
+          "pl": "ją",
+          "en": "her",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "wolno",
+          "en": "free",
+          "type": "Adverb"
+        },
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "brak",
+          "en": "lack/absence",
+          "type": "Noun"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "słów",
+          "en": "words (genitive plural)",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 55.21,
+      "original": "Do tyłu nie zerkaj,",
+      "translation": "Do not look back.",
+      "words": [
+        {
+          "pl": "Do",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tyłu",
+          "en": "back/rear",
+          "type": "Noun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "zerkaj",
+          "en": "glance/look",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 57.69,
+      "original": "bo zamienisz się w soli słup.",
+      "translation": "Or you will turn into a pillar of salt.",
+      "words": [
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "zamienisz",
+          "en": "will change",
+          "type": "Verb"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "w",
+          "en": "in/to",
+          "type": "Preposition"
+        },
+        {
+          "pl": "soli",
+          "en": "of salt",
+          "type": "Noun"
+        },
+        {
+          "pl": "słup",
+          "en": "pillar/post",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 60.25,
+      "original": "Smaczna jak bułka tarta,",
+      "translation": "Tasty like breadcrumbs.",
+      "words": [
+        {
+          "pl": "Smaczna",
+          "en": "tasty",
+          "type": "Adjective"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "bułka",
+          "en": "roll",
+          "type": "Noun"
+        },
+        {
+          "pl": "tarta",
+          "en": "grated",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 63.57,
+      "original": "słucha Mozarta i kocha róż.",
+      "translation": "She listens to Mozart and loves roses.",
+      "words": [
+        {
+          "pl": "słucha",
+          "en": "listens",
+          "type": "Verb"
+        },
+        {
+          "pl": "Mozarta",
+          "en": "Mozart (genitive)",
+          "type": "Proper noun"
+        },
+        {
+          "pl": "i",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "kocha",
+          "en": "loves",
+          "type": "Verb"
+        },
+        {
+          "pl": "róż",
+          "en": "roses",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 67.18,
+      "original": "Mówią miłość jest ślepa,",
+      "translation": "They say love is blind.",
+      "words": [
+        {
+          "pl": "Mówią",
+          "en": "they say",
+          "type": "Verb"
+        },
+        {
+          "pl": "miłość",
+          "en": "love",
+          "type": "Noun"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "ślepa",
+          "en": "blind",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 69.82,
+      "original": "a ty za dużo widziałeś już.",
+      "translation": "And you have already seen too much.",
+      "words": [
+        {
+          "pl": "a",
+          "en": "and/but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "ty",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "dużo",
+          "en": "much/many",
+          "type": "Adverb"
+        },
+        {
+          "pl": "widziałeś",
+          "en": "you saw",
+          "type": "Verb"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 73.33,
+      "original": "Kochanie mnie to jak ze storczykiem,",
+      "translation": "Loving me is like caring for an orchid.",
+      "words": [
+        {
+          "pl": "Kochanie",
+          "en": "Loving",
+          "type": "Gerund"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "to",
+          "en": "is",
+          "type": "Particle"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "ze",
+          "en": "with / like",
+          "type": "Preposition"
+        },
+        {
+          "pl": "storczykiem",
+          "en": "orchid",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 75.72,
+      "original": "bo się wiąże z ryzykiem, padnie drugiego dnia.",
+      "translation": "Because it is risky; it will die on the second day.",
+      "words": [
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "wiąże",
+          "en": "binds/connects",
+          "type": "Verb"
+        },
+        {
+          "pl": "z",
+          "en": "with/from",
+          "type": "Preposition"
+        },
+        {
+          "pl": "ryzykiem",
+          "en": "risk",
+          "type": "Noun"
+        },
+        {
+          "pl": "padnie",
+          "en": "will fall/die",
+          "type": "Verb"
+        },
+        {
+          "pl": "drugiego",
+          "en": "second",
+          "type": "Adjective"
+        },
+        {
+          "pl": "dnia",
+          "en": "day",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 79.47,
+      "original": "Kochanie mnie jak walka z nawykiem,",
+      "translation": "Loving me is like fighting a habit.",
+      "words": [
+        {
+          "pl": "Kochanie",
+          "en": "Loving",
+          "type": "Gerund"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "walka",
+          "en": "fight",
+          "type": "Noun"
+        },
+        {
+          "pl": "z",
+          "en": "with/from",
+          "type": "Preposition"
+        },
+        {
+          "pl": "nawykiem",
+          "en": "habit",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 82.96,
+      "original": "nie pozbędziesz się mykiem, a ta batalia trwa.",
+      "translation": "You cannot get rid of it with a trick, and the battle goes on.",
+      "words": [
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "pozbędziesz",
+          "en": "will get rid of",
+          "type": "Verb"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "mykiem",
+          "en": "with a trick",
+          "type": "Noun (Slang)"
+        },
+        {
+          "pl": "a",
+          "en": "and/but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "ta",
+          "en": "this",
+          "type": "Determiner"
+        },
+        {
+          "pl": "batalia",
+          "en": "battle",
+          "type": "Noun"
+        },
+        {
+          "pl": "trwa",
+          "en": "lasts/continues",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 85.49,
+      "original": "Więc upadam i się ratuję krzykiem,",
+      "translation": "So I fall and save myself with a scream.",
+      "words": [
+        {
+          "pl": "Więc",
+          "en": "so/therefore",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "upadam",
+          "en": "I fall",
+          "type": "Verb"
+        },
+        {
+          "pl": "i",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "ratuję",
+          "en": "I save",
+          "type": "Verb"
+        },
+        {
+          "pl": "krzykiem",
+          "en": "scream",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 87.88,
+      "original": "cichym, ciemnym kącikiem, potem już cicho sza.",
+      "translation": "In a quiet, dark corner; then hush.",
+      "words": [
+        {
+          "pl": "cichym",
+          "en": "quiet",
+          "type": "Adjective"
+        },
+        {
+          "pl": "ciemnym",
+          "en": "dark",
+          "type": "Adjective"
+        },
+        {
+          "pl": "kącikiem",
+          "en": "corner",
+          "type": "Noun"
+        },
+        {
+          "pl": "potem",
+          "en": "afterwards",
+          "type": "Adverb"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "cicho",
+          "en": "quietly",
+          "type": "Adverb"
+        },
+        {
+          "pl": "sza",
+          "en": "hush",
+          "type": "Interjection"
+        }
+      ]
+    },
+    {
+      "startTime": 91.35,
+      "original": "Czy za błędy mogę przelać ci blikiem?",
+      "translation": "Can I pay you for my mistakes with BLIK?",
+      "words": [
+        {
+          "pl": "Czy",
+          "en": "whether / question particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "błędy",
+          "en": "mistakes",
+          "type": "Noun"
+        },
+        {
+          "pl": "mogę",
+          "en": "I can",
+          "type": "Verb"
+        },
+        {
+          "pl": "przelać",
+          "en": "transfer",
+          "type": "Verb"
+        },
+        {
+          "pl": "ci",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "blikiem",
+          "en": "BLIK",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 93.73,
+      "original": "Ja mam problem z cennikiem, dobrze wie, kto mnie zna.",
+      "translation": "I struggle with the price list; those who know me know that.",
+      "words": [
+        {
+          "pl": "Ja",
+          "en": "I",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "mam",
+          "en": "I have",
+          "type": "Verb"
+        },
+        {
+          "pl": "problem",
+          "en": "problem",
+          "type": "Noun"
+        },
+        {
+          "pl": "z",
+          "en": "with/from",
+          "type": "Preposition"
+        },
+        {
+          "pl": "cennikiem",
+          "en": "price list",
+          "type": "Noun"
+        },
+        {
+          "pl": "dobrze",
+          "en": "well",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wie",
+          "en": "knows",
+          "type": "Verb"
+        },
+        {
+          "pl": "kto",
+          "en": "who",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "zna",
+          "en": "knows",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 97.34,
+      "original": "Słyszę, jak ptak o tym śpiewa,",
+      "translation": "I hear a bird singing about it.",
+      "words": [
+        {
+          "pl": "Słyszę",
+          "en": "I hear",
+          "type": "Verb"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "ptak",
+          "en": "bird",
+          "type": "Noun"
+        },
+        {
+          "pl": "o",
+          "en": "about",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tym",
+          "en": "this/that",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "śpiewa",
+          "en": "sings",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 99.29,
+      "original": "kwiaty, trawa, cały świat,",
+      "translation": "Flowers, grass, the whole world.",
+      "words": [
+        {
+          "pl": "kwiaty",
+          "en": "flowers",
+          "type": "Noun"
+        },
+        {
+          "pl": "trawa",
+          "en": "grass",
+          "type": "Noun"
+        },
+        {
+          "pl": "cały",
+          "en": "whole",
+          "type": "Adjective"
+        },
+        {
+          "pl": "świat",
+          "en": "world",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 103.6,
+      "original": "i potoki, i drzewa gawędzą sobie tak.",
+      "translation": "And streams and trees chat like this.",
+      "words": [
+        {
+          "pl": "i",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "potoki",
+          "en": "streams",
+          "type": "Noun"
+        },
+        {
+          "pl": "drzewa",
+          "en": "trees",
+          "type": "Noun"
+        },
+        {
+          "pl": "gawędzą",
+          "en": "chat",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to themselves",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tak",
+          "en": "like this",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 109.07,
+      "original": "Ona nie grosza warta,",
+      "translation": "She is not worth a penny.",
+      "words": [
+        {
+          "pl": "Ona",
+          "en": "she",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "grosza",
+          "en": "penny",
+          "type": "Noun"
+        },
+        {
+          "pl": "warta",
+          "en": "worth",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 112.37,
+      "original": "puść ją wolno, bo brak już słów.",
+      "translation": "Let her go, for there are no words left.",
+      "words": [
+        {
+          "pl": "puść",
+          "en": "let go",
+          "type": "Verb"
+        },
+        {
+          "pl": "ją",
+          "en": "her",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "wolno",
+          "en": "free",
+          "type": "Adverb"
+        },
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "brak",
+          "en": "lack/absence",
+          "type": "Noun"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "słów",
+          "en": "words (genitive plural)",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 115.82,
+      "original": "Do tyłu nie zerkaj,",
+      "translation": "Do not look back.",
+      "words": [
+        {
+          "pl": "Do",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tyłu",
+          "en": "back/rear",
+          "type": "Noun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "zerkaj",
+          "en": "glance/look",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 118.38,
+      "original": "bo zamienisz się w soli słup.",
+      "translation": "Or you will turn into a pillar of salt.",
+      "words": [
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "zamienisz",
+          "en": "will change",
+          "type": "Verb"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "w",
+          "en": "in/to",
+          "type": "Preposition"
+        },
+        {
+          "pl": "soli",
+          "en": "of salt",
+          "type": "Noun"
+        },
+        {
+          "pl": "słup",
+          "en": "pillar/post",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 120.89,
+      "original": "Smaczna jak bułka tarta,",
+      "translation": "Tasty like breadcrumbs.",
+      "words": [
+        {
+          "pl": "Smaczna",
+          "en": "tasty",
+          "type": "Adjective"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "bułka",
+          "en": "roll",
+          "type": "Noun"
+        },
+        {
+          "pl": "tarta",
+          "en": "grated",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 124.28,
+      "original": "słucha Mozarta i kocha róż.",
+      "translation": "She listens to Mozart and loves roses.",
+      "words": [
+        {
+          "pl": "słucha",
+          "en": "listens",
+          "type": "Verb"
+        },
+        {
+          "pl": "Mozarta",
+          "en": "Mozart (genitive)",
+          "type": "Proper noun"
+        },
+        {
+          "pl": "i",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "kocha",
+          "en": "loves",
+          "type": "Verb"
+        },
+        {
+          "pl": "róż",
+          "en": "roses",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 127.91,
+      "original": "Mówią miłość jest ślepa,",
+      "translation": "They say love is blind.",
+      "words": [
+        {
+          "pl": "Mówią",
+          "en": "they say",
+          "type": "Verb"
+        },
+        {
+          "pl": "miłość",
+          "en": "love",
+          "type": "Noun"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "ślepa",
+          "en": "blind",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 130.62,
+      "original": "a ty za dużo widziałeś już.",
+      "translation": "And you have already seen too much.",
+      "words": [
+        {
+          "pl": "a",
+          "en": "and/but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "ty",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "dużo",
+          "en": "much/many",
+          "type": "Adverb"
+        },
+        {
+          "pl": "widziałeś",
+          "en": "you saw",
+          "type": "Verb"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 133.46,
+      "original": "Ona nie grosza warta,",
+      "translation": "She is not worth a penny.",
+      "words": [
+        {
+          "pl": "Ona",
+          "en": "she",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "grosza",
+          "en": "penny",
+          "type": "Noun"
+        },
+        {
+          "pl": "warta",
+          "en": "worth",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 136.43,
+      "original": "puść ją wolno, bo brak już słów.",
+      "translation": "Let her go, for there are no words left.",
+      "words": [
+        {
+          "pl": "puść",
+          "en": "let go",
+          "type": "Verb"
+        },
+        {
+          "pl": "ją",
+          "en": "her",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "wolno",
+          "en": "free",
+          "type": "Adverb"
+        },
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "brak",
+          "en": "lack/absence",
+          "type": "Noun"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "słów",
+          "en": "words (genitive plural)",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 139.94,
+      "original": "Do tyłu nie zerkaj,",
+      "translation": "Do not look back.",
+      "words": [
+        {
+          "pl": "Do",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tyłu",
+          "en": "back/rear",
+          "type": "Noun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "zerkaj",
+          "en": "glance/look",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 142.74,
+      "original": "bo zamienisz się w soli słup.",
+      "translation": "Or you will turn into a pillar of salt.",
+      "words": [
+        {
+          "pl": "bo",
+          "en": "because",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "zamienisz",
+          "en": "will change",
+          "type": "Verb"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive particle",
+          "type": "Particle"
+        },
+        {
+          "pl": "w",
+          "en": "in/to",
+          "type": "Preposition"
+        },
+        {
+          "pl": "soli",
+          "en": "of salt",
+          "type": "Noun"
+        },
+        {
+          "pl": "słup",
+          "en": "pillar/post",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 145.42,
+      "original": "Smaczna jak bułka tarta,",
+      "translation": "Tasty like breadcrumbs.",
+      "words": [
+        {
+          "pl": "Smaczna",
+          "en": "tasty",
+          "type": "Adjective"
+        },
+        {
+          "pl": "jak",
+          "en": "like",
+          "type": "Adverb"
+        },
+        {
+          "pl": "bułka",
+          "en": "roll",
+          "type": "Noun"
+        },
+        {
+          "pl": "tarta",
+          "en": "grated",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 148.6,
+      "original": "słucha Mozarta i kocha róż.",
+      "translation": "She listens to Mozart and loves roses.",
+      "words": [
+        {
+          "pl": "słucha",
+          "en": "listens",
+          "type": "Verb"
+        },
+        {
+          "pl": "Mozarta",
+          "en": "Mozart (genitive)",
+          "type": "Proper noun"
+        },
+        {
+          "pl": "i",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "kocha",
+          "en": "loves",
+          "type": "Verb"
+        },
+        {
+          "pl": "róż",
+          "en": "roses",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 152.29,
+      "original": "Mówią miłość jest ślepa,",
+      "translation": "They say love is blind.",
+      "words": [
+        {
+          "pl": "Mówią",
+          "en": "they say",
+          "type": "Verb"
+        },
+        {
+          "pl": "miłość",
+          "en": "love",
+          "type": "Noun"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "ślepa",
+          "en": "blind",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 154.94,
+      "original": "a ty za dużo widziałeś już.",
+      "translation": "And you have already seen too much.",
+      "words": [
+        {
+          "pl": "a",
+          "en": "and/but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "ty",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "dużo",
+          "en": "much/many",
+          "type": "Adverb"
+        },
+        {
+          "pl": "widziałeś",
+          "en": "you saw",
+          "type": "Verb"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 158.48,
+      "original": "Poradzisz sobie sam, zadałam za dużo ran.",
+      "translation": "You will manage alone; I have caused too many wounds.",
+      "words": [
+        {
+          "pl": "Poradzisz",
+          "en": "will manage",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to themselves",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "sam",
+          "en": "alone/self",
+          "type": "Adjective"
+        },
+        {
+          "pl": "zadałam",
+          "en": "I inflicted",
+          "type": "Verb (Past)"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "dużo",
+          "en": "much/many",
+          "type": "Adverb"
+        },
+        {
+          "pl": "ran",
+          "en": "wounds",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 161.58,
+      "original": "Jest wiele na tym globie, już po dobie będzie raj.",
+      "translation": "There are many in this world; after a day it will be paradise.",
+      "words": [
+        {
+          "pl": "Jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "wiele",
+          "en": "many",
+          "type": "Quantifier"
+        },
+        {
+          "pl": "na",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tym",
+          "en": "this/that",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "globie",
+          "en": "globe",
+          "type": "Noun"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "dobie",
+          "en": "24 hours",
+          "type": "Noun"
+        },
+        {
+          "pl": "będzie",
+          "en": "will be",
+          "type": "Verb"
+        },
+        {
+          "pl": "raj",
+          "en": "paradise",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 170.53,
+      "original": "Poradzisz sobie sam, zadałam za dużo ran.",
+      "translation": "You will manage alone; I have caused too many wounds.",
+      "words": [
+        {
+          "pl": "Poradzisz",
+          "en": "will manage",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to themselves",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "sam",
+          "en": "alone/self",
+          "type": "Adjective"
+        },
+        {
+          "pl": "zadałam",
+          "en": "I inflicted",
+          "type": "Verb (Past)"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "dużo",
+          "en": "much/many",
+          "type": "Adverb"
+        },
+        {
+          "pl": "ran",
+          "en": "wounds",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 173.67,
+      "original": "Jest wiele na tym globie, już po dobie będzie raj.",
+      "translation": "There are many in this world; after a day it will be paradise.",
+      "words": [
+        {
+          "pl": "Jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "wiele",
+          "en": "many",
+          "type": "Quantifier"
+        },
+        {
+          "pl": "na",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tym",
+          "en": "this/that",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "globie",
+          "en": "globe",
+          "type": "Noun"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        },
+        {
+          "pl": "po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "dobie",
+          "en": "24 hours",
+          "type": "Noun"
+        },
+        {
+          "pl": "będzie",
+          "en": "will be",
+          "type": "Verb"
+        },
+        {
+          "pl": "raj",
+          "en": "paradise",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 176.64,
+      "original": "Mówią miłość jest ślepa,",
+      "translation": "They say love is blind.",
+      "words": [
+        {
+          "pl": "Mówią",
+          "en": "they say",
+          "type": "Verb"
+        },
+        {
+          "pl": "miłość",
+          "en": "love",
+          "type": "Noun"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "ślepa",
+          "en": "blind",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 179.18,
+      "original": "a ty za dużo widziałeś już.",
+      "translation": "And you have already seen too much.",
+      "words": [
+        {
+          "pl": "a",
+          "en": "and/but",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "ty",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "za",
+          "en": "too / for",
+          "type": "Particle"
+        },
+        {
+          "pl": "dużo",
+          "en": "much/many",
+          "type": "Adverb"
+        },
+        {
+          "pl": "widziałeś",
+          "en": "you saw",
+          "type": "Verb"
+        },
+        {
+          "pl": "już",
+          "en": "already",
+          "type": "Adverb"
+        }
       ]
     }
   ]

@@ -134,13 +134,13 @@ function AudioProgress({
       marginTop: 5
     }}>
         <span style={{
-        fontSize: 10,
+        fontSize: 12,
         color: "rgba(148,163,184,0.38)",
         fontVariantNumeric: "tabular-nums",
         fontFamily: "monospace"
       }}><IconText>{fmt(progress)}</IconText></span>
         <span style={{
-        fontSize: 10,
+        fontSize: 12,
         color: "rgba(148,163,184,0.22)",
         fontVariantNumeric: "tabular-nums",
         fontFamily: "monospace"
@@ -219,7 +219,7 @@ function VocabCard({
         marginBottom: "1.1rem"
       }}>
           <span style={{
-          fontSize: 9,
+          fontSize: 11,
           fontWeight: 800,
           textTransform: "uppercase",
           letterSpacing: "0.3em",
@@ -260,7 +260,7 @@ function VocabCard({
         borderRadius: 9999,
         background: ACCENT_SOFT,
         border: `1px solid ${ACCENT_MID}`,
-        fontSize: 9,
+        fontSize: 11,
         fontWeight: 800,
         textTransform: "uppercase",
         letterSpacing: "0.18em",
@@ -279,11 +279,11 @@ function VocabCard({
         marginBottom: "1.25rem"
       }}>
           <p style={{
-          fontSize: 9,
+          fontSize: 11,
           fontWeight: 800,
           textTransform: "uppercase",
           letterSpacing: "0.25em",
-          color: "rgba(148,163,184,0.3)",
+          color: "#aebdd1",
           marginBottom: 5
         }}>English</p>
           <p style={{
@@ -305,7 +305,7 @@ function VocabCard({
         background: isLearned ? "rgba(52,211,153,0.1)" : ACCENT_SOFT,
         border: `1px solid ${isLearned ? "rgba(52,211,153,0.3)" : ACCENT_MID}`,
         color: isLearned ? GREEN : "#a5b4fc",
-        fontSize: 10,
+        fontSize: 12,
         fontWeight: 800,
         textTransform: "uppercase",
         letterSpacing: "0.18em",
@@ -375,18 +375,31 @@ function VocabEmpty() {
         </svg>
       </div>
       <p style={{
-      fontSize: 10,
+      fontSize: 12,
       fontWeight: 800,
       textTransform: "uppercase",
       letterSpacing: "0.24em",
-      color: "rgba(148,163,184,0.2)",
+      color: "#94a3b8",
       marginBottom: 4
     }}>Tap any word</p>
       <p style={{
       fontSize: 11,
-      color: "rgba(148,163,184,0.14)"
+      color: "#94a3b8"
     }}>to explore its meaning</p>
     </motion.div>;
+}
+
+/* Preserve every lyric word, even when its vocabulary annotation is missing. */
+function lyricTokens(line) {
+  const annotations = Array.isArray(line.words) ? line.words : [];
+  const normalize = value => String(value ?? "").toLocaleLowerCase("pl-PL")
+    .replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+  const tokens = String(line.original ?? "").match(/\S+|\s+/gu) || [];
+  return tokens.map((token, index) => ({
+    text: token,
+    index,
+    word: /^\s+$/u.test(token) ? null : annotations.find(item => normalize(item.pl) === normalize(token)) || null
+  }));
 }
 
 /* ─── Main ──────────────────────────────────────────────────────────────── */
@@ -402,12 +415,141 @@ export default function LirycznaSymfonia() {
   const [lastTapped, setLastTapped] = useState(null);
   const [savedFlash, setSavedFlash] = useState(false);
   const audioRef = useRef(null);
+  const lyricLineRefs = useRef([]);
+  const lyricsScrollRef = useRef(null);
+  const followAnimationRef = useRef(0);
+  const followSuppressionRef = useRef(false);
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const [autoFollow, setAutoFollow] = useState(true);
+
+  // A line is active from its startTime until the next cue. Handles repeated lyrics.
+  const activeLineIndex = song?.fullLyrics?.reduce((best, line, index, lines) => {
+    const time = Number(line.startTime);
+    if (!Number.isFinite(time) || time > playbackTime) return best;
+    return best < 0 || time >= Number(lines[best].startTime) ? index : best;
+  }, -1) ?? -1;
+
+  // Audio is the only clock. RAF gives responsive seeking/highlighting without
+  // allowing animation frames to invent or advance lyric timestamps.
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    let frameId = 0;
+    let lastTime = -1;
+    const sync = () => {
+      const time = audio.currentTime || 0;
+      if (Math.abs(time - lastTime) >= 0.035) {
+        lastTime = time;
+        setPlaybackTime(time);
+      }
+    };
+    const tick = () => {
+      sync();
+      if (!audio.paused && !audio.ended) frameId = requestAnimationFrame(tick);
+    };
+    const onPlay = () => {
+      setIsPlaying(true);
+      cancelAnimationFrame(frameId);
+      frameId = requestAnimationFrame(tick);
+    };
+    const onPause = () => {
+      setIsPlaying(false);
+      cancelAnimationFrame(frameId);
+      sync();
+    };
+    audio.addEventListener("timeupdate", sync);
+    audio.addEventListener("seeking", sync);
+    audio.addEventListener("seeked", sync);
+    audio.addEventListener("loadedmetadata", sync);
+    audio.addEventListener("play", onPlay);
+    audio.addEventListener("pause", onPause);
+    audio.addEventListener("ended", onPause);
+    if (!audio.paused) onPlay();
+    else sync();
+    return () => {
+      cancelAnimationFrame(frameId);
+      audio.removeEventListener("timeupdate", sync);
+      audio.removeEventListener("seeking", sync);
+      audio.removeEventListener("seeked", sync);
+      audio.removeEventListener("loadedmetadata", sync);
+      audio.removeEventListener("play", onPlay);
+      audio.removeEventListener("pause", onPause);
+      audio.removeEventListener("ended", onPause);
+    };
+  }, [song]);
+
+  // Scroll ONLY within the lyrics panel on desktop, or the page on mobile.
+  // A short, capped animation prevents a backlog of smooth-scroll requests
+  // from producing a rapid catch-up at the end of the recording.
+  const followLine = useCallback((index, immediate = false) => {
+    const line = lyricLineRefs.current[index];
+    const panel = lyricsScrollRef.current;
+    if (!line || !panel) return;
+    cancelAnimationFrame(followAnimationRef.current);
+    const desktop = window.matchMedia("(min-width: 1024px)").matches;
+    const scroller = desktop ? panel : document.scrollingElement;
+    if (!scroller) return;
+    const lineRect = line.getBoundingClientRect();
+    const panelRect = desktop ? panel.getBoundingClientRect() : { top: 0, height: window.innerHeight };
+    const delta = lineRect.top + lineRect.height / 2 - (panelRect.top + panelRect.height / 2);
+    const maxScroll = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+    const target = Math.max(0, Math.min(maxScroll, scroller.scrollTop + delta));
+    const initial = scroller.scrollTop;
+    const distance = target - initial;
+    if (Math.abs(distance) < 5) return;
+    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (immediate || reduceMotion || Math.abs(distance) > scroller.clientHeight * 1.7) {
+      followSuppressionRef.current = true;
+      scroller.scrollTop = target;
+      requestAnimationFrame(() => { followSuppressionRef.current = false; });
+      return;
+    }
+    const start = performance.now();
+    const duration = 360;
+    followSuppressionRef.current = true;
+    const step = now => {
+      const t = Math.min(1, (now - start) / duration);
+      const ease = 1 - Math.pow(1 - t, 3);
+      scroller.scrollTop = initial + distance * ease;
+      if (t < 1) followAnimationRef.current = requestAnimationFrame(step);
+      else followSuppressionRef.current = false;
+    };
+    followAnimationRef.current = requestAnimationFrame(step);
+  }, []);
+
+  useEffect(() => {
+    if (autoFollow && activeLineIndex >= 0) followLine(activeLineIndex);
+  }, [activeLineIndex, autoFollow, followLine, currentIndex]);
+
+  useEffect(() => () => cancelAnimationFrame(followAnimationRef.current), []);
+
+  const stopFollowingOnInteraction = () => {
+    cancelAnimationFrame(followAnimationRef.current);
+    followSuppressionRef.current = false;
+    setAutoFollow(false);
+  };
+
+  const seekToLine = time => {
+    const audio = audioRef.current;
+    if (!audio || !Number.isFinite(Number(time))) return;
+    audio.currentTime = Math.max(0, Number(time));
+    setPlaybackTime(audio.currentTime);
+    setAutoFollow(true);
+    const lines = song?.fullLyrics || [];
+    const index = lines.reduce((best, line, i) => Number(line.startTime) <= audio.currentTime ? i : best, -1);
+    if (index >= 0) followLine(index, true);
+  };
+
 
   /* ── Load song ── */
   useEffect(() => {
     setSong(null);
     setLoadError(false);
     setSelectedWord(null);
+    setPlaybackTime(0);
+    setAutoFollow(true);
+    lyricLineRefs.current = [];
+    cancelAnimationFrame(followAnimationRef.current);
     const controller = new AbortController();
     fetch(`/songs/${playlist[currentIndex]}`, { signal: controller.signal })
       .then(r => { if (!r.ok) throw new Error('Song unavailable'); return r.json(); })
@@ -499,10 +641,16 @@ export default function LirycznaSymfonia() {
           background: none; border: none; cursor: pointer;
           padding: 3px 4px; border-radius: 6px;
           font-family: 'Space Grotesk', sans-serif;
-          font-weight: 800; letter-spacing: -0.02em; line-height: 1.15;
+          font-weight: 650; letter-spacing: 0; line-height: 1.55;
           transition: color 0.15s, background 0.15s;
         }
-        .ls-root .ls-word:hover { background: rgba(99,102,241,0.1); }
+        .ls-root .ls-word:hover { background: rgba(99,102,241,0.14); }
+        .ls-root .ls-word:focus-visible, .ls-root .ls-line-seek:focus-visible {
+          outline: 2px solid #a5b4fc; outline-offset: 3px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ls-root .ls-word { transition: none; }
+        }
 
         /* Responsive layout */
         /* Mobile: single column, lyrics col scrolls normally */
@@ -600,7 +748,7 @@ export default function LirycznaSymfonia() {
           }}>
                 <div>
                   <p style={{
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: 800,
                 textTransform: "uppercase",
                 letterSpacing: "0.28em",
@@ -670,7 +818,7 @@ export default function LirycznaSymfonia() {
                         {active ? <EqBars active={isPlaying} /> : <span style={{
                     fontFamily: "monospace",
                     fontSize: 11,
-                    color: "rgba(148,163,184,0.3)",
+                    color: "#aebdd1",
                     fontWeight: 700
                   }}>0<IconText>{idx + 1}</IconText></span>}
                       </div>
@@ -680,7 +828,7 @@ export default function LirycznaSymfonia() {
                   minWidth: 0
                 }}>
                         <p style={{
-                    fontSize: 9,
+                    fontSize: 11,
                     fontWeight: 800,
                     textTransform: "uppercase",
                     letterSpacing: "0.2em",
@@ -739,7 +887,7 @@ export default function LirycznaSymfonia() {
                 color: "#6ee7b7"
               }}><IconText>{learnedCount}</IconText> word<IconText>{learnedCount > 1 ? "s" : ""}</IconText> saved</p>
                     <p style={{
-                fontSize: 10,
+                fontSize: 12,
                 color: "rgba(110,231,183,0.4)",
                 marginTop: 2
               }}>Keep exploring!</p>
@@ -920,7 +1068,7 @@ export default function LirycznaSymfonia() {
                   <IconText>{song.title}</IconText>
                 </p>
                 <p style={{
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: 800,
                 textTransform: "uppercase",
                 letterSpacing: "0.14em",
@@ -990,7 +1138,11 @@ export default function LirycznaSymfonia() {
       width: "100%"
     }}>
         {/* ── LEFT: LYRICS — scrolls independently ──────────────────────── */}
-        <div className="ls-lyrics-col" style={{
+        <div className="ls-lyrics-col" ref={lyricsScrollRef}
+          onWheel={stopFollowingOnInteraction}
+          onTouchMove={stopFollowingOnInteraction}
+          onKeyDown={event => { if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End"].includes(event.key)) stopFollowingOnInteraction(); }}
+          style={{
         flex: 1,
         minWidth: 0,
         overflowY: "auto",
@@ -1009,7 +1161,7 @@ export default function LirycznaSymfonia() {
           marginBottom: "3rem"
         }}>
             <p style={{
-            fontSize: 9,
+            fontSize: 11,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: "0.32em",
@@ -1032,7 +1184,7 @@ export default function LirycznaSymfonia() {
             fontWeight: 700,
             textTransform: "uppercase",
             letterSpacing: "0.22em",
-            color: "rgba(148,163,184,0.3)"
+            color: "#aebdd1"
           }}>
               <IconText>{song.artist}</IconText>
             </p>
@@ -1045,80 +1197,70 @@ export default function LirycznaSymfonia() {
           }} />
           </motion.div>
 
-          {/* Lyric lines */}
-          <div style={{
-          display: "flex",
-          flexDirection: "column",
-          gap: "3rem"
-        }}>
-            {song.fullLyrics.map((line, lineIdx) => <motion.div key={`${currentIndex}-${lineIdx}`} initial={{
-            opacity: 0,
-            y: 14
-          }} whileInView={{
-            opacity: 1,
-            y: 0
-          }} viewport={{
-            once: true,
-            margin: "-5%",
-            root: undefined
-          }} transition={{
-            duration: 0.45,
-            delay: Math.min(lineIdx * 0.035, 0.22)
-          }} style={{
-            paddingLeft: "1.1rem",
-            borderLeft: `2px solid rgba(99,102,241,0.1)`,
-            position: "relative"
-          }}>
-                {/* Words */}
-                <div style={{
-              display: "flex",
-              flexWrap: "wrap",
-              gap: "4px 8px",
-              marginBottom: 12
-            }}>
-                  {line.words.map((word, wIdx) => {
-                const isSelected = selectedWord?.pl === word.pl;
-                const isLearned = wordsLearned.has(word.pl);
-                return <span key={wIdx} style={{
-                  position: "relative",
-                  display: "inline-block"
+          {/* Lyrics: display the complete original text; annotations are optional. */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 12, marginBottom: 22 }}>
+            <span style={{ fontSize: 13, color: "#cbd5e1", fontWeight: 600 }}>
+              {activeLineIndex >= 0 ? `Line ${activeLineIndex + 1} of ${song.fullLyrics.length}` : "Lyrics"}
+            </span>
+            <button type="button" onClick={() => {
+              setAutoFollow(true);
+              if (activeLineIndex >= 0) followLine(activeLineIndex, true);
+            }} aria-pressed={autoFollow} style={{
+              background: autoFollow ? ACCENT_SOFT : "rgba(255,255,255,0.06)",
+              color: autoFollow ? "#c7d2fe" : "#e2e8f0",
+              border: `1px solid ${autoFollow ? ACCENT_MID : "rgba(255,255,255,0.18)"}`,
+              padding: "9px 13px", borderRadius: 10, fontSize: 12, fontWeight: 700, cursor: "pointer"
+            }}>{autoFollow ? "Following lyrics · On" : "Follow lyrics · Off"}</button>
+          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.65rem", paddingBottom: "20vh" }}>
+            {song.fullLyrics.map((line, lineIdx) => {
+              const active = lineIdx === activeLineIndex;
+              return <div key={`${currentIndex}-${lineIdx}`}
+                ref={el => { lyricLineRefs.current[lineIdx] = el; }}
+                style={{
+                  padding: "16px 18px", borderRadius: 16,
+                  borderLeft: `3px solid ${active ? "#818cf8" : "rgba(148,163,184,0.24)"}`,
+                  background: active ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.015)",
+                  transition: "background 220ms ease, border-color 220ms ease"
                 }}>
-                        {isSelected && <WordRipple trigger={lastTapped} />}
-                        <button className="ls-word" onClick={() => tapWord(word)} style={{
-                    fontSize: "clamp(1.3rem, 3.5vw, 2rem)",
-                    color: isLearned ? "#6ee7b7" : isSelected ? "#a5b4fc" : "rgba(226,232,240,0.82)"
-                  }}>
-                          <IconText>{word.pl}</IconText>
-                          {isLearned && <motion.span initial={{
-                      scale: 0
-                    }} animate={{
-                      scale: 1
-                    }} style={{
-                      position: "absolute",
-                      top: 1,
-                      right: -1,
-                      width: 6,
-                      height: 6,
-                      borderRadius: "50%",
-                      background: GREEN,
-                      boxShadow: `0 0 6px ${GREEN}`
-                    }} />}
-                        </button>
-                      </span>;
-              })}
-                </div>
-
-                {/* Translation */}
-                <p style={{
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: "italic",
-              fontSize: "clamp(0.78rem, 1.8vw, 0.9rem)",
-              color: "rgba(148,163,184,0.32)",
-              lineHeight: 1.7
-            }}>
-                  <IconText>{line.translation}</IconText>
+                <button type="button" className="ls-line-seek"
+                  onClick={() => seekToLine(line.startTime)}
+                  aria-label={`Jump to lyric line ${lineIdx + 1} at ${line.startTime} seconds`}
+                  title="Play from this line"
+                  style={{ border: "none", background: "none", color: active ? "#c7d2fe" : "#94a3b8", fontSize: 12, fontWeight: 700, cursor: "pointer", marginBottom: 9 }}>
+                  {active ? "▶ Playing" : "▶ Play from here"}
+                </button>
+                <p lang="pl" style={{
+                  fontSize: "clamp(1.35rem, 2.7vw, 1.9rem)",
+                  lineHeight: 1.75, fontWeight: active ? 700 : 600,
+                  letterSpacing: "0", color: active ? "#ffffff" : "#e2e8f0",
+                  overflowWrap: "anywhere"
+                }}>
+                  {lyricTokens(line).map(({ text, index, word }) => {
+                    if (!word) return <span key={index}>{text}</span>;
+                    const selected = selectedWord?.pl === word.pl;
+                    const learned = wordsLearned.has(word.pl);
+                    return <span key={index} style={{ position: "relative", display: "inline" }}>
+                      {selected && <WordRipple trigger={lastTapped} />}
+                      <button type="button" className="ls-word" onClick={() => tapWord(word)}
+                        aria-label={`${text}: show vocabulary meaning`}
+                        style={{ fontSize: "inherit", fontWeight: "inherit", lineHeight: "inherit",
+                          color: learned ? "#6ee7b7" : selected ? "#c7d2fe" : "inherit",
+                          textDecoration: learned ? "underline" : "none", textUnderlineOffset: 5,
+                          padding: "0 1px", verticalAlign: "baseline" }}>
+                        {text}
+                      </button>
+                    </span>;
+                  })}
                 </p>
-              </motion.div>)}
+                {line.translation && <p lang="en" style={{
+                  fontFamily: "'Space Grotesk', sans-serif", fontStyle: "normal",
+                  fontSize: "clamp(0.95rem, 1.6vw, 1.05rem)",
+                  color: active ? "#cbd5e1" : "#aebdd1", lineHeight: 1.65,
+                  marginTop: 10
+                }}><IconText>{line.translation}</IconText></p>}
+              </div>;
+            })}
           </div>
         </div>
 
@@ -1133,7 +1275,7 @@ export default function LirycznaSymfonia() {
         borderLeft: "1px solid rgba(255,255,255,0.04)"
       }}>
           <p style={{
-          fontSize: 9,
+          fontSize: 11,
           fontWeight: 800,
           textTransform: "uppercase",
           letterSpacing: "0.28em",
@@ -1154,7 +1296,7 @@ export default function LirycznaSymfonia() {
           marginTop: 16
         }}>
               <p style={{
-            fontSize: 9,
+            fontSize: 11,
             fontWeight: 800,
             textTransform: "uppercase",
             letterSpacing: "0.24em",
@@ -1247,7 +1389,7 @@ export default function LirycznaSymfonia() {
           }}>
                 <div>
                   <p style={{
-                fontSize: 9,
+                fontSize: 11,
                 fontWeight: 800,
                 textTransform: "uppercase",
                 letterSpacing: "0.28em",
@@ -1271,7 +1413,7 @@ export default function LirycznaSymfonia() {
               borderRadius: 9999,
               background: ACCENT_SOFT,
               border: `1px solid ${ACCENT_MID}`,
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.15em",
@@ -1287,11 +1429,11 @@ export default function LirycznaSymfonia() {
             borderBottom: "1px solid rgba(255,255,255,0.05)"
           }}>
                 <p style={{
-              fontSize: 9,
+              fontSize: 11,
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.28em",
-              color: "rgba(148,163,184,0.3)",
+              color: "#aebdd1",
               marginBottom: 5
             }}>English</p>
                 <p style={{
@@ -1312,7 +1454,7 @@ export default function LirycznaSymfonia() {
               background: "rgba(255,255,255,0.03)",
               border: "1px solid rgba(255,255,255,0.07)",
               color: "rgba(148,163,184,0.45)",
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.14em",
@@ -1334,7 +1476,7 @@ export default function LirycznaSymfonia() {
               background: wordsLearned.has(selectedWord.pl) ? "rgba(52,211,153,0.1)" : ACCENT_SOFT,
               border: `1px solid ${wordsLearned.has(selectedWord.pl) ? "rgba(52,211,153,0.3)" : ACCENT_MID}`,
               color: wordsLearned.has(selectedWord.pl) ? GREEN : "#a5b4fc",
-              fontSize: 10,
+              fontSize: 12,
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.14em",

@@ -5,166 +5,1786 @@
   "audioUrl": "/songs/sanah_tesknie_sobie.mp3",
   "fullLyrics": [
     {
-      "startTime": 0,
-      "original": "Śmiesznie jak płynie czas. On podpowiadał nie raz.",
-      "translation": "Funny how time flows. It suggested more than once.",
+      "startTime": 22.18,
+      "original": "Śmiesznie jak płynie czas",
+      "translation": "Funny how time passes",
       "words": [
-        {"pl": "Śmiesznie", "en": "Funny", "type": "Adverb"},
-        {"pl": "jak", "en": "how", "type": "Adverb"},
-        {"pl": "płynie", "en": "flows", "type": "Verb (Present)"},
-        {"pl": "czas", "en": "time", "type": "Noun"},
-        {"pl": "On", "en": "It/He", "type": "Pronoun"},
-        {"pl": "podpowiadał", "en": "suggested", "type": "Verb (Past)"},
-        {"pl": "nie", "en": "not", "type": "Particle"},
-        {"pl": "raz", "en": "once", "type": "Noun"}
+        {
+          "pl": "Śmiesznie",
+          "en": "funny",
+          "type": "Adverb"
+        },
+        {
+          "pl": "jak",
+          "en": "how",
+          "type": "Adverb"
+        },
+        {
+          "pl": "płynie",
+          "en": "flows",
+          "type": "Verb"
+        },
+        {
+          "pl": "czas",
+          "en": "time",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 10,
-      "original": "Mówiłam jeszcze powalczę. Chciałeś za kilka lat mieć u stóp cały świat.",
-      "translation": "I said I'll still fight. You wanted to have the whole world at your feet in a few years.",
+      "startTime": 25.31,
+      "original": "On podpowiadał nie raz",
+      "translation": "It gave hints more than once",
       "words": [
-        {"pl": "Mówiłam", "en": "I said", "type": "Verb (Past)"},
-        {"pl": "jeszcze", "en": "still", "type": "Adverb"},
-        {"pl": "powalczę", "en": "I will fight", "type": "Verb (Future)"},
-        {"pl": "Chciałeś", "en": "You wanted", "type": "Verb (Past)"},
-        {"pl": "kilka", "en": "a few", "type": "Number"},
-        {"pl": "lat", "en": "years", "type": "Noun"},
-        {"pl": "stóp", "en": "feet", "type": "Noun"},
-        {"pl": "świat", "en": "world", "type": "Noun"}
+        {
+          "pl": "On",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "podpowiadał",
+          "en": "hinted",
+          "type": "Verb"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "raz",
+          "en": "once",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 20,
-      "original": "Patrzyłam na to przez palce.",
-      "translation": "I turned a blind eye (looked through fingers).",
+      "startTime": 27.64,
+      "original": "Mówiłam: jeszcze powalczę",
+      "translation": "I said: I will keep fighting",
       "words": [
-        {"pl": "Patrzyłam", "en": "I looked", "type": "Verb (Past)"},
-        {"pl": "na", "en": "at", "type": "Preposition"},
-        {"pl": "to", "en": "it", "type": "Pronoun"},
-        {"pl": "przez", "en": "through", "type": "Preposition"},
-        {"pl": "palce", "en": "fingers", "type": "Noun"}
+        {
+          "pl": "Mówiłam",
+          "en": "I said",
+          "type": "Verb"
+        },
+        {
+          "pl": "jeszcze",
+          "en": "still",
+          "type": "Adverb"
+        },
+        {
+          "pl": "powalczę",
+          "en": "I will fight",
+          "type": "Verb"
+        }
       ]
     },
     {
-      "startTime": 30,
-      "original": "Kolejny raz sercem się baw. I tak jest od lat bezradne.",
-      "translation": "Play with my heart once again. It has been helpless for years anyway.",
+      "startTime": 32.61,
+      "original": "Chciałeś za kilka lat",
+      "translation": "You wanted, in a few years",
       "words": [
-        {"pl": "Kolejny", "en": "Another", "type": "Adjective"},
-        {"pl": "raz", "en": "time", "type": "Noun"},
-        {"pl": "sercem", "en": "heart", "type": "Noun"},
-        {"pl": "się", "en": "itself", "type": "Particle"},
-        {"pl": "baw", "en": "play", "type": "Verb (Imp.)"},
-        {"pl": "bezradne", "en": "helpless", "type": "Adjective"}
+        {
+          "pl": "Chciałeś",
+          "en": "you wanted",
+          "type": "Verb"
+        },
+        {
+          "pl": "za",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "kilka",
+          "en": "a few",
+          "type": "Numeral"
+        },
+        {
+          "pl": "lat",
+          "en": "years",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 40,
-      "original": "Nie ufam ci już. Odejdź z mych snów. Niczego dziś tak nie pragnę.",
-      "translation": "I don't trust you anymore. Leave my dreams. I desire nothing else today.",
+      "startTime": 35.65,
+      "original": "Mieć u stóp cały świat",
+      "translation": "To have the whole world at your feet",
       "words": [
-        {"pl": "Nie", "en": "Not", "type": "Particle"},
-        {"pl": "ufam", "en": "I trust", "type": "Verb"},
-        {"pl": "Odejdź", "en": "Leave", "type": "Verb (Imp.)"},
-        {"pl": "snów", "en": "dreams", "type": "Noun"},
-        {"pl": "pragnę", "en": "I desire", "type": "Verb"}
+        {
+          "pl": "Mieć",
+          "en": "to have",
+          "type": "Verb"
+        },
+        {
+          "pl": "u",
+          "en": "at",
+          "type": "Preposition"
+        },
+        {
+          "pl": "stóp",
+          "en": "feet",
+          "type": "Noun"
+        },
+        {
+          "pl": "cały",
+          "en": "whole",
+          "type": "Adjective"
+        },
+        {
+          "pl": "świat",
+          "en": "world",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 50,
-      "original": "Wiem beze mnie tobie będzie dużo lżej. To już wiem o tobie.",
-      "translation": "I know it will be much easier for you without me. I know that now about you.",
+      "startTime": 38.17,
+      "original": "Patrzyłam na to przez palce",
+      "translation": "I turned a blind eye to it",
       "words": [
-        {"pl": "Wiem", "en": "I know", "type": "Verb"},
-        {"pl": "beze", "en": "without", "type": "Preposition"},
-        {"pl": "tobie", "en": "you", "type": "Pronoun"},
-        {"pl": "będzie", "en": "will be", "type": "Verb (Future)"},
-        {"pl": "lżej", "en": "easier", "type": "Adjective"}
+        {
+          "pl": "Patrzyłam",
+          "en": "I looked",
+          "type": "Verb"
+        },
+        {
+          "pl": "na",
+          "en": "at",
+          "type": "Preposition"
+        },
+        {
+          "pl": "to",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "przez",
+          "en": "through",
+          "type": "Preposition"
+        },
+        {
+          "pl": "palce",
+          "en": "fingers",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 60,
-      "original": "Głucha cisza gdy jesteś daleko hen. To nie sen. Tylko tęsknię sobie.",
-      "translation": "Deafening silence when you're far away. It's not a dream. I'm just longing.",
+      "startTime": 43.97,
+      "original": "Kolejny raz sercem się baw",
+      "translation": "Play with my heart once again",
       "words": [
-        {"pl": "Głucha", "en": "Deaf", "type": "Adjective"},
-        {"pl": "cisza", "en": "silence", "type": "Noun"},
-        {"pl": "daleko", "en": "far", "type": "Adverb"},
-        {"pl": "sen", "en": "dream", "type": "Noun"},
-        {"pl": "tęsknię", "en": "I miss", "type": "Verb"}
+        {
+          "pl": "Kolejny",
+          "en": "another",
+          "type": "Adjective"
+        },
+        {
+          "pl": "raz",
+          "en": "once",
+          "type": "Noun"
+        },
+        {
+          "pl": "sercem",
+          "en": "heart",
+          "type": "Noun"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive marker",
+          "type": "Particle"
+        },
+        {
+          "pl": "baw",
+          "en": "play",
+          "type": "Verb"
+        }
       ]
     },
     {
-      "startTime": 70,
-      "original": "Wybacz traciłem czas. Tyle rzeczy nie tak. Myślałem, że tak już skończę.",
-      "translation": "Forgive me, I was wasting time. So many things wrong. I thought I'd end like this.",
+      "startTime": 48.95,
+      "original": "I tak jest od lat bezradne",
+      "translation": "It has been helpless for years anyway",
       "words": [
-        {"pl": "Wybacz", "en": "Forgive", "type": "Verb"},
-        {"pl": "traciłem", "en": "I was losing", "type": "Verb (Past)"},
-        {"pl": "rzeczy", "en": "things", "type": "Noun"},
-        {"pl": "skończę", "en": "I will finish", "type": "Verb (Future)"}
+        {
+          "pl": "I",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "od",
+          "en": "since",
+          "type": "Preposition"
+        },
+        {
+          "pl": "lat",
+          "en": "years",
+          "type": "Noun"
+        },
+        {
+          "pl": "bezradne",
+          "en": "helpless",
+          "type": "Adjective"
+        }
       ]
     },
     {
-      "startTime": 80,
-      "original": "Nie odbieraj mi szans. Jesteś wszystkim co mam. Pójdę za tobą gdzie powiesz.",
-      "translation": "Don't take my chances. You're all I have. I'll follow you wherever you say.",
+      "startTime": 53.99,
+      "original": "Nie ufam ci już",
+      "translation": "I no longer trust you",
       "words": [
-        {"pl": "odbieraj", "en": "take away", "type": "Verb"},
-        {"pl": "szans", "en": "chances", "type": "Noun"},
-        {"pl": "wszystkim", "en": "everything", "type": "Pronoun"},
-        {"pl": "Pójdę", "en": "I will go", "type": "Verb (Future)"}
+        {
+          "pl": "Nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "ufam",
+          "en": "I trust",
+          "type": "Verb"
+        },
+        {
+          "pl": "ci",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        }
       ]
     },
     {
-      "startTime": 90,
-      "original": "Kolejny raz inny ten sam. Łzy płoną w środku serca.",
-      "translation": "Another time, different but the same. Tears burn inside the heart.",
+      "startTime": 56.82,
+      "original": "Odejdź z mych snów",
+      "translation": "Leave my dreams",
       "words": [
-        {"pl": "inny", "en": "different", "type": "Adjective"},
-        {"pl": "sam", "en": "same", "type": "Adjective"},
-        {"pl": "Łzy", "en": "Tears", "type": "Noun"},
-        {"pl": "płoną", "en": "burn", "type": "Verb"}
+        {
+          "pl": "Odejdź",
+          "en": "leave",
+          "type": "Verb"
+        },
+        {
+          "pl": "z",
+          "en": "from",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mych",
+          "en": "my",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "snów",
+          "en": "dreams",
+          "type": "Noun"
+        }
       ]
     },
     {
-      "startTime": 100,
-      "original": "Głupio mi tak. Zawiodłem nas. Nie ma już dla mnie miejsca.",
-      "translation": "I feel foolish. I failed us. There is no more room for me.",
+      "startTime": 59.08,
+      "original": "Niczego dziś tak nie pragnę",
+      "translation": "There is nothing I want more today",
       "words": [
-        {"pl": "Głupio", "en": "Foolishly", "type": "Adverb"},
-        {"pl": "Zawiodłem", "en": "I failed", "type": "Verb (Past)"},
-        {"pl": "miejsca", "en": "place/room", "type": "Noun"}
+        {
+          "pl": "Niczego",
+          "en": "nothing",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "dziś",
+          "en": "today",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "pragnę",
+          "en": "I desire",
+          "type": "Verb"
+        }
       ]
     },
     {
-      "startTime": 110,
-      "original": "[Chorus x2] Wiem beze mnie tobie będzie dużo lżej. Tylko tęsknię sobie.",
-      "translation": "I know it will be easier for you without me. I'm just longing.",
+      "startTime": 64.13,
+      "original": "Wiem, beze mnie tobie będzie dużo lżej",
+      "translation": "I know it will be much easier for you without me",
       "words": [
-        {"pl": "Wiem", "en": "I know", "type": "Verb"},
-        {"pl": "lżej", "en": "easier", "type": "Adjective"},
-        {"pl": "tęsknię", "en": "I miss", "type": "Verb"}
+        {
+          "pl": "Wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "beze",
+          "en": "without",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "będzie",
+          "en": "will be",
+          "type": "Verb"
+        },
+        {
+          "pl": "dużo",
+          "en": "much",
+          "type": "Adverb"
+        },
+        {
+          "pl": "lżej",
+          "en": "easier",
+          "type": "Adverb"
+        }
       ]
     },
     {
-      "startTime": 130,
-      "original": "Po tobie, Po tobie, Po tobie. Tęsknię sobie.",
-      "translation": "After you, after you, after you. I'm longing.",
+      "startTime": 68.74,
+      "original": "To już wiem",
+      "translation": "Now I know",
       "words": [
-        {"pl": "Po", "en": "After", "type": "Preposition"},
-        {"pl": "tobie", "en": "you", "type": "Pronoun"},
-        {"pl": "Tęsknię", "en": "I miss", "type": "Verb"}
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        }
       ]
     },
     {
-      "startTime": 140,
-      "original": "[Outro] Kolejny raz sercem się baw... Niczego dziś tak nie pragnę.",
-      "translation": "Play with my heart once again... I desire nothing else today.",
+      "startTime": 71.48,
+      "original": "To już wiem o tobie",
+      "translation": "Now I know this about you",
       "words": [
-        {"pl": "baw", "en": "play", "type": "Verb"},
-        {"pl": "pragnę", "en": "I desire", "type": "Verb"}
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "o",
+          "en": "o",
+          "type": "Vocabulary"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 74.93,
+      "original": "Głucha cisza, gdy jesteś daleko hen",
+      "translation": "Deafening silence when you are far away",
+      "words": [
+        {
+          "pl": "Głucha",
+          "en": "deafening",
+          "type": "Adjective"
+        },
+        {
+          "pl": "cisza",
+          "en": "silence",
+          "type": "Noun"
+        },
+        {
+          "pl": "gdy",
+          "en": "when",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "jesteś",
+          "en": "you are",
+          "type": "Verb"
+        },
+        {
+          "pl": "daleko",
+          "en": "far away",
+          "type": "Adverb"
+        },
+        {
+          "pl": "hen",
+          "en": "far off",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 79.55,
+      "original": "To nie sen",
+      "translation": "This is not a dream",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "sen",
+          "en": "dream",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 82.44,
+      "original": "Tylko tęsknię sobie",
+      "translation": "I am just missing you",
+      "words": [
+        {
+          "pl": "Tylko",
+          "en": "only",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tęsknię",
+          "en": "I miss",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to myself",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 88.13,
+      "original": "Wybacz, traciłem czas",
+      "translation": "Forgive me, I wasted time",
+      "words": [
+        {
+          "pl": "Wybacz",
+          "en": "forgive",
+          "type": "Verb"
+        },
+        {
+          "pl": "traciłem",
+          "en": "I wasted",
+          "type": "Verb"
+        },
+        {
+          "pl": "czas",
+          "en": "time",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 90.85,
+      "original": "Tyle rzeczy nie tak",
+      "translation": "So many things went wrong",
+      "words": [
+        {
+          "pl": "Tyle",
+          "en": "so many",
+          "type": "Quantifier"
+        },
+        {
+          "pl": "rzeczy",
+          "en": "things",
+          "type": "Noun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 93.35,
+      "original": "Myślałem, że tak już skończę",
+      "translation": "I thought this was how I would end",
+      "words": [
+        {
+          "pl": "Myślałem",
+          "en": "I thought",
+          "type": "Verb"
+        },
+        {
+          "pl": "że",
+          "en": "that",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "skończę",
+          "en": "I will end",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 98.54,
+      "original": "Nie odbieraj mi szans",
+      "translation": "Do not take away my chances",
+      "words": [
+        {
+          "pl": "Nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "odbieraj",
+          "en": "take away",
+          "type": "Verb"
+        },
+        {
+          "pl": "mi",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "szans",
+          "en": "chances",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 101.25,
+      "original": "Jesteś wszystkim, co mam",
+      "translation": "You are everything I have",
+      "words": [
+        {
+          "pl": "Jesteś",
+          "en": "you are",
+          "type": "Verb"
+        },
+        {
+          "pl": "wszystkim",
+          "en": "everything",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "co",
+          "en": "what",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "mam",
+          "en": "I have",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 103.8,
+      "original": "Pójdę za tobą, gdzie powiesz",
+      "translation": "I will follow you wherever you say",
+      "words": [
+        {
+          "pl": "Pójdę",
+          "en": "I will go",
+          "type": "Verb"
+        },
+        {
+          "pl": "za",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobą",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "gdzie",
+          "en": "where",
+          "type": "Adverb"
+        },
+        {
+          "pl": "powiesz",
+          "en": "you say",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 109.34,
+      "original": "Kolejny raz, inny ten sam",
+      "translation": "Once again, different yet the same",
+      "words": [
+        {
+          "pl": "Kolejny",
+          "en": "another",
+          "type": "Adjective"
+        },
+        {
+          "pl": "raz",
+          "en": "once",
+          "type": "Noun"
+        },
+        {
+          "pl": "inny",
+          "en": "different",
+          "type": "Adjective"
+        },
+        {
+          "pl": "ten",
+          "en": "this",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "sam",
+          "en": "same",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 114.58,
+      "original": "Łzy płoną w środku serca",
+      "translation": "Tears burn inside my heart",
+      "words": [
+        {
+          "pl": "Łzy",
+          "en": "tears",
+          "type": "Noun"
+        },
+        {
+          "pl": "płoną",
+          "en": "burn",
+          "type": "Verb"
+        },
+        {
+          "pl": "w",
+          "en": "in",
+          "type": "Preposition"
+        },
+        {
+          "pl": "środku",
+          "en": "inside",
+          "type": "Noun"
+        },
+        {
+          "pl": "serca",
+          "en": "heart",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 119.63,
+      "original": "Głupio mi tak",
+      "translation": "I feel so foolish",
+      "words": [
+        {
+          "pl": "Głupio",
+          "en": "foolish",
+          "type": "Adverb"
+        },
+        {
+          "pl": "mi",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 122.06,
+      "original": "Zawiodłem nas",
+      "translation": "I let us down",
+      "words": [
+        {
+          "pl": "Zawiodłem",
+          "en": "I failed",
+          "type": "Verb"
+        },
+        {
+          "pl": "nas",
+          "en": "us",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 124.77,
+      "original": "Nie ma już dla mnie miejsca",
+      "translation": "There is no place for me anymore",
+      "words": [
+        {
+          "pl": "Nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "ma",
+          "en": "there is",
+          "type": "Verb"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "dla",
+          "en": "for",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "miejsca",
+          "en": "place",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 129.36,
+      "original": "Wiem, beze mnie tobie będzie dużo lżej",
+      "translation": "I know it will be much easier for you without me",
+      "words": [
+        {
+          "pl": "Wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "beze",
+          "en": "without",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "będzie",
+          "en": "will be",
+          "type": "Verb"
+        },
+        {
+          "pl": "dużo",
+          "en": "much",
+          "type": "Adverb"
+        },
+        {
+          "pl": "lżej",
+          "en": "easier",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 133.94,
+      "original": "To już wiem",
+      "translation": "Now I know",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 136.79,
+      "original": "To już wiem o tobie",
+      "translation": "Now I know this about you",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "o",
+          "en": "o",
+          "type": "Vocabulary"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 140.15,
+      "original": "Głucha cisza, gdy jesteś daleko hen",
+      "translation": "Deafening silence when you are far away",
+      "words": [
+        {
+          "pl": "Głucha",
+          "en": "deafening",
+          "type": "Adjective"
+        },
+        {
+          "pl": "cisza",
+          "en": "silence",
+          "type": "Noun"
+        },
+        {
+          "pl": "gdy",
+          "en": "when",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "jesteś",
+          "en": "you are",
+          "type": "Verb"
+        },
+        {
+          "pl": "daleko",
+          "en": "far away",
+          "type": "Adverb"
+        },
+        {
+          "pl": "hen",
+          "en": "far off",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 144.7,
+      "original": "To nie sen",
+      "translation": "This is not a dream",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "sen",
+          "en": "dream",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 147.43,
+      "original": "Tylko tęsknię sobie",
+      "translation": "I am just missing you",
+      "words": [
+        {
+          "pl": "Tylko",
+          "en": "only",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tęsknię",
+          "en": "I miss",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to myself",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 150.69,
+      "original": "Wiem, beze mnie tobie będzie dużo lżej",
+      "translation": "I know it will be much easier for you without me",
+      "words": [
+        {
+          "pl": "Wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "beze",
+          "en": "without",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "będzie",
+          "en": "will be",
+          "type": "Verb"
+        },
+        {
+          "pl": "dużo",
+          "en": "much",
+          "type": "Adverb"
+        },
+        {
+          "pl": "lżej",
+          "en": "easier",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 155.14,
+      "original": "To już wiem",
+      "translation": "Now I know",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 158.11,
+      "original": "To już wiem o tobie",
+      "translation": "Now I know this about you",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "o",
+          "en": "o",
+          "type": "Vocabulary"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 160.81,
+      "original": "Głucha cisza, gdy jesteś daleko hen",
+      "translation": "Deafening silence when you are far away",
+      "words": [
+        {
+          "pl": "Głucha",
+          "en": "deafening",
+          "type": "Adjective"
+        },
+        {
+          "pl": "cisza",
+          "en": "silence",
+          "type": "Noun"
+        },
+        {
+          "pl": "gdy",
+          "en": "when",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "jesteś",
+          "en": "you are",
+          "type": "Verb"
+        },
+        {
+          "pl": "daleko",
+          "en": "far away",
+          "type": "Adverb"
+        },
+        {
+          "pl": "hen",
+          "en": "far off",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 165.26,
+      "original": "To nie sen",
+      "translation": "This is not a dream",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "sen",
+          "en": "dream",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 167.47,
+      "original": "Tylko tęsknię sobie",
+      "translation": "I am just missing you",
+      "words": [
+        {
+          "pl": "Tylko",
+          "en": "only",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tęsknię",
+          "en": "I miss",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to myself",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 171.67,
+      "original": "Po tobie",
+      "translation": "For you / missing you",
+      "words": [
+        {
+          "pl": "Po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 174.05,
+      "original": "Po tobie",
+      "translation": "For you / missing you",
+      "words": [
+        {
+          "pl": "Po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 176.61,
+      "original": "Po tobie",
+      "translation": "For you / missing you",
+      "words": [
+        {
+          "pl": "Po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 178.61,
+      "original": "Tęsknię sobie",
+      "translation": "I am just missing you",
+      "words": [
+        {
+          "pl": "Tęsknię",
+          "en": "I miss",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to myself",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 181.81,
+      "original": "Po tobie",
+      "translation": "For you / missing you",
+      "words": [
+        {
+          "pl": "Po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 184.09,
+      "original": "Po tobie",
+      "translation": "For you / missing you",
+      "words": [
+        {
+          "pl": "Po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 186.63,
+      "original": "Po tobie",
+      "translation": "For you / missing you",
+      "words": [
+        {
+          "pl": "Po",
+          "en": "after",
+          "type": "Preposition"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 188.61,
+      "original": "Tęsknię sobie",
+      "translation": "I am just missing you",
+      "words": [
+        {
+          "pl": "Tęsknię",
+          "en": "I miss",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to myself",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 212.29,
+      "original": "Kolejny raz sercem się baw",
+      "translation": "Play with my heart once again",
+      "words": [
+        {
+          "pl": "Kolejny",
+          "en": "another",
+          "type": "Adjective"
+        },
+        {
+          "pl": "raz",
+          "en": "once",
+          "type": "Noun"
+        },
+        {
+          "pl": "sercem",
+          "en": "heart",
+          "type": "Noun"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive marker",
+          "type": "Particle"
+        },
+        {
+          "pl": "baw",
+          "en": "play",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 217.51,
+      "original": "I tak jest od lat bezradne",
+      "translation": "It has been helpless for years anyway",
+      "words": [
+        {
+          "pl": "I",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "od",
+          "en": "since",
+          "type": "Preposition"
+        },
+        {
+          "pl": "lat",
+          "en": "years",
+          "type": "Noun"
+        },
+        {
+          "pl": "bezradne",
+          "en": "helpless",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 222.4,
+      "original": "Nie ufam ci już",
+      "translation": "I no longer trust you",
+      "words": [
+        {
+          "pl": "Nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "ufam",
+          "en": "I trust",
+          "type": "Verb"
+        },
+        {
+          "pl": "ci",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 225.02,
+      "original": "Odejdź z mych snów",
+      "translation": "Leave my dreams",
+      "words": [
+        {
+          "pl": "Odejdź",
+          "en": "leave",
+          "type": "Verb"
+        },
+        {
+          "pl": "z",
+          "en": "from",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mych",
+          "en": "my",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "snów",
+          "en": "dreams",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 227.44,
+      "original": "Niczego dziś tak nie pragnę",
+      "translation": "There is nothing I want more today",
+      "words": [
+        {
+          "pl": "Niczego",
+          "en": "nothing",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "dziś",
+          "en": "today",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "pragnę",
+          "en": "I desire",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 232.5,
+      "original": "Kolejny raz sercem się baw",
+      "translation": "Play with my heart once again",
+      "words": [
+        {
+          "pl": "Kolejny",
+          "en": "another",
+          "type": "Adjective"
+        },
+        {
+          "pl": "raz",
+          "en": "once",
+          "type": "Noun"
+        },
+        {
+          "pl": "sercem",
+          "en": "heart",
+          "type": "Noun"
+        },
+        {
+          "pl": "się",
+          "en": "reflexive marker",
+          "type": "Particle"
+        },
+        {
+          "pl": "baw",
+          "en": "play",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 237.71,
+      "original": "I tak jest od lat bezradne",
+      "translation": "It has been helpless for years anyway",
+      "words": [
+        {
+          "pl": "I",
+          "en": "and",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "jest",
+          "en": "is",
+          "type": "Verb"
+        },
+        {
+          "pl": "od",
+          "en": "since",
+          "type": "Preposition"
+        },
+        {
+          "pl": "lat",
+          "en": "years",
+          "type": "Noun"
+        },
+        {
+          "pl": "bezradne",
+          "en": "helpless",
+          "type": "Adjective"
+        }
+      ]
+    },
+    {
+      "startTime": 242.39,
+      "original": "Nie ufam ci już",
+      "translation": "I no longer trust you",
+      "words": [
+        {
+          "pl": "Nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "ufam",
+          "en": "I trust",
+          "type": "Verb"
+        },
+        {
+          "pl": "ci",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 245.34,
+      "original": "Odejdź z mych snów",
+      "translation": "Leave my dreams",
+      "words": [
+        {
+          "pl": "Odejdź",
+          "en": "leave",
+          "type": "Verb"
+        },
+        {
+          "pl": "z",
+          "en": "from",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mych",
+          "en": "my",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "snów",
+          "en": "dreams",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 247.82,
+      "original": "Niczego dziś tak nie pragnę",
+      "translation": "There is nothing I want more today",
+      "words": [
+        {
+          "pl": "Niczego",
+          "en": "nothing",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "dziś",
+          "en": "today",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tak",
+          "en": "so",
+          "type": "Adverb"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "pragnę",
+          "en": "I desire",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 255.97,
+      "original": "Wiem, beze mnie tobie będzie dużo lżej",
+      "translation": "I know it will be much easier for you without me",
+      "words": [
+        {
+          "pl": "Wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "beze",
+          "en": "without",
+          "type": "Preposition"
+        },
+        {
+          "pl": "mnie",
+          "en": "me",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "będzie",
+          "en": "will be",
+          "type": "Verb"
+        },
+        {
+          "pl": "dużo",
+          "en": "much",
+          "type": "Adverb"
+        },
+        {
+          "pl": "lżej",
+          "en": "easier",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 261.25,
+      "original": "To już wiem",
+      "translation": "Now I know",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        }
+      ]
+    },
+    {
+      "startTime": 264.33,
+      "original": "To już wiem o tobie",
+      "translation": "Now I know this about you",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "już",
+          "en": "anymore",
+          "type": "Adverb"
+        },
+        {
+          "pl": "wiem",
+          "en": "I know",
+          "type": "Verb"
+        },
+        {
+          "pl": "o",
+          "en": "o",
+          "type": "Vocabulary"
+        },
+        {
+          "pl": "tobie",
+          "en": "you",
+          "type": "Pronoun"
+        }
+      ]
+    },
+    {
+      "startTime": 268.57,
+      "original": "Głucha cisza, gdy jesteś daleko hen",
+      "translation": "Deafening silence when you are far away",
+      "words": [
+        {
+          "pl": "Głucha",
+          "en": "deafening",
+          "type": "Adjective"
+        },
+        {
+          "pl": "cisza",
+          "en": "silence",
+          "type": "Noun"
+        },
+        {
+          "pl": "gdy",
+          "en": "when",
+          "type": "Conjunction"
+        },
+        {
+          "pl": "jesteś",
+          "en": "you are",
+          "type": "Verb"
+        },
+        {
+          "pl": "daleko",
+          "en": "far away",
+          "type": "Adverb"
+        },
+        {
+          "pl": "hen",
+          "en": "far off",
+          "type": "Adverb"
+        }
+      ]
+    },
+    {
+      "startTime": 273.54,
+      "original": "To nie sen",
+      "translation": "This is not a dream",
+      "words": [
+        {
+          "pl": "To",
+          "en": "it",
+          "type": "Pronoun"
+        },
+        {
+          "pl": "nie",
+          "en": "not",
+          "type": "Particle"
+        },
+        {
+          "pl": "sen",
+          "en": "dream",
+          "type": "Noun"
+        }
+      ]
+    },
+    {
+      "startTime": 276.77,
+      "original": "Tylko tęsknię sobie",
+      "translation": "I am just missing you",
+      "words": [
+        {
+          "pl": "Tylko",
+          "en": "only",
+          "type": "Adverb"
+        },
+        {
+          "pl": "tęsknię",
+          "en": "I miss",
+          "type": "Verb"
+        },
+        {
+          "pl": "sobie",
+          "en": "to myself",
+          "type": "Pronoun"
+        }
       ]
     }
   ]
