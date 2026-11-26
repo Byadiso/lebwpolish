@@ -184,9 +184,7 @@ Netlify deployment settings:
 | Environment variables | Configure Firebase web settings in Netlify |
 | Routing | Single-page application fallback to `index.html` |
 
-Develop changes on dedicated branches, review them through pull requests, run tests and verify a deployment preview before merging into the production branch. Publish a GitHub release after validating the deployed version.
 
-The V2 upgrade uses the branch `feature/v2-premium-active-learning`. The planned release tag is `v2.0.0`; the release badge above reflects published releases rather than planned versions.
 
 ## Privacy and security
 
