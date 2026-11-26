@@ -1,7 +1,7 @@
 .lebw-music-toggle {
   position: fixed;
   right: max(16px, env(safe-area-inset-right));
-  bottom: max(18px, env(safe-area-inset-bottom));
+  bottom: calc(max(18px, env(safe-area-inset-bottom)) + var(--lebw-footer-lift, 0px));
   z-index: 1000;
   display: inline-flex;
   align-items: center;
@@ -19,4 +19,4 @@
 .lebw-music-toggle:focus-visible { outline: 3px solid #f4ba55; outline-offset: 3px; }
 .lebw-music-toggle > span:first-child { font-size: 19px; }
 .lebw-music-hint { font-size: 11px; opacity: .8; }
-@media (max-width: 480px) { .lebw-music-toggle { bottom: max(12px, env(safe-area-inset-bottom)); right: 12px; padding: 9px 12px; } }
+@media (max-width: 480px) { .lebw-music-toggle { bottom: calc(max(12px, env(safe-area-inset-bottom)) + var(--lebw-footer-lift, 0px)); right: 12px; padding: 9px 12px; } }

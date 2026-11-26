@@ -1,3 +1,4 @@
+import "./MemeLab.css";
 import IconText from "../components/IconText";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
@@ -449,7 +450,7 @@ function DeleteModal({
       }}>Delete this meme?</p>
         <p style={{
         fontSize: 12,
-        color: "rgba(148,163,184,0.4)",
+        color: "#a8b6ca",
         marginBottom: 20,
         fontFamily: "'DM Sans',sans-serif"
       }}>This cannot be undone.</p>
@@ -708,6 +709,8 @@ function LearnPanel({
   post,
   onClose
 }) {
+  const [guess, setGuess] = useState("");
+  const [revealed, setRevealed] = useState(false);
   const allPl = [post.caption, post.grammarRule, post.explanation].filter(Boolean).join(". ");
   const allEn = [post.translation, post.explanation].filter(Boolean).join(". ");
   const blocks = [{
@@ -771,12 +774,19 @@ function LearnPanel({
           fontWeight: 800,
           textTransform: "uppercase",
           letterSpacing: "0.18em",
-          color: "rgba(148,163,184,0.3)",
+          color: "#a8b6ca",
           fontFamily: "'DM Mono',monospace"
         }}>Read everything:</span>
           <TTSButton plText={allPl} enText={allEn} />
         </div>
-        {blocks.map(b => <div key={b.key} style={{
+        {post.translation && <div className="pm-recall">
+          <strong>Try it before revealing</strong>
+          <p>What does the Polish caption mean in English?</p>
+          <textarea aria-label="Your translation" value={guess} onChange={e => setGuess(e.target.value)} placeholder="Write your own translation…" rows={2} />
+          <button type="button" onClick={() => setRevealed(v => !v)}>{revealed ? "Hide reference" : "Reveal reference translation"}</button>
+          {revealed && <p role="status">Compare your meaning with the reference below. Different wording can also be correct.</p>}
+        </div>}
+        {blocks.filter(b => b.key !== "translation" || revealed || !post.translation).map(b => <div key={b.key} style={{
         padding: "12px 14px",
         borderRadius: 13,
         background: b.bg,
@@ -808,7 +818,7 @@ function LearnPanel({
         }}><IconText>{b.plVal}</IconText></p>
             {b.enVal && b.key !== "explanation" && <p style={{
           fontSize: 12,
-          color: `${b.text}88`,
+          color: b.text,
           fontStyle: "italic",
           marginTop: 4,
           fontFamily: "'DM Sans',sans-serif"
@@ -820,7 +830,7 @@ function LearnPanel({
         border: "1px solid rgba(255,255,255,0.07)",
         cursor: "pointer",
         background: "rgba(255,255,255,0.03)",
-        color: "rgba(148,163,184,0.4)",
+        color: "#a8b6ca",
         fontSize: 9,
         fontWeight: 800,
         textTransform: "uppercase",
@@ -998,7 +1008,7 @@ function EditModal({
         border: "none",
         cursor: "pointer",
         background: saving ? "rgba(255,255,255,0.06)" : "linear-gradient(135deg,#6366f1,#4f46e5)",
-        color: saving ? "rgba(255,255,255,0.3)" : "#fff",
+        color: saving ? "#e2e8f0" : "#fff",
         fontFamily: "'DM Sans',sans-serif",
         fontWeight: 800,
         fontSize: 11,
@@ -1277,7 +1287,7 @@ function UploadModal({
           }}>Drop meme image here or click to browse</p>
               <p style={{
             fontSize: 10,
-            color: "rgba(148,163,184,0.3)",
+            color: "#a8b6ca",
             fontFamily: "'DM Mono',monospace"
           }}>PNG · JPG · GIF · WEBP</p>
             </div>}
@@ -1348,7 +1358,7 @@ function UploadModal({
               fontWeight: 800,
               textTransform: "uppercase",
               letterSpacing: "0.2em",
-              color: "rgba(148,163,184,0.3)",
+              color: "#a8b6ca",
               display: "block",
               marginBottom: 5,
               fontFamily: "'DM Mono',monospace"
@@ -1387,7 +1397,7 @@ function UploadModal({
         border: "none",
         cursor: "pointer",
         background: uploading ? "rgba(255,255,255,0.06)" : "linear-gradient(135deg,#6366f1,#4f46e5)",
-        color: uploading ? "rgba(255,255,255,0.3)" : "#fff",
+        color: uploading ? "#e2e8f0" : "#fff",
         fontFamily: "'DM Sans',sans-serif",
         fontWeight: 800,
         fontSize: 11,
@@ -1456,7 +1466,7 @@ function MemeCard({
       <AnimatePresence>{showEdit && <EditModal post={post} onClose={() => setShowEdit(false)} />}</AnimatePresence>
       <AnimatePresence>{showDeleteModal && <DeleteModal onConfirm={handleDelete} onCancel={() => setShowDeleteModal(false)} />}</AnimatePresence>
 
-      <motion.article initial={{
+      <motion.article className="pm-card" initial={{
       opacity: 0,
       y: 18
     }} animate={{
@@ -1542,7 +1552,7 @@ function MemeCard({
                 {post.edited && <span style={{
                 fontSize: 7,
                 fontWeight: 700,
-                color: "rgba(148,163,184,0.3)",
+                color: "#a8b6ca",
                 background: "rgba(255,255,255,0.04)",
                 padding: "1px 5px",
                 borderRadius: 4,
@@ -1552,7 +1562,7 @@ function MemeCard({
               </div>
               <div style={{
               fontSize: 9,
-              color: "rgba(148,163,184,0.32)",
+              color: "#a8b6ca",
               textTransform: "uppercase",
               letterSpacing: "0.14em",
               marginTop: 2,
@@ -1623,7 +1633,7 @@ function MemeCard({
         e.stopPropagation();
         handleLike(e);
       }}>
-          <img src={post.imageUrl} alt="" style={{
+          <img src={post.imageUrl} loading="lazy" alt={post.caption || "Community meme"} style={{
           width: "100%",
           display: "block",
           objectFit: "contain",
@@ -1666,7 +1676,7 @@ function MemeCard({
             backdropFilter: "blur(8px)",
             fontSize: 8,
             fontWeight: 700,
-            color: "rgba(255,255,255,0.3)",
+            color: "#e2e8f0",
             textTransform: "uppercase",
             letterSpacing: "0.1em",
             fontFamily: "'DM Mono',monospace"
@@ -1694,7 +1704,7 @@ function MemeCard({
           cursor: "pointer",
           background: liked ? "rgba(244,63,94,0.12)" : "rgba(255,255,255,0.04)",
           border: `1px solid ${liked ? "rgba(244,63,94,0.28)" : "rgba(255,255,255,0.07)"}`,
-          color: liked ? "#f43f5e" : "rgba(255,255,255,0.5)",
+          color: liked ? "#f43f5e" : "#dbe4ef",
           fontSize: 12,
           fontWeight: 700,
           transition: "all .2s",
@@ -1718,13 +1728,13 @@ function MemeCard({
           cursor: "pointer",
           background: showComments ? "rgba(99,102,241,0.12)" : "rgba(255,255,255,0.04)",
           border: `1px solid ${showComments ? "rgba(99,102,241,0.28)" : "rgba(255,255,255,0.07)"}`,
-          color: showComments ? "#818cf8" : "rgba(255,255,255,0.5)",
+          color: showComments ? "#818cf8" : "#dbe4ef",
           fontSize: 12,
           fontWeight: 700,
           transition: "all .2s",
           fontFamily: "'DM Sans',sans-serif"
         }}><IconText>
-            [icon:chat] </IconText><IconText>{post.commentCount || ""}</IconText>
+            [icon:chat] </IconText><IconText>{post.commentCount || 0} Comments</IconText>
           </motion.button>
           <div style={{
           flex: 1
@@ -1751,7 +1761,7 @@ function MemeCard({
           transition: "all .2s",
           fontFamily: "'DM Sans',sans-serif"
         }}>
-            <IconText>{showLearn ? "✓ Learning" : "[icon:sparkles] Learn"}</IconText>
+            <IconText>{showLearn ? "✓ Learning" : "[icon:sparkles] Decode meme"}</IconText>
           </motion.button>
         </div>
 
@@ -1783,402 +1793,46 @@ function MemeCard({
 
 /* ── Main ── */
 export default function PolishMeme() {
-  const {
-    user,
-    profile
-  } = useAuth();
+  const { user, profile } = useAuth();
   const [posts, setPosts] = useState([]);
   const [showUpload, setShowUpload] = useState(false);
   const [xpItems, setXpItems] = useState([]);
-  const [filter, setFilter] = useState("new");
+  const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [visible, setVisible] = useState(12);
+  const [status, setStatus] = useState("loading");
+  const [retry, setRetry] = useState(0);
+  const [word, setWord] = useState(0);
+  const [wordReveal, setWordReveal] = useState(false);
   const isAdmin = user?.email === ADMIN_EMAIL;
   const totalXp = profile?.xp || 0;
-  const levelLabel = LEVELS[getLevel(totalXp)];
-  const streak = profile?.streak || 0;
+  const words = [["gdyby", "if (hypothetical)", "Gdyby padało, zostałbym w domu."], ["ponieważ", "because", "Uczę się, ponieważ lubię polski."], ["przecież", "after all", "Przecież to proste!"], ["dopiero", "only just / not until", "Dopiero zaczynam."]];
   useEffect(() => {
-    if (!db) return;
-    const q = query(collection(db, "memes"), orderBy("createdAt", "desc"), limit(80));
-    return onSnapshot(q, snap => setPosts(snap.docs.map(d => ({
-      id: d.id,
-      ...d.data()
-    }))));
-  }, []);
-  const triggerXp = useCallback(amount => {
-    const id = Date.now() + Math.random();
-    setXpItems(p => [...p, {
-      id,
-      amount
-    }]);
-  }, []);
+    setPosts([]); setStatus("loading");
+    if (!db) { setStatus("unavailable"); return; }
+    return onSnapshot(collection(db, "memes"), snap => {
+      setPosts(snap.docs.map(d => ({ ...d.data(), id: d.id })).sort((a,b) => (b.createdAt?.toMillis?.() || 0) - (a.createdAt?.toMillis?.() || 0) || a.id.localeCompare(b.id)));
+      setStatus("ready");
+    }, err => { setPosts([]); setStatus(err.code === "permission-denied" ? "denied" : "error"); });
+  }, [user?.uid, retry]);
+  const triggerXp = useCallback(amount => { setXpItems(p => [...p, { id: Date.now() + Math.random(), amount }]); }, []);
   const removeXp = useCallback(id => setXpItems(p => p.filter(x => x.id !== id)), []);
-  const filteredPosts = posts.filter(p => {
-    if (filter === "my") return p.uid === user?.uid;
-    if (filter === "hot") return (p.likes?.length || 0) >= 1;
-    return true;
-  }).sort((a, b) => filter === "hot" ? (b.likes?.length || 0) - (a.likes?.length || 0) : 0);
-  const col1 = filteredPosts.filter((_, i) => i % 2 === 0);
-  const col2 = filteredPosts.filter((_, i) => i % 2 === 1);
-  return <>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700;800&family=DM+Mono:wght@400;500&display=swap');
-        .pmfeed-root*,.pmfeed-root*::before,.pmfeed-root*::after{box-sizing:border-box;margin:0;padding:0;}
-        .pmfeed-root ::-webkit-scrollbar{width:4px;}
-        .pmfeed-root ::-webkit-scrollbar-thumb{background:rgba(99,102,241,0.2);border-radius:9999px;}
-        button{-webkit-tap-highlight-color:transparent;}
-        .pmfeed-root{min-height:100%;background:radial-gradient(ellipse 900px 500px at 15% 0%,rgba(99,102,241,0.07) 0%,transparent 70%),radial-gradient(ellipse 600px 400px at 85% 100%,rgba(52,211,153,0.05) 0%,transparent 70%),#020617;color:#f1f5f9;font-family:'DM Sans',sans-serif;}
-        .pmfeed-layout{display:grid;grid-template-columns:1fr;gap:20px;max-width:1280px;margin:0 auto;padding:20px 14px 80px;}
-        @media(min-width:1080px){.pmfeed-layout{grid-template-columns:1fr 268px;padding:24px 20px 80px;}}
-        .pmfeed-masonry{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start;}
-        @media(max-width:560px){.pmfeed-masonry{grid-template-columns:1fr;}}
-        .pmfeed-col{display:flex;flex-direction:column;gap:14px;}
-        .pmfeed-sidebar{display:flex;flex-direction:column;gap:12px;}
-        @media(min-width:1080px){.pmfeed-sidebar{position:sticky;top:20px;}}
-        .pmfeed-sidebar-full{display:flex;flex-direction:column;gap:12px;}
-        @media(max-width:1079px){.pmfeed-sidebar-full{display:none;}}
-        .pmfeed-scard{background:#0b1220;border:1px solid rgba(255,255,255,0.06);border-radius:18px;padding:16px 18px;transition:border-color .2s;}
-        .pmfeed-scard:hover{border-color:rgba(99,102,241,0.15);}
-        .pmfeed-label{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:0.26em;color:rgba(148,163,184,0.32);margin-bottom:8px;font-family:'DM Mono',monospace;}
-        .pmfeed-upload-btn{width:100%;padding:13px;border:none;border-radius:14px;background:linear-gradient(135deg,#6366f1,#4f46e5);color:#fff;font-family:'DM Sans',sans-serif;font-weight:800;font-size:10px;letter-spacing:0.22em;text-transform:uppercase;cursor:pointer;transition:all .25s;box-shadow:0 8px 24px rgba(79,70,229,0.3);touch-action:manipulation;}
-        .pmfeed-upload-btn:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(79,70,229,0.4);}
-        .pmfeed-upload-btn:active{transform:scale(.97);}
-        .pmfeed-filter-btn{padding:7px 14px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;border:1px solid transparent;transition:all .2s;font-family:'DM Sans',sans-serif;}
-        .pmfeed-filter-btn.active{background:rgba(99,102,241,0.14);border-color:rgba(99,102,241,0.32);color:#818cf8;}
-        .pmfeed-filter-btn:not(.active){background:rgba(255,255,255,0.04);color:rgba(148,163,184,0.4);}
-        .pmfeed-filter-btn:not(.active):hover{color:#818cf8;background:rgba(99,102,241,0.08);}
-        .pmfeed-trending{padding:7px 11px;border-radius:9px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.16);color:#818cf8;font-weight:700;font-size:11px;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif;}
-        .pmfeed-trending:hover{background:rgba(99,102,241,0.18);transform:translateY(-1px);}
-        .pmfeed-mobile-bar{display:none;gap:8px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
-        @media(max-width:1079px){.pmfeed-mobile-bar{display:flex;}}
-      `}</style>
-
-      <div className="pmfeed-root">
-        <AnimatePresence>{xpItems.map(x => <XpBurst key={x.id} amount={x.amount} onDone={() => removeXp(x.id)} />)}</AnimatePresence>
-        <AnimatePresence>{showUpload && <UploadModal user={user} profile={profile} onClose={() => setShowUpload(false)} onSuccess={triggerXp} />}</AnimatePresence>
-
-        <div className="pmfeed-layout">
-          <div>
-            <div style={{
-            marginBottom: 16
-          }}>
-              <p style={{
-              fontSize: 9,
-              fontWeight: 800,
-              textTransform: "uppercase",
-              letterSpacing: "0.3em",
-              color: "rgba(99,102,241,0.45)",
-              marginBottom: 5,
-              fontFamily: "'DM Mono',monospace"
-            }}>Community Feed</p>
-              <h1 style={{
-              fontFamily: "'Playfair Display',serif",
-              fontStyle: "italic",
-              fontWeight: 700,
-              fontSize: "clamp(1.4rem,5vw,2rem)",
-              color: "#f1f5f9",
-              lineHeight: 1.05,
-              marginBottom: 5
-            }}><IconText>Polish Meme Lab [icon:brain]</IconText></h1>
-              <p style={{
-              fontSize: 12,
-              color: "rgba(148,163,184,0.4)",
-              fontFamily: "'DM Sans',sans-serif"
-            }}><IconText>Laugh your way to B1. Tap [icon:sparkles] to learn · [icon:volume] PL/EN audio on every post.</IconText></p>
-            </div>
-
-            {/* Mobile bar: upload + XP/streak strip */}
-            <div className="pmfeed-mobile-bar">
-              <button className="pmfeed-upload-btn" onClick={() => setShowUpload(true)} style={{
-              flex: "1 1 140px"
-            }}>Upload Meme ✦</button>
-              <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 14px",
-              borderRadius: 13,
-              background: "rgba(99,102,241,0.08)",
-              border: "1px solid rgba(99,102,241,0.16)",
-              flexShrink: 0
-            }}>
-                <motion.span animate={{
-                rotate: [-5, 5, -5]
-              }} transition={{
-                duration: 1.6,
-                repeat: Infinity,
-                ease: "easeInOut"
-              }} style={{
-                fontSize: "1rem"
-              }}><IconText>[icon:flame]</IconText></motion.span>
-                <span style={{
-                fontFamily: "'Playfair Display',serif",
-                fontStyle: "italic",
-                fontSize: ".95rem",
-                fontWeight: 700,
-                color: "#f59e0b"
-              }}><IconText>{streak}</IconText>d</span>
-                <span style={{
-                width: 1,
-                height: 14,
-                background: "rgba(255,255,255,0.1)"
-              }} />
-                <span style={{
-                fontFamily: "'Playfair Display',serif",
-                fontStyle: "italic",
-                fontSize: ".95rem",
-                fontWeight: 700,
-                color: "#818cf8"
-              }}><IconText>{totalXp.toLocaleString()}</IconText> XP</span>
-              </div>
-            </div>
-
-            <div style={{
-            display: "flex",
-            gap: 6,
-            marginBottom: 16,
-            flexWrap: "wrap"
-          }}>
-              {[["new", "[icon:sparkles] New"], ["hot", "[icon:flame] Hot"], ["my", "[icon:user] Mine"]].map(([v, l]) => <button key={v} className={`pmfeed-filter-btn ${filter === v ? "active" : ""}`} onClick={() => setFilter(v)}><IconText>{l}</IconText></button>)}
-              <span style={{
-              marginLeft: "auto",
-              fontSize: 10,
-              color: "rgba(148,163,184,0.25)",
-              fontFamily: "'DM Mono',monospace",
-              alignSelf: "center"
-            }}><IconText>{filteredPosts.length}</IconText> posts</span>
-            </div>
-
-            {filteredPosts.length === 0 ? <div style={{
-            textAlign: "center",
-            padding: "60px 20px",
-            color: "rgba(148,163,184,0.28)"
-          }}>
-                <div style={{
-              fontSize: "3rem",
-              marginBottom: 12
-            }}><IconText>[icon:sparkles]</IconText></div>
-                <p style={{
-              fontSize: 14,
-              fontWeight: 600,
-              fontFamily: "'DM Sans',sans-serif"
-            }}><IconText>{filter === "my" ? "You haven't posted yet." : "No memes yet — be first!"}</IconText></p>
-              </div> : <div className="pmfeed-masonry">
-                <div className="pmfeed-col">
-                  {col1.map((post, i) => <motion.div key={post.id} initial={{
-                opacity: 0,
-                y: 20
-              }} animate={{
-                opacity: 1,
-                y: 0
-              }} transition={{
-                delay: Math.min(i * .07, .3)
-              }}>
-                      <MemeCard post={post} user={user} profile={profile} onXp={triggerXp} isAdmin={isAdmin} />
-                    </motion.div>)}
-                </div>
-                <div className="pmfeed-col">
-                  {col2.map((post, i) => <motion.div key={post.id} initial={{
-                opacity: 0,
-                y: 20
-              }} animate={{
-                opacity: 1,
-                y: 0
-              }} transition={{
-                delay: Math.min(i * .07 + .04, .35)
-              }}>
-                      <MemeCard post={post} user={user} profile={profile} onXp={triggerXp} isAdmin={isAdmin} />
-                    </motion.div>)}
-                </div>
-              </div>}
-          </div>
-
-          <aside className="pmfeed-sidebar">
-            <div className="pmfeed-sidebar-full">
-              <button className="pmfeed-upload-btn" onClick={() => setShowUpload(true)}>Upload Meme ✦</button>
-              <div className="pmfeed-scard" style={{
-              border: "1px solid rgba(99,102,241,0.18)"
-            }}>
-                <div style={{
-                height: 2,
-                background: "linear-gradient(90deg,#6366f1,#34d399,transparent)",
-                borderRadius: 9999,
-                marginBottom: 14
-              }} />
-                <p className="pmfeed-label">Your Polish Brain</p>
-                <p style={{
-                fontFamily: "'Playfair Display',serif",
-                fontStyle: "italic",
-                fontWeight: 700,
-                fontSize: "1.5rem",
-                color: "#f1f5f9",
-                marginBottom: 4
-              }}><IconText>{levelLabel}</IconText></p>
-                <div style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                marginBottom: 10
-              }}>
-                  <span style={{
-                  fontFamily: "'Playfair Display',serif",
-                  fontStyle: "italic",
-                  fontSize: ".95rem",
-                  fontWeight: 700,
-                  color: "#818cf8"
-                }}><IconText>{totalXp.toLocaleString()}</IconText> XP</span>
-                  <div style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 4
-                }}>
-                    <motion.span animate={{
-                    rotate: [-5, 5, -5]
-                  }} transition={{
-                    duration: 1.6,
-                    repeat: Infinity,
-                    ease: "easeInOut"
-                  }} style={{
-                    fontSize: "1.1rem",
-                    filter: "drop-shadow(0 0 8px rgba(245,158,11,0.5))"
-                  }}><IconText>[icon:flame]</IconText></motion.span>
-                    <span style={{
-                    fontFamily: "'Playfair Display',serif",
-                    fontStyle: "italic",
-                    fontWeight: 700,
-                    fontSize: "1rem",
-                    color: "#f59e0b"
-                  }}><IconText>{streak}</IconText>d</span>
-                  </div>
-                </div>
-                <div style={{
-                height: 4,
-                background: "rgba(255,255,255,0.05)",
-                borderRadius: 9999,
-                overflow: "hidden"
-              }}>
-                  <div style={{
-                  height: "100%",
-                  width: `${Math.min(100, totalXp % 500 / 5)}%`,
-                  background: "linear-gradient(90deg,#6366f1,#34d399)",
-                  borderRadius: 9999,
-                  transition: "width .7s ease"
-                }} />
-                </div>
-              </div>
-              <div className="pmfeed-scard">
-                <p className="pmfeed-label">Trending words</p>
-                <div style={{
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 7
-              }}>
-                  {TRENDING.map(w => <span key={w} className="pmfeed-trending"><IconText>[icon:flame] </IconText><IconText>{w}</IconText></span>)}
-                </div>
-              </div>
-              <div className="pmfeed-scard" style={{
-              textAlign: "center"
-            }}>
-                <p className="pmfeed-label" style={{
-                marginBottom: 6
-              }}>Community</p>
-                <p style={{
-                fontFamily: "'Playfair Display',serif",
-                fontStyle: "italic",
-                fontWeight: 700,
-                fontSize: "1.7rem",
-                color: "#818cf8"
-              }}><IconText>{posts.length}</IconText></p>
-                <p style={{
-                fontSize: 10,
-                color: "rgba(148,163,184,0.3)",
-                fontFamily: "'DM Mono',monospace"
-              }}>memes published</p>
-                <div style={{
-                marginTop: 12,
-                height: 1,
-                background: "rgba(255,255,255,0.05)"
-              }} />
-                <div style={{
-                marginTop: 12,
-                display: "flex",
-                justifyContent: "center",
-                gap: 16
-              }}>
-                  <div><p style={{
-                    fontFamily: "'Playfair Display',serif",
-                    fontStyle: "italic",
-                    fontWeight: 700,
-                    fontSize: "1.2rem",
-                    color: "#f43f5e"
-                  }}>{posts.reduce((a, p) => a + (p.likes?.length || 0), 0)}</p><p style={{
-                    fontSize: 9,
-                    color: "rgba(148,163,184,0.28)",
-                    fontFamily: "'DM Mono',monospace"
-                  }}><IconText>[icon:heart] total</IconText></p></div>
-                  <div><p style={{
-                    fontFamily: "'Playfair Display',serif",
-                    fontStyle: "italic",
-                    fontWeight: 700,
-                    fontSize: "1.2rem",
-                    color: "#34d399"
-                  }}>{posts.reduce((a, p) => a + (p.commentCount || 0), 0)}</p><p style={{
-                    fontSize: 9,
-                    color: "rgba(148,163,184,0.28)",
-                    fontFamily: "'DM Mono',monospace"
-                  }}><IconText>[icon:chat] total</IconText></p></div>
-                </div>
-              </div>
-              <Link to="/shadow-protocol" style={{
-              textDecoration: "none"
-            }}>
-                <div className="pmfeed-scard" style={{
-                border: "1px solid rgba(52,211,153,0.15)",
-                cursor: "pointer"
-              }} onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(52,211,153,0.32)"} onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(52,211,153,0.15)"}>
-                  <p style={{
-                  fontSize: 8,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.22em",
-                  color: "rgba(52,211,153,0.5)",
-                  marginBottom: 7,
-                  fontFamily: "'DM Mono',monospace"
-                }}>Shadow Protocol</p>
-                  <p style={{
-                  fontFamily: "'Playfair Display',serif",
-                  fontStyle: "italic",
-                  fontSize: "1.05rem",
-                  fontWeight: 700,
-                  color: "#34d399"
-                }}><IconText>Continue Training [icon:bolt]</IconText></p>
-                </div>
-              </Link>
-              <Link to="/reading-practice" style={{
-              textDecoration: "none"
-            }}>
-                <div className="pmfeed-scard" style={{
-                cursor: "pointer"
-              }} onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(99,102,241,0.22)"} onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,0.06)"}>
-                  <p style={{
-                  fontSize: 8,
-                  fontWeight: 800,
-                  textTransform: "uppercase",
-                  letterSpacing: "0.22em",
-                  color: "rgba(99,102,241,0.45)",
-                  marginBottom: 7,
-                  fontFamily: "'DM Mono',monospace"
-                }}>Reading Lab</p>
-                  <p style={{
-                  fontFamily: "'Playfair Display',serif",
-                  fontStyle: "italic",
-                  fontSize: "1.05rem",
-                  fontWeight: 700,
-                  color: "#818cf8"
-                }}><IconText>Practice Reading [icon:book]</IconText></p>
-                </div>
-              </Link>
-            </div>
-          </aside>
-        </div>
-      </div>
-    </>;
+  const filtered = posts.filter(p => (filter !== "my" || p.uid === user?.uid) && (filter !== "hot" || (p.likes?.length || 0) > 0) && [p.caption,p.translation,p.author,p.grammarRule,p.explanation].some(v => String(v || "").toLocaleLowerCase("pl").includes(search.trim().toLocaleLowerCase("pl"))));
+  if (filter === "hot") filtered.sort((a,b) => (b.likes?.length || 0) - (a.likes?.length || 0));
+  return <div className="pmfeed-root">
+    <AnimatePresence>{xpItems.map(x => <XpBurst key={x.id} amount={x.amount} onDone={() => removeXp(x.id)} />)}</AnimatePresence>
+    <AnimatePresence>{showUpload && <UploadModal user={user} profile={profile} onClose={() => setShowUpload(false)} onSuccess={triggerXp} />}</AnimatePresence>
+    <div className="pm-shell">
+      <header className="pm-hero"><div><span className="pm-kicker">Polish in real life</span><h1>Laugh. Learn. <em>Repeat.</em></h1><p>Discover memes from the whole community. Decode the joke, listen to Polish and try a comment of your own.</p></div>{user && <button className="pm-primary" onClick={() => setShowUpload(true)}>+ Share a meme</button>}</header>
+      <div className="pm-layout"><main className="pm-main">
+        <div className="pm-toolbar"><h2>Community memes</h2><div className="pm-tabs" aria-label="Feed filter">{[["all","All memes"],["hot","Popular"],["my","My memes"]].filter(([v]) => v !== "my" || user).map(([v,label]) => <button key={v} aria-pressed={filter===v} onClick={() => {setFilter(v);setVisible(12);}}>{label}</button>)}</div><input type="search" aria-label="Search memes" placeholder="Search captions, words or authors…" value={search} onChange={e => {setSearch(e.target.value);setVisible(12);}} /></div>
+        {status === "loading" ? <p role="status" className="pm-message">Loading community memes…</p> : status !== "ready" ? <div role="alert" className="pm-message"><strong>Could not load community memes.</strong><p>{status === "denied" ? "Firestore denied access to the shared memes collection. Ask an administrator to check read permissions." : "Check your connection or Firebase configuration."}</p><button onClick={() => setRetry(v => v+1)}>Try again</button></div> : <><p className="pm-count" role="status">Showing {Math.min(visible,filtered.length)} of {filtered.length} memes</p>{filtered.length === 0 ? <div className="pm-message">{search ? "No matching memes. Try another word." : filter === "my" ? "Your shared memes will appear here." : filter === "hot" ? "No liked memes yet." : "No community memes yet. Share the first one!"}</div> : <div className="pm-grid">{filtered.slice(0,visible).map(post => <MemeCard key={post.id} post={post} user={user} profile={profile} onXp={triggerXp} isAdmin={isAdmin} />)}</div>}{visible < filtered.length && <button className="pm-more" onClick={() => setVisible(v => v+12)}>Load more memes</button>}</>}
+      </main><aside className="pm-side">
+        <section className="pm-panel"><h2>Your learning</h2><strong className="pm-rank">{LEVELS[getLevel(totalXp)]}</strong><div className="pm-metrics"><div><strong>{totalXp.toLocaleString()}</strong><span>Profile XP</span></div><div><strong>{profile?.streak || 0}</strong><span>Day streak</span></div></div></section>
+        <section className="pm-panel"><span className="pm-kicker">Quick recall</span><h2>{words[word][0]}</h2><p>Can you remember the meaning?</p>{wordReveal && <div className="pm-reference"><strong>{words[word][1]}</strong><p>{words[word][2]}</p></div>}<button className="pm-primary" onClick={() => setWordReveal(v => !v)}>{wordReveal ? "Hide meaning" : "Reveal meaning"}</button><button onClick={() => {setWord(v => (v+1)%words.length);setWordReveal(false);}}>Next word →</button></section>
+        <section className="pm-panel"><h2>Try a comment</h2><p>Use one of these starters under a meme:</p><strong>To jest zabawne, ponieważ…</strong><strong>Moim zdaniem…</strong><p>One sentence is enough to start.</p></section>
+        <section className="pm-panel"><h2>Keep practising</h2><Link to="/shadow-protocol">Speaking practice →</Link><Link to="/reading-practice">Reading practice →</Link></section>
+      </aside></div>
+    </div>
+  </div>;
 }

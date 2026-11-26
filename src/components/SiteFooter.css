@@ -1,0 +1,3 @@
+/* Footer keeps its original dimensions and typography.
+   Floating controls lift out of the footer area when it enters the viewport. */
+.lebw-site-footer { box-sizing: border-box; }

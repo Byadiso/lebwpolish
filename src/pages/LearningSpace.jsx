@@ -1,3 +1,5 @@
+import './CommunityRefresh.css';
+import { safeExternalUrl } from '../lib/inputSafety';
 import IconText from "../components/IconText";
 import { spaceAlias } from '../utils/spaceAlias';
 import { useState, useEffect, useRef } from 'react';
@@ -62,6 +64,8 @@ export default function LearningSpace() {
     user,
     loading: authLoading
   } = useAuth();
+  const [feedFilter, setFeedFilter] = useState("all");
+  const [published, setPublished] = useState(false);
   const [posts, setPosts] = useState([]);
   const [resources, setResources] = useState([]);
   const [text, setText] = useState("");
@@ -98,7 +102,7 @@ export default function LearningSpace() {
   const wordCount = getWordCount(text);
   const getMilestone = count => {
     if (count === 0) return {
-      label: "Gotowy do walki?",
+      label: "Zacznij pisać",
       color: "#64748b",
       stars: 0
     };
@@ -124,6 +128,9 @@ export default function LearningSpace() {
     };
   };
   const milestone = getMilestone(wordCount);
+  const starters = {1: ["Gdybym…", "Najpierw…", "Ponieważ…"], 2: ["W dzieciństwie…", "Pamiętam, że…", "Moje ulubione miejsce to…"], 3: ["Moim zdaniem…", "Z jednej strony…", "Jednak…"], 4: ["W przyszłym roku…", "Pojadę do…", "Chcę odwiedzić…"]};
+  const visiblePosts = feedFilter === "mine" ? posts.filter(p => p.uid === user?.uid) : posts;
+  const focusWriter = () => mainTextareaRef.current?.focus();
   const insertChar = (char, ref, currentText, setter) => {
     const input = ref.current;
     if (!input) return;
@@ -251,6 +258,7 @@ export default function LearningSpace() {
           colors: ['#f59e0b']
         }), 500);
       }
+      setPublished(true);
       setText("");
       setVocab("");
       setPulseEditor(true);
@@ -323,7 +331,7 @@ export default function LearningSpace() {
     gap: '20px'
   }}>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes pulse { 0%,100% { opacity: 0.4; } 50% { opacity: 1; } }
       `}</style>
@@ -345,9 +353,9 @@ export default function LearningSpace() {
     </div>;
   return <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,400;1,700&family=DM+Sans:wght@400;500;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&display=swap');
 
-        *, *::before, *::after { box-sizing: border-box; }
+        .ls-root *, .ls-page-intro *, .ls-vault-overlay * { box-sizing: border-box; }
 
         /* Community introduction follows the site's editorial light/red visual language.
            Existing arena cards, fonts, editor and Firestore logic remain untouched. */
@@ -358,7 +366,7 @@ export default function LearningSpace() {
         .ls-kicker-dot { width: 8px; height: 8px; border-radius: 50%; background: #dc2626; }
         .ls-page-intro-grid { display: flex; justify-content: space-between; align-items: end; gap: 28px; }
         .ls-page-intro h1 { font-family: 'DM Sans', sans-serif; font-weight: 800; letter-spacing: -.055em; font-size: clamp(38px, 6vw, 66px); line-height: 1.07; margin: 0 0 14px; }
-        .ls-page-intro h1 em { font-family: 'Playfair Display', serif; color: #dc2626; font-weight: 700; }
+        .ls-page-intro h1 em { font-family: 'DM Sans', sans-serif; color: #dc2626; font-weight: 700; }
         .ls-page-intro .ls-alias-note { margin-top: 16px; padding: 12px 15px; background: #fff; border: 1px solid #e2e8f0; border-left: 3px solid #dc2626; border-radius: 10px; font-size: 13px; }
         .ls-alias-note strong { color: #b91c1c; }
         .ls-alias-note span { color: #64748b; }
@@ -393,8 +401,8 @@ export default function LearningSpace() {
           top: 80px; right: 24px;
           background: linear-gradient(135deg, #6366f1, #34d399);
           color: white;
-          font-family: 'Playfair Display', serif;
-          font-style: italic;
+          font-family: 'DM Sans', sans-serif;
+          font-style: normal;
           font-size: 26px;
           font-weight: 700;
           letter-spacing: -0.01em;
@@ -423,8 +431,8 @@ export default function LearningSpace() {
           pointer-events: none;
         }
         .ls-combo-text {
-          font-family: 'Playfair Display', serif;
-          font-style: italic;
+          font-family: 'DM Sans', sans-serif;
+          font-style: normal;
           font-size: clamp(52px, 10vw, 100px);
           background: linear-gradient(135deg, #f59e0b, #ef4444, #818cf8);
           -webkit-background-clip: text;
@@ -658,7 +666,7 @@ export default function LearningSpace() {
           border-radius: 14px;
           display: flex; align-items: center; justify-content: center;
           font-weight: 900; font-size: 20px; color: white;
-          font-family: 'Playfair Display', serif;
+          font-family: 'DM Sans', sans-serif;
           flex-shrink: 0;
         }
         .ls-post-content {
@@ -954,6 +962,76 @@ export default function LearningSpace() {
           background: rgba(255,255,255,0.04); padding: 2px 8px; border-radius: 6px;
           margin-left: 6px;
         }
+        /* /space typography refinement — two existing families only.
+           DM Sans for readable interface and writing; Playfair for editorial accents.
+           Scoped to this route; no shared theme or functional behavior changes. */
+        .ls-page-intro, .ls-root, .ls-vault-overlay {
+          font-family: 'DM Sans', sans-serif;
+          font-synthesis: none;
+        }
+        .ls-page-intro button, .ls-page-intro input,
+        .ls-root button, .ls-root input, .ls-root textarea,
+        .ls-vault-overlay button, .ls-vault-overlay input {
+          font-family: 'DM Sans', sans-serif;
+        }
+        .ls-root .ls-mission-tab, .ls-root .ls-section-label,
+        .ls-root .ls-action-btn, .ls-root .ls-vocab-tag,
+        .ls-root .ls-edited-badge {
+          font-size: 12px;
+          letter-spacing: .045em;
+          line-height: 1.5;
+        }
+        .ls-root .ls-mission-tab { padding: 11px 16px; }
+        .ls-root .ls-post-content {
+          font-size: 16px;
+          line-height: 1.85;
+          letter-spacing: normal;
+          font-style: normal;
+        }
+        .ls-root .ls-textarea {
+          font-size: 17px;
+          line-height: 1.85;
+          min-height: 200px;
+          resize: vertical;
+        }
+        .ls-root .ls-textarea::placeholder,
+        .ls-root .ls-vocab-input::placeholder,
+        .ls-root .ls-comment-input::placeholder,
+        .ls-vault-overlay .ls-vault-search::placeholder {
+          color: rgba(230,230,255,.56);
+          opacity: 1;
+        }
+        .ls-root .ls-vocab-input,
+        .ls-root .ls-comment-input,
+        .ls-root .ls-edit-textarea,
+        .ls-vault-overlay .ls-vault-search {
+          font-size: 15px;
+          line-height: 1.65;
+        }
+        .ls-root .ls-char-btn { min-width: 34px; min-height: 34px; }
+        .ls-root button:focus-visible,
+        .ls-root textarea:focus-visible,
+        .ls-root input:focus-visible,
+        .ls-vault-overlay button:focus-visible,
+        .ls-vault-overlay input:focus-visible {
+          outline: 2px solid #818cf8;
+          outline-offset: 3px;
+        }
+        .ls-writing-invitation {
+          font-family: 'DM Sans', sans-serif;
+          color: rgba(240,240,255,.78);
+          font-size: 14px;
+          line-height: 1.7;
+          margin: -8px 0 4px;
+        }
+        @media (max-width: 600px) {
+          .ls-root .ls-textarea { font-size: 16px; padding: 17px; }
+          .ls-root .ls-post-content { font-size: 16px; padding: 16px; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .ls-root .ls-textarea, .ls-root .ls-mission-tab { transition: none; }
+        }
+
         .ls-section-label {
           display: flex; align-items: center; gap: 8px;
           font-size: 9px; font-weight: 700;
@@ -987,8 +1065,8 @@ export default function LearningSpace() {
         }}>
               <div>
                 <p style={{
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: 'italic',
+              fontFamily: "'DM Sans', sans-serif",
+              fontStyle: 'normal',
               fontSize: '26px',
               fontWeight: 700,
               color: 'white',
@@ -1055,21 +1133,18 @@ export default function LearningSpace() {
       {/* ── Main layout ── */}
       <section className="ls-page-intro" aria-labelledby="ls-page-title">
         <div className="ls-page-intro-inner">
-          <div className="ls-page-kicker"><span className="ls-kicker-dot" /> LEBWPOLISH / COMMUNITY</div>
+          
           <div className="ls-page-intro-grid">
             <div>
-              <h1 id="ls-page-title">Your writing <em>space.</em></h1>
-              <p>Practice Polish in good company. Choose a prompt, share your thoughts, and grow with feedback from fellow learners.</p>
-              {user && <p className="ls-alias-note">Your private writing identity: <strong>{mySpaceAlias}</strong> <span>· Your real name and email are not shown on posts.</span></p>}
+              <h1 id="ls-page-title">Your Polish <em>community.</em></h1>
+              <p>Write a few sentences, share them with the community and learn from feedback. One sentence is enough to begin.</p>
+              {user && <p className="ls-alias-note">You post as: <strong>{mySpaceAlias}</strong> <span>· Your name and email are not displayed in the feed.</span></p>}
             </div>
-            <div className="ls-page-intro-aside">
-              <span className="ls-intro-overline">WRITE · CONNECT · IMPROVE</span>
-              <span className="ls-intro-subline">A place to put your Polish into words.</span>
-            </div>
+            <button type="button" className="ls-start-writing" onClick={focusWriter}>Write a post →</button>
           </div>
         </div>
       </section>
-      <div className="ls-root">
+      <div className="ls-root ls-community-refresh">
       <main className="ls-main">
 
         {/* ════ LEFT COLUMN ════ */}
@@ -1081,13 +1156,13 @@ export default function LearningSpace() {
       }}>
 
           {/* ── XP / Level bar ── */}
-          <div style={{
+          <div className="ls-community-xp" style={{
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
           gap: '16px',
           padding: '16px 24px',
-          background: '#0d1526',
+          background: '#0f172a',
           border: '1px solid rgba(255,255,255,0.05)',
           borderRadius: '20px',
           flexWrap: 'wrap'
@@ -1120,8 +1195,8 @@ export default function LearningSpace() {
                 fontFamily: "'DM Sans', sans-serif"
               }}>Poziom</p>
                 <p style={{
-                fontFamily: "'Playfair Display', serif",
-                fontStyle: 'italic',
+                fontFamily: "'DM Sans', sans-serif",
+                fontStyle: 'normal',
                 fontSize: '18px',
                 color: '#c4b5fd',
                 fontWeight: 700,
@@ -1174,8 +1249,8 @@ export default function LearningSpace() {
             gap: '8px'
           }}>
               <span style={{
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: 'italic',
+              fontFamily: "'DM Sans', sans-serif",
+              fontStyle: 'normal',
               fontSize: '22px',
               color: combo >= 5 ? '#ef4444' : combo >= 3 ? '#f59e0b' : 'white',
               fontWeight: 700
@@ -1195,7 +1270,7 @@ export default function LearningSpace() {
           </div>
 
           {/* ── Editor card ── */}
-          <div className="ls-card ls-card-glow" style={{
+          <div id="space-composer" className="ls-card ls-card-glow" style={{
           overflow: 'visible'
         }}>
             {/* Glow orb */}
@@ -1218,11 +1293,12 @@ export default function LearningSpace() {
             zIndex: 1
           }}>
 
+              <div className="ls-composer-heading"><div><h2>What’s on your mind?</h2><p>Choose a topic and write in Polish.</p></div><span>+{activeMission.xp} base XP</span></div>
               {/* Mission tabs */}
               <div className="ls-mission-tabs" style={{
               marginBottom: '20px'
             }}>
-                {MISSIONS.map(m => <button key={m.id} onClick={() => setActiveMission(m)} className={`ls-mission-tab ${activeMission.id === m.id ? 'active' : ''}`} style={activeMission.id === m.id ? {
+                {MISSIONS.map(m => <button key={m.id} onClick={() => setActiveMission(m)} aria-pressed={activeMission.id === m.id} className={`ls-mission-tab ${activeMission.id === m.id ? 'active' : ''}`} style={activeMission.id === m.id ? {
                 color: m.color,
                 borderColor: m.color + '99',
                 boxShadow: `0 0 14px ${m.color}44`
@@ -1240,16 +1316,16 @@ export default function LearningSpace() {
 
               {/* Prompt */}
               <div style={{
-              fontSize: 'clamp(15px, 2.8vw, 20px)',
+              fontSize: 'clamp(17px, 2.8vw, 20px)',
               fontWeight: 700,
-              lineHeight: 1.45,
+              lineHeight: 1.6,
               marginBottom: '22px',
               padding: '18px 22px',
               borderRadius: '18px',
               borderLeft: `3px solid ${activeMission.color}`,
               background: 'rgba(255,255,255,0.025)',
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: 'italic',
+              fontFamily: "'DM Sans', sans-serif",
+              fontStyle: 'normal',
               color: `${activeMission.color}dd`
             }}>
                 "<IconText>{activeMission.prompt}</IconText>"
@@ -1274,8 +1350,11 @@ export default function LearningSpace() {
                     </button>)}
                 </div>
 
-                <textarea ref={mainTextareaRef} required value={text} onChange={e => setText(e.target.value)} placeholder="Napisz coś ambitnego..." className={`ls-textarea ${pulseEditor ? 'pulse-success' : ''}`} />
+                <div className="ls-starters"><strong>Need a starting point?</strong><div>{starters[activeMission.id].map(starter => <button type="button" key={starter} onClick={() => {setPublished(false); setText(old => old + (old && !/\s$/.test(old) ? " " : "") + starter.replace(/…$/, "") + " "); focusWriter();}}>{starter}</button>)}</div></div>
+                <p className="ls-writing-invitation">Nie musisz pisać idealnie. Zacznij od kilku zdań — każda próba to postęp.</p>
+                <textarea ref={mainTextareaRef} required value={text} onChange={e => {setText(e.target.value); setPublished(false);}} placeholder="Zacznij od jednego zdania. Co chcesz opowiedzieć?" aria-label="Napisz tekst po polsku" className={`ls-textarea ${pulseEditor ? 'pulse-success' : ''}`} />
 
+                <div className="ls-mini-goal" aria-live="polite"><span>{wordCount >= 10 ? "First goal reached! Keep going if you like." : wordCount ? "Keep going — aim for 10 words." : "Your first goal: 10 words"}</span><strong>{wordCount}/10</strong><progress max={10} value={Math.min(wordCount,10)} aria-label="First writing goal" /></div>
                 <div style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -1300,16 +1379,17 @@ export default function LearningSpace() {
                   gap: '10px',
                   alignItems: 'flex-end'
                 }}>
-                    <input ref={vocabInputRef} value={vocab} onChange={e => setVocab(e.target.value)} placeholder="Słówka (oddzielone przecinkiem)..." className="ls-vocab-input" />
+                    <input ref={vocabInputRef} value={vocab} onChange={e => setVocab(e.target.value)} aria-label="Optional vocabulary, separated by commas" placeholder="Save new words (optional)…" className="ls-vocab-input" />
                     <button disabled={!text.trim() || isSubmitting} className={`ls-submit-btn ${slotSpin ? 'spinning' : ''}`} style={slotSpin ? {
                     opacity: 0.7
                   } : {}}>
-                      <IconText>{isSubmitting ? "✦" : "OPUBLIKUJ ✦"}</IconText>
+                      <IconText>{isSubmitting ? "✦" : "Share writing →"}</IconText>
                     </button>
                   </div>
                 </div>
               </form>
 
+              {published && <p className="ls-published" role="status">Brawo! Your writing was shared. Read a community post or take a break.</p>}
               {/* Word meter */}
               <div className="ls-word-meter">
                 <div>
@@ -1364,8 +1444,8 @@ export default function LearningSpace() {
               }}><IconText>{combo >= 4 ? "[icon:flame][icon:flame][icon:flame]" : combo >= 3 ? "[icon:flame][icon:flame]" : "[icon:flame]"}</IconText></span>
                   <div>
                     <div style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontStyle: 'italic',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontStyle: 'normal',
                   fontSize: '15px',
                   color: '#f59e0b',
                   fontWeight: 700
@@ -1378,11 +1458,11 @@ export default function LearningSpace() {
                   letterSpacing: '0.1em',
                   marginTop: '2px',
                   fontFamily: "'DM Sans', sans-serif"
-                }}>Pisz częściej, zarabiaj więcej XP!</div>
+                }}>Każdy tekst to kolejna okazja do nauki.</div>
                   </div>
                   <div style={{
                 marginLeft: 'auto',
-                fontFamily: "'Playfair Display', serif",
+                fontFamily: "'DM Sans', sans-serif",
                 fontSize: '26px',
                 color: '#f59e0b',
                 fontWeight: 700,
@@ -1398,7 +1478,9 @@ export default function LearningSpace() {
           flexDirection: 'column',
           gap: '16px'
         }}>
-            {posts.map(p => <article key={p.id} className={`ls-card ls-post-card ${newPostIds.has(p.id) ? 'new-post' : ''}`}>
+            <div id="space-feed" className="ls-feed-heading"><div><h2>Community feed</h2><p>Read, encourage and help each other improve.</p></div><div className="ls-feed-filters">{[["all","Everyone"],["mine","My writing"]].map(([id,label]) => <button key={id} type="button" aria-pressed={feedFilter===id} onClick={()=>setFeedFilter(id)}>{label}</button>)}</div></div>
+            {visiblePosts.length === 0 && <div className="ls-card ls-empty-feed">{feedFilter === "mine" ? "Your writing will appear here after you share it." : "No posts to display yet."}<button type="button" onClick={focusWriter}>Write a sentence →</button></div>}
+            {visiblePosts.map(p => <article key={p.id} className={`ls-card ls-post-card ${newPostIds.has(p.id) ? 'new-post' : ''}`}>
                 {/* Post header */}
                 <div style={{
               display: 'flex',
@@ -1427,7 +1509,7 @@ export default function LearningSpace() {
                         <span style={{
                       fontSize: '13px',
                       fontWeight: 700,
-                      color: 'white',
+                      color: '#0f172a',
                       textTransform: 'uppercase',
                       letterSpacing: '0.05em',
                       fontFamily: "'DM Sans', sans-serif"
@@ -1440,7 +1522,7 @@ export default function LearningSpace() {
                       textTransform: 'uppercase',
                       letterSpacing: '0.1em',
                       background: 'rgba(99,102,241,0.12)',
-                      color: '#818cf8',
+                      color: '#4338ca',
                       border: '1px solid rgba(99,102,241,0.2)',
                       fontFamily: "'DM Sans', sans-serif"
                     }}><IconText>{p.authorLevel}</IconText></span>
@@ -1449,7 +1531,7 @@ export default function LearningSpace() {
                       <div style={{
                     fontSize: '9px',
                     fontWeight: 700,
-                    color: 'rgba(255,255,255,0.3)',
+                    color: '#64748b',
                     textTransform: 'uppercase',
                     letterSpacing: '0.15em',
                     marginTop: '3px',
@@ -1479,8 +1561,8 @@ export default function LearningSpace() {
                           {p.uid === user.uid && <button onClick={() => {
                     setEditingId(p.id);
                     setEditText(p.content);
-                  }} className="ls-btn-icon" title="Edytuj"><IconText>[icon:pen]</IconText></button>}
-                          <button onClick={() => setDeleteConfirmId(p.id)} className="ls-btn-icon" title="Usuń"><IconText>[icon:trash]</IconText></button>
+                  }} className="ls-btn-icon" aria-label="Edit post" title="Edytuj"><IconText>[icon:pen]</IconText></button>}
+                          <button onClick={() => setDeleteConfirmId(p.id)} className="ls-btn-icon" aria-label="Delete post" title="Usuń"><IconText>[icon:trash]</IconText></button>
                         </div>}
                     </div>}
                 </div>
@@ -1513,7 +1595,7 @@ export default function LearningSpace() {
                       <button onClick={() => handleEditPost(p.id)} className="ls-btn-save">Zapisz</button>
                       <button onClick={() => setEditingId(null)} className="ls-btn-cancel-text">Anuluj</button>
                     </div>
-                  </div> : <p className="ls-post-content">"<IconText>{p.content}</IconText>"</p>}
+                  </div> : <p className="ls-post-content"><IconText>{p.content}</IconText></p>}
 
                 {p.vocabulary?.length > 0 && <div style={{
               display: 'flex',
@@ -1532,11 +1614,11 @@ export default function LearningSpace() {
               paddingTop: '14px',
               borderTop: '1px solid rgba(255,255,255,0.05)'
             }}>
-                  <button onClick={() => handleLike(p)} className={`ls-action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
+                  <button onClick={() => handleLike(p)} aria-label="Like post" aria-pressed={Boolean(p.likes?.includes(user.uid))} className={`ls-action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
                     <span className="icon"><IconText>{p.likes?.includes(user.uid) ? "[icon:heart]" : "[icon:heart]"}</IconText></span>
                     <span><IconText>{p.likes?.length || 0}</IconText></span>
                   </button>
-                  <button onClick={() => toggleComments(p.id)} className="ls-action-btn">
+                  <button onClick={() => toggleComments(p.id)} aria-expanded={activeCommentBox === p.id} className="ls-action-btn">
                     <span className="icon"><IconText>[icon:chat]</IconText></span>
                     <span>Komentarze</span>
                   </button>
@@ -1557,7 +1639,7 @@ export default function LearningSpace() {
                     fontWeight: 700,
                     textTransform: 'uppercase',
                     letterSpacing: '0.1em',
-                    color: '#c4b5fd',
+                    color: '#334155',
                     fontFamily: "'DM Sans', sans-serif"
                   }}>
                             <IconText>{spaceAlias(c.uid)}</IconText> {c.isCorrection && <span style={{
@@ -1567,7 +1649,7 @@ export default function LearningSpace() {
                           </div>
                           <div style={{
                     fontSize: '14px',
-                    color: 'rgba(240,240,255,0.7)',
+                    color: '#334155',
                     marginTop: '4px',
                     lineHeight: 1.55,
                     fontFamily: "'DM Sans', sans-serif"
@@ -1592,7 +1674,7 @@ export default function LearningSpace() {
                     insertChar(char, ref, commentText, setCommentText);
                   }}><IconText>{char}</IconText></button>)}
                       </div>
-                      <textarea id={`comment-${p.id}`} value={commentText} onChange={e => setCommentText(e.target.value)} placeholder="Napisz feedback..." className="ls-comment-input" rows={3} />
+                      <textarea id={`comment-${p.id}`} value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Write feedback" placeholder="Napisz feedback..." className="ls-comment-input" rows={3} />
                       <div style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
@@ -1622,6 +1704,15 @@ export default function LearningSpace() {
           gap: '14px'
         }}>
 
+            <section className="ls-community-side" aria-label="Community shortcuts">
+              <h2>Your writing space</h2>
+              <p>Posting as <strong>{mySpaceAlias}</strong></p>
+              <div className="ls-side-counts"><div><strong>{posts.filter(p => p.uid === user?.uid).length}</strong><span>Your posts in feed</span></div><div><strong>{totalXp}</strong><span>XP earned</span></div></div>
+              <button type="button" onClick={focusWriter}>Write something <span aria-hidden="true">→</span></button>
+              <button type="button" onClick={() => {setFeedFilter("mine"); document.getElementById("space-feed")?.scrollIntoView({block:"start"});}}>My writing <span aria-hidden="true">→</span></button>
+              <button type="button" onClick={() => {setFeedFilter("all"); document.getElementById("space-feed")?.scrollIntoView({block:"start"});}}>Read community posts <span aria-hidden="true">→</span></button>
+            </section>
+            <section className="ls-community-side ls-peer-tip"><h2>Learn together</h2><p>Read a post, leave an encouraging comment or offer a kind correction in Polish.</p><p lang="pl">Świetnie napisane! A co o tym myślisz?</p></section>
             {/* Shadow Protocol */}
             <Link to="/shadow-protocol" className="ls-shadow-card">
               <div style={{
@@ -1643,7 +1734,7 @@ export default function LearningSpace() {
                   textTransform: 'uppercase',
                   letterSpacing: '0.25em',
                   fontFamily: "'DM Sans', sans-serif"
-                }}>System: Active</span>
+                }}>Speaking practice</span>
                 </div>
                 <span style={{
                 fontSize: '8px',
@@ -1655,7 +1746,7 @@ export default function LearningSpace() {
                 padding: '3px 8px',
                 borderRadius: '6px',
                 fontFamily: "'DM Sans', sans-serif"
-              }}>B1 Protocol</span>
+              }}>B1</span>
               </div>
               <div style={{
               display: 'flex',
@@ -1665,8 +1756,8 @@ export default function LearningSpace() {
             }}>
                 <div>
                   <div style={{
-                  fontFamily: "'Playfair Display', serif",
-                  fontStyle: 'italic',
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontStyle: 'normal',
                   fontSize: '24px',
                   fontWeight: 700,
                   color: 'white',
@@ -1684,9 +1775,9 @@ export default function LearningSpace() {
                   lineHeight: 1.5,
                   fontFamily: "'DM Sans', sans-serif"
                 }}>
-                    Inicjuj symulację<br /><span style={{
+                    Practise a conversation<br /><span style={{
                     color: 'rgba(52,211,153,0.5)'
-                  }}>Autoryzacja wymagana...</span>
+                  }}>Open speaking activity →</span>
                   </div>
                 </div>
                 <div style={{
@@ -1735,7 +1826,7 @@ export default function LearningSpace() {
             }}>
                 <div>
                   <div style={{
-                  fontFamily: "'Playfair Display', serif",
+                  fontFamily: "'DM Sans', sans-serif",
                   fontSize: '52px',
                   fontWeight: 700,
                   lineHeight: 1,
@@ -1774,7 +1865,7 @@ export default function LearningSpace() {
               }} />
                 Biblioteka B1
               </div>
-              {resources.map(res => <a key={res.id} href={res.url} target="_blank" rel="noreferrer" className="ls-library-item">
+              {resources.filter(res => safeExternalUrl(res.url)).map(res => <a key={res.id} href={safeExternalUrl(res.url)} target="_blank" rel="noreferrer" className="ls-library-item">
                   <div style={{
                 fontSize: '12px',
                 fontWeight: 700,
@@ -1790,7 +1881,7 @@ export default function LearningSpace() {
                 textTransform: 'uppercase',
                 letterSpacing: '0.15em',
                 marginTop: '3px',
-                fontStyle: 'italic',
+                fontStyle: 'normal',
                 fontFamily: "'DM Sans', sans-serif"
               }}><IconText>{res.type}</IconText></div>
                 </a>)}
@@ -1808,8 +1899,8 @@ export default function LearningSpace() {
               fontFamily: "'DM Sans', sans-serif"
             }}>Wskazówka Dnia</div>
               <div style={{
-              fontFamily: "'Playfair Display', serif",
-              fontStyle: 'italic',
+              fontFamily: "'DM Sans', sans-serif",
+              fontStyle: 'normal',
               fontSize: '13px',
               fontWeight: 400,
               color: 'rgba(245,158,11,0.78)',
@@ -1820,6 +1911,7 @@ export default function LearningSpace() {
             </div>
 
             {/* Link cards */}
+            <details className="ls-more-activities"><summary>More learning activities</summary>
             {[{
             to: "/vocabularyvault",
             label: "Vocabulary Vault",
@@ -1875,6 +1967,7 @@ export default function LearningSpace() {
               fontFamily: "'DM Sans', sans-serif' "
             }}><IconText>{text}</IconText></div>
               </Link>)}
+            </details>
 
           </div>
         </aside>

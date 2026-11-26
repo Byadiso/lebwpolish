@@ -1,3 +1,4 @@
+import {KEY,EMPTY,mergeActive} from './activePractice.js';
 import { STORAGE_KEY, emptyProgress } from './journeyProgress.js';
 export function mergeJourney(a=emptyProgress(), b=emptyProgress()) {
  const completed=[...new Set([...(a.completed||[]),...(b.completed||[])])];
@@ -15,6 +16,7 @@ export function applyLearningOperation(values,op) {
  if(op.value===null){delete next[op.key];return next;}
  let value=op.value;
  try {
+  if(op.key===KEY)value=JSON.stringify(mergeActive(JSON.parse(next[op.key]||'null')||EMPTY,JSON.parse(value)));
   if(op.key===STORAGE_KEY)value=JSON.stringify(mergeJourney(JSON.parse(next[op.key]||'null')||emptyProgress(),JSON.parse(value)));
   if(op.key==='lebw.writing.drafts') {
    const remote=JSON.parse(next[op.key]||'{}'), before=JSON.parse(op.before||'{}'), incoming=JSON.parse(value);

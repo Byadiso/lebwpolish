@@ -18,7 +18,7 @@ export default function QuickNotes() {
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open]);
-  if (pathname === '/' || pathname === '/notes') return null;
+  if (pathname === '/' || pathname === '/notes' || /^\/admin(?:\/|$)/i.test(pathname)) return null;
   const save = e => {
     e.preventDefault();
     try {

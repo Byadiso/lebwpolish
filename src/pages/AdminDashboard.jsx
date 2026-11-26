@@ -1,3 +1,5 @@
+import './AdminRefresh.css';
+import { safeExternalUrl, boundedText } from '../lib/inputSafety';
 import FeatureIcon from '../components/FeatureIcon';
 import { Link } from "react-router-dom";
 import IconText from "../components/IconText";
@@ -25,6 +27,8 @@ const AdminDashboard = () => {
     user,
     loading: authLoading
   } = useAuth();
+  const [workspace, setWorkspace] = useState("content");
+  const [inventorySearch, setInventorySearch] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({
     text: "",
@@ -37,7 +41,7 @@ const AdminDashboard = () => {
   const [generatedKey, setGeneratedKey] = useState("");
   const [keyLoading, setKeyLoading] = useState(false); // separate from shared `loading`
   const [usersLoaded, setUsersLoaded] = useState(false);
-  const [keyMsg, setKeyMsg] = useState(""); // inline message inside the Key Generator card
+  const [keyMsg, setKeyMsg] = useState(""); // inline message inside the Create an access key card
   const [searchEmail, setSearchEmail] = useState("");
   const [targetUser, setTargetUser] = useState(null);
   const [newName, setNewName] = useState("");
@@ -113,11 +117,14 @@ const AdminDashboard = () => {
   // NEW: Handle Resource Upload (Links/PDFs)
   const handleAddResource = async e => {
     e.preventDefault();
+    const url = safeExternalUrl(resUrl);
+    const title = boundedText(resTitle, 150);
+    if (!url || !title) { showStatus('Enter a title and a valid HTTP(S) resource URL.', 'error'); return; }
     setLoading(true);
     try {
       await addDoc(collection(db, "resources"), {
-        title: resTitle.trim(),
-        url: resUrl.trim(),
+        title,
+        url,
         level: resLevel,
         createdAt: serverTimestamp()
       });
@@ -284,18 +291,18 @@ const AdminDashboard = () => {
   };
   if (authLoading) return <div className="p-10 text-center font-black animate-pulse text-indigo-600">AUTHENTICATING...</div>;
   if (!user || user.email !== ADMIN_EMAIL) return <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white font-black uppercase tracking-[0.5em]">Access Denied</div>;
-  return <div className="min-h-screen bg-[#F1F5F9] p-4 md:p-10 font-sans text-slate-900">
+  return <div className="admin-refresh min-h-screen bg-[#F1F5F9] p-4 md:p-10 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto">
         
-        <div className="mb-6"><Link to="/statistics" className="inline-flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-4 text-white font-black shadow-lg hover:bg-indigo-700"><FeatureIcon name="chart" size={21} /> View site statistics →</Link></div>
+        
         {/* HEADER */}
         <header className="mb-8 md:mb-12 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter italic leading-none">
-              ADMIN <span className="text-indigo-600">CORE</span>
+              Manage <span className="text-indigo-600">LEBWPOLISH.</span>
             </h1>
             <p className="text-slate-400 font-black text-[9px] md:text-[10px] uppercase tracking-[0.3em] mt-2">
-              System Terminal • <IconText>{user.email}</IconText>
+              Manage learning content, learner access and platform activity.
             </p>
           </div>
           
@@ -314,16 +321,18 @@ const AdminDashboard = () => {
           </AnimatePresence>
         </header>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
+        <div className="admin-overview">{[["Resources",resources.length],["Grammar tasks",grammarTasks.length],["Drills",drills.length],["Access records",usersLoaded ? pendingUsers.length : "—"]].map(([label,count])=><div key={label}><span>{label}</span><strong>{count}</strong></div>)}</div>
+        <div className="admin-workspace-nav" aria-label="Admin workspaces">{[["content","Learning content"],["learners","Learner access"],["inventory","Content & access records"]].map(([id,label])=><button key={id} type="button" aria-pressed={workspace===id} onClick={()=>setWorkspace(id)}>{label}</button>)}<Link to="/admin/statistics"><FeatureIcon name="chart" size={18}/> Site statistics →</Link></div>
+        <div className="admin-workspace">
           
           {/* MAIN COLUMN: FORMS */}
-          <div className="lg:col-span-8 space-y-6 md:space-y-8">
+          <div hidden={workspace !== "content"} className="admin-content-grid space-y-6 md:space-y-8">
             
             {/* NEW: RESOURCE VAULT CARD */}
             <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-200">
               <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-white text-lg shadow-amber-100 shadow-lg"><IconText>[icon:folder]</IconText></div>
-                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Resource Vault</h2>
+                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Add a resource</h2>
               </div>
               <form onSubmit={handleAddResource} className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -343,7 +352,7 @@ const AdminDashboard = () => {
             <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-200">
               <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <div className="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white text-lg shadow-indigo-200 shadow-lg"><IconText>[icon:brain]</IconText></div>
-                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Grammar Lab</h2>
+                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Add a grammar task</h2>
               </div>
               <form onSubmit={handleAddGrammar} className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -366,7 +375,7 @@ const AdminDashboard = () => {
             <section className="bg-white rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 shadow-sm border border-slate-200">
               <div className="flex items-center gap-3 mb-6 md:mb-8">
                 <div className="w-10 h-10 bg-rose-600 rounded-xl flex items-center justify-center text-white text-lg shadow-rose-200 shadow-lg"><IconText>[icon:mic]</IconText></div>
-                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Drill Factory</h2>
+                <h2 className="text-lg md:text-xl font-black uppercase tracking-tight">Add a drill</h2>
               </div>
               <form onSubmit={handleAddDrill} className="space-y-4 md:space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
@@ -384,12 +393,12 @@ const AdminDashboard = () => {
           </div>
 
           {/* SIDE COLUMN: USERS & MONITOR */}
-          <div className="lg:col-span-4 space-y-6 md:space-y-8">
+          <div hidden={workspace === "content"} className="admin-side space-y-6 md:space-y-8">
             
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4 md:gap-6">
+            <div hidden={workspace !== "learners"} className="admin-learner-grid grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
               <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
                 <h3 className="font-black text-[10px] uppercase mb-4 text-slate-400 tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Identity Manager
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500"></span> Find or edit a learner
                 </h3>
                 {!targetUser ? <form onSubmit={handleSearchUser} className="space-y-3">
                     <input required value={searchEmail} onChange={e => setSearchEmail(e.target.value)} className="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl font-bold text-xs outline-none focus:border-indigo-500" placeholder="User email..." />
@@ -411,10 +420,10 @@ const AdminDashboard = () => {
 
               <div className="bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm">
                 <h3 className="font-black text-[10px] uppercase mb-4 text-slate-400 tracking-widest flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span> Key Generator
+                  <span className="w-1.5 h-1.5 rounded-full bg-slate-900"></span> Create an access key
                 </h3>
                 {!generatedKey ? <form onSubmit={handleCreateStudent} className="space-y-3">
-                    <input required type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} className="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl font-bold text-xs outline-none focus:border-indigo-500" placeholder="Student email..." />
+                    <input required type="email" value={studentEmail} onChange={e => setStudentEmail(e.target.value)} className="w-full bg-slate-50 border-2 border-slate-100 p-3 rounded-xl font-bold text-xs outline-none focus:border-indigo-500" placeholder="Student email..." /><label className="admin-field-label">Assigned level<select value={assignedLevel} onChange={e=>setAssignedLevel(e.target.value)}><option>A1</option><option>B1</option><option>C1</option></select></label>
                     <button type="submit" disabled={keyLoading} className="w-full py-3 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] hover:bg-indigo-600 disabled:opacity-50">{keyLoading ? "Generating..." : "Generate"}</button>
                     {keyMsg && <p className="text-[10px] font-bold uppercase tracking-tight text-red-600 text-center"><IconText>{keyMsg}</IconText></p>}
                   </form> : <div className="text-center">
@@ -428,20 +437,20 @@ const AdminDashboard = () => {
             </div>
 
             {/* SYSTEM MONITOR (Dark Mode UI) */}
-            <div className="bg-slate-900 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-8 text-white shadow-2xl h-[400px] md:h-[500px] flex flex-col border border-white/5">
-              <h3 className="font-black text-[10px] uppercase text-indigo-400 mb-6 shrink-0 tracking-[0.3em]">System Monitor</h3>
+            <div hidden={workspace !== "inventory"} className="admin-inventory bg-white rounded-[2rem] p-6 md:p-8 border border-slate-200">
+              <h3 className="font-black text-[10px] uppercase text-indigo-400 mb-6 shrink-0 tracking-[0.3em]">Content & access records</h3><input className="admin-search" aria-label="Search records" placeholder="Search titles, questions or emails…" value={inventorySearch} onChange={e=>setInventorySearch(e.target.value)}/>
               <div className="space-y-8 overflow-y-auto pr-2 flex-1 custom-scrollbar">
                 
                 {/* Resources Feed */}
                 <div className="space-y-4">
-                  <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Resource Archive</p>
+                  <p className="text-[9px] font-black text-amber-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Resources</p>
                   {resources.length === 0 && <p className="text-xs text-slate-700 italic">No files linked...</p>}
-                  {resources.map(r => <div key={r.id} className="group flex justify-between items-start border-b border-white/5 pb-3">
+                  {resources.filter(r => `${r.title || ""} ${r.level || ""}`.toLowerCase().includes(inventorySearch.toLowerCase())).map(r => <div key={r.id} className="group flex justify-between items-start border-b border-white/5 pb-3">
                       <div className="min-w-0 pr-4">
                         <p className="text-xs font-bold text-slate-200 line-clamp-1"><IconText>{r.title}</IconText></p>
                         <p className="text-[8px] text-amber-400 font-black uppercase mt-1">Level <IconText>{r.level}</IconText> • External Link</p>
                       </div>
-                      <button onClick={() => handleDelete('resources', r.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
+                      <button aria-label="Delete resource" onClick={() => handleDelete('resources', r.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                       </button>
                     </div>)}
@@ -449,14 +458,14 @@ const AdminDashboard = () => {
 
                 {/* Grammar Feed */}
                 <div className="space-y-4">
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Grammar Feed</p>
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Grammar tasks</p>
                   {grammarTasks.length === 0 && <p className="text-xs text-slate-700 italic">No tasks found...</p>}
-                  {grammarTasks.map(g => <div key={g.id} className="group flex justify-between items-start border-b border-white/5 pb-3">
+                  {grammarTasks.filter(g => `${g.question || ""} ${g.category || ""} ${g.level || ""}`.toLowerCase().includes(inventorySearch.toLowerCase())).map(g => <div key={g.id} className="group flex justify-between items-start border-b border-white/5 pb-3">
                       <div className="min-w-0 pr-4">
                         <p className="text-xs font-bold text-slate-200 line-clamp-1"><IconText>{g.question}</IconText></p>
                         <p className="text-[8px] text-indigo-400 font-black uppercase mt-1"><IconText>{g.category}</IconText> • <IconText>{g.level}</IconText></p>
                       </div>
-                      <button onClick={() => handleDelete('grammar_lab', g.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
+                      <button aria-label="Delete grammar task" onClick={() => handleDelete('grammar_lab', g.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                       </button>
                     </div>)}
@@ -464,13 +473,13 @@ const AdminDashboard = () => {
 
                 {/* User Matrix */}
                 <div className="space-y-4">
-                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">User Matrix</p>
-                  {pendingUsers.map(u => <div key={u.id} className="group flex justify-between items-center border-b border-white/5 pb-3">
+                  <p className="text-[9px] font-black text-slate-500 uppercase tracking-widest sticky top-0 bg-slate-900 py-1">Learner access records</p>
+                  {pendingUsers.filter(u => `${u.email || ""}`.toLowerCase().includes(inventorySearch.toLowerCase())).map(u => <div key={u.id} className="group flex justify-between items-center border-b border-white/5 pb-3">
                       <div className="min-w-0">
                         <p className="text-xs font-bold text-slate-300 truncate w-32 md:w-48"><IconText>{u.email}</IconText></p>
                         <p className="text-[8px] text-slate-500 uppercase"><IconText>{u.claimed ? "Claimed" : "Pending Key"}</IconText></p>
                       </div>
-                      <button onClick={() => handleDelete('pending_users', u.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
+                      <button aria-label="Delete access record" onClick={() => handleDelete('pending_users', u.id)} className="text-slate-600 hover:text-rose-500 transition-colors">
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                       </button>
                     </div>)}

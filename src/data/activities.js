@@ -1,4 +1,7 @@
 export const activities = [
+ {path:'/word-bank',title:'Word & Connector Bank',skill:'Vocabulary',level:'A1–B1',minutes:5,icon:'book',description:'Recall everyday words and connectors with spaced practice.'},
+ {path:'/b1-readiness',title:'B1 Readiness Coach',skill:'Mixed',level:'B1',minutes:12,icon:'compass',description:'Try a short diagnostic and follow a personalized skills roadmap.'},
+ {path:'/b1-vocabulary',title:'B1 Vocabulary Building Blocks',skill:'Vocabulary',level:'B1',minutes:8,icon:'book',description:'Recall thematic chunks, discover aspect and case patterns, and write with confidence.'},
  {path:'/cloze',title:'One word closer',skill:'Vocabulary',level:'B1',minutes:5,icon:'target',description:'Fill Polish sentence gaps, earn XP, and grow recall through spaced review.'},
  {path:'/learn',title:'Daily Journey',skill:'Mixed',level:'A1–B1',minutes:5,icon:'compass',description:'Learn one pattern, try it, then use it in your life.'},
  {path:'/play',title:'Polish Arcade',skill:'Play',level:'A2–B1',minutes:5,icon:'game',description:'Build sentences, recall words, and follow a story.'},

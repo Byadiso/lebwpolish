@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import './BackgroundMusic.css';
 
 const STORAGE_KEY = 'lebw.backgroundMusic.enabled';
@@ -11,6 +12,8 @@ function getInitialEnabled() {
 
 /** Mounted above the router's page content so navigation never restarts the soundtrack. */
 export default function BackgroundMusic() {
+  const { pathname } = useLocation();
+  const isAdminPage = /^\/admin(?:\/|$)/i.test(pathname);
   const audioRef = useRef(null);
   const [enabled, setEnabled] = useState(getInitialEnabled);
   const [blocked, setBlocked] = useState(false);
@@ -61,12 +64,12 @@ export default function BackgroundMusic() {
 
   return <>
     <audio ref={audioRef} src={TRACK_URL} loop preload="auto" onError={() => setMissing(true)} aria-hidden="true" />
-    <button type="button" className="lebw-music-toggle" onClick={toggle}
+    {!isAdminPage && <button type="button" className="lebw-music-toggle" onClick={toggle}
       aria-label={enabled ? 'Turn off background music' : 'Turn on background music'}
       aria-pressed={enabled} title={missing ? 'Add background.mp3 to public/background_songs' : enabled ? 'Turn off background music' : 'Turn on background music'}>
       <span aria-hidden="true">{enabled ? '♫' : '♪'}</span>
       <span>{enabled ? 'Music on' : 'Music off'}</span>
       {enabled && blocked && <span className="lebw-music-hint">Interact to start</span>}
-    </button>
+    </button>}
   </>;
 }
