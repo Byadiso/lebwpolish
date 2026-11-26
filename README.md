@@ -192,7 +192,7 @@ The V2 upgrade uses the branch `feature/v2-premium-active-learning`. The planned
 
 LEBWPOLISH includes administrator-only visitor statistics intended to understand platform usage, including guest and authenticated sessions, page visits and engagement duration.
 
-Read the [Privacy Policy](https://lebwpolish.netlify.app/privacy). Review analytics configuration, applicable privacy requirements, database permissions and community document visibility before production deployment. Shared community reads must not grant unauthorized editing or deletion. Frontend controls do not replace server-enforced access rules.
+Read the [Privacy Policy](https://lebwpolish.netlify.app/privacy). 
 
 ## Learning scope
 
