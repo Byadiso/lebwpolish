@@ -1,0 +1,7 @@
+export const homePaths = [
+ {id:'A1', title:'I’m new to Polish', description:'Start with everyday words and simple phrases.', steps:[['/word-bank','Discover useful words','Browse the collection and reveal meanings.','book'],['/learn','Try a daily mission','Learn a pattern and use it yourself.','compass'],['/learn?tab=review','Review what you learned','Return to phrases from completed missions.','refresh']]},
+ {id:'A2', title:'I know some Polish', description:'Build sentences and confidence in everyday situations.', steps:[['/polish-simplified','Build a sentence','Arrange words into useful Polish sentences.','tool'],['/practice','Listen and write','Reconstruct a phrase you hear.','headphones'],['/PolishRolePlay','Try a conversation','Practise responding in everyday situations.','chat']]},
+ {id:'B1', title:'I’m preparing for B1', description:'Find your gaps and practise exam skills.', steps:[['/b1-readiness','Check your readiness','Start with a short diagnostic.','target'],['/learn?tab=b1','Explore the five exam skills','Choose a skill to practise.','compass'],['/B1-writing','Practise writing','Plan, draft and review a message.','pen']]}
+];
+export function getHomePath(level){return homePaths.find(path=>path.id===level)||homePaths[0];}
+export const homeSkills=[['/word-bank','Words & connectors','book'],['/grammar','Grammar','brain'],['/practice','Listening','headphones'],['/reading-practice','Reading','book'],['/PolishRolePlay','Speaking','mic'],['/B1-writing','Writing','pen'],['/play','Quick games','game'],['/learn?tab=b1','B1 exam skills','target']];

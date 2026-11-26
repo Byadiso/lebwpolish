@@ -16,6 +16,8 @@ import { AccountSyncBanner } from './context/LearningProgressContext';
 const ClozeLab = lazy(() => import('./pages/ClozeLab'));
 const Home = lazy(() => import('./pages/Home'));
 const Notes = lazy(() => import('./pages/Notes'));
+const WordBank = lazy(() => import('./pages/WordBank'));
+const PersonalStatistics = lazy(() => import('./pages/PersonalStatistics'));
 const Statistics = lazy(() => import('./pages/Statistics'));
 const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 const DailyJourney = lazy(() => import('./pages/DailyJourney'));
@@ -30,6 +32,8 @@ const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const PracticeLab = lazy(() => import('./pages/PracticeLab'));
 const GrammarGauntlet = lazy(() => import('./pages/GrammarGauntlet'));
 const VocabularyVault = lazy(() => import('./pages/VocabularyVault'));
+const B1VocabularyBuilder = lazy(() => import('./pages/B1VocabularyBuilder'));
+const B1ReadinessCoach = lazy(() => import('./pages/B1ReadinessCoach'));
 const PolishWarForge = lazy(() => import('./pages/PolishWarForge'));
 const LirycznaSymfonia = lazy(() => import('./pages/LirycznaSymfonia'));
 const ScenarioEngine = lazy(() => import('./pages/ScenarioEngine'));
@@ -71,8 +75,8 @@ function AppContent() {
   return <div className="min-h-screen bg-[#fafafa]"><Navbar /><VisitTracker /><BackgroundMusic /><QuickNotes /><AccountSyncBanner />{!firebaseConfigured && <div className="app-guest-notice">Local practice is ready. Sign-in and community features need your Firebase settings in <code>.env</code>.</div>}<div id="app-content" tabIndex={-1}><AppBoundary key={location.pathname}><Suspense fallback={<LearningLoader title="Loading your next activity" detail="Your next Polish challenge is almost ready." />}><Routes>
  <Route path="/" element={<Home />} /><Route path="/privacy" element={<PrivacyPolicy />} /><Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} /><Route path="/notes" element={<Notes />} /><Route path="/cloze" element={<ClozeLab />} /><Route path="/learn" element={<DailyJourney />} /><Route path="/explore" element={<Explore />} /><Route path="/B1-writing" element={<WritingStudio />} />
  <Route path="/login" element={firebaseConfigured ? <Login /> : <Navigate to="/learn" replace />} /><Route path="/signup" element={firebaseConfigured ? <Signup /> : <Navigate to="/learn" replace />} /><Route path="/guest" element={<EnrollmentGuard />} />
- <Route path="/grammar" element={<GrammarGauntlet />} /><Route path="/shadow-protocol" element={<ScenarioEngine />} /><Route path="/vocabularyvault" element={<VocabularyVault />} /><Route path="/polish-simplified" element={<PolishWarForge />} /><Route path="/practice-polish-case" element={<PolishCaseCodex />} /><Route path="/reading-practice" element={<PolishReadingEngine />} /><Route path="/Reading-comprehension" element={<ReadingComprehension />} /><Route path="/conjugation-practice" element={<KoniugacjaMaster />} /><Route path="/B1-ready" element={<B1ShadowBoxer />} /><Route path="/play" element={<PolishArena />} /><Route path="/polish-music" element={<LirycznaSymfonia />} /><Route path="/practice" element={<PracticeLab />} /><Route path="/PolishMeme" element={<PolishWithMeme />} /><Route path="/PolishRolePlay" element={<PolishRoleplay />} />
- <Route path="/space" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} /><Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /><Route path="/statistics" element={<ProtectedRoute admin><Statistics /></ProtectedRoute>} /><Route path="/admin" element={<ProtectedRoute admin><AdminDashboard /></ProtectedRoute>} /><Route path="*" element={<Navigate to="/explore" replace />} />
+ <Route path="/grammar" element={<GrammarGauntlet />} /><Route path="/shadow-protocol" element={<ScenarioEngine />} /><Route path="/vocabularyvault" element={<VocabularyVault />} /><Route path="/b1-vocabulary" element={<B1VocabularyBuilder />} /><Route path="/b1-readiness" element={<B1ReadinessCoach />} /><Route path="/polish-simplified" element={<PolishWarForge />} /><Route path="/practice-polish-case" element={<PolishCaseCodex />} /><Route path="/reading-practice" element={<PolishReadingEngine />} /><Route path="/Reading-comprehension" element={<ReadingComprehension />} /><Route path="/conjugation-practice" element={<KoniugacjaMaster />} /><Route path="/B1-ready" element={<B1ShadowBoxer />} /><Route path="/play" element={<PolishArena />} /><Route path="/polish-music" element={<LirycznaSymfonia />} /><Route path="/practice" element={<PracticeLab />} /><Route path="/PolishMeme" element={<PolishWithMeme />} /><Route path="/PolishRolePlay" element={<PolishRoleplay />} />
+ <Route path="/space" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} /><Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /><Route path="/word-bank" element={<WordBank />} /><Route path="/statistics" element={<ProtectedRoute><PersonalStatistics /></ProtectedRoute>} /><Route path="/admin/statistics" element={<ProtectedRoute admin><Statistics /></ProtectedRoute>} /><Route path="/admin" element={<ProtectedRoute admin><AdminDashboard /></ProtectedRoute>} /><Route path="*" element={<Navigate to="/explore" replace />} />
  </Routes></Suspense></AppBoundary></div>{location.pathname !== "/" && <SiteFooter />}</div>;
 }
 export default function App() {

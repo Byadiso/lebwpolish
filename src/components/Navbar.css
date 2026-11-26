@@ -110,7 +110,7 @@
 .app-skip:focus {
   top: 12px;
 }
-@media (max-width: 960px) {
+@media (max-width: 1200px) {
   .app-nav-desktop {
     display: none;
   }
@@ -159,3 +159,6 @@
     display: none;
   }
 }
+
+.app-mobile-nav a[aria-current="page"] { background:#1e293b; }
+@media(min-width:1201px){.app-nav-inner{gap:14px}.app-nav-link{padding:10px 8px;gap:6px}.app-nav-desktop{gap:2px}}

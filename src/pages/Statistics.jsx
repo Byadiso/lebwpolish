@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { get, ref } from 'firebase/database';
 import { Link } from 'react-router-dom';
 import { realtimeDb, auth } from '../firebase';
+import './StatisticsDashboard.css';
 
 const fmt = ms => `${Math.floor(ms / 60000)}m ${Math.floor(ms % 60000 / 1000)}s`;
 const dates = [{ label: '7 days', days: 7 }, { label: '30 days', days: 30 }, { label: 'All time', days: 0 }];
@@ -12,8 +13,17 @@ export default function Statistics() {
   const [error, setError] = useState('');
   const load = async () => {
     setLoading(true); setError('');
-    try { await auth.authStateReady(); if (!auth.currentUser) throw new Error('Sign in as administrator first'); const snap = await get(ref(realtimeDb, 'visit_sessions')); setSessions(snap.exists() ? Object.values(snap.val()) : []); }
-    catch (err) { setError(`Unable to read statistics (${err.code || err.message}). Check Realtime Database rules.`); }
+    try {
+      // AuthProvider resolves the initial auth state before ProtectedRoute mounts.
+      if (!auth || !realtimeDb) throw new Error('Firebase is not configured');
+      if (!auth.currentUser) throw new Error('Sign in as administrator first');
+      const snap = await get(ref(realtimeDb, 'visit_sessions'));
+      setSessions(snap.exists() ? Object.values(snap.val()) : []);
+    } catch (err) {
+      const detail = err.code || err.message || 'Unknown error';
+      const denied = /permission[_ -]?denied/i.test(detail);
+      setError(`Unable to read statistics (${detail}).${denied ? ' Check administrator email verification and Realtime Database rules.' : ''}`);
+    }
     finally { setLoading(false); }
   };
   useEffect(() => { load(); }, []);
@@ -32,12 +42,22 @@ export default function Statistics() {
     selected.forEach(s => { const day = new Date(s.startedAt).toLocaleDateString('en-CA'); days[day] = (days[day] || 0) + 1; });
     return { sessions: selected.length, visitors: visitors.size, signedIn: signedIn.size, guests, loggedIn, total, avg: selected.length ? total / selected.length : 0, pageviews: Object.values(paths).reduce((a,b)=>a+b,0), paths: Object.entries(paths).sort((a,b)=>b[1]-a[1]), days: Object.entries(days).sort((a,b)=>a[0].localeCompare(b[0])) };
   }, [sessions, period]);
-  return <main className="min-h-screen bg-slate-50 px-4 py-8 md:px-10 text-slate-900 font-sans"><div className="max-w-7xl mx-auto space-y-7">
-    <header className="flex flex-wrap justify-between items-center gap-4"><div><Link to="/admin" className="text-sm font-bold text-indigo-600">← Admin dashboard</Link><h1 className="text-4xl md:text-5xl font-black tracking-tight mt-2">SITE <span className="text-indigo-600">STATISTICS</span></h1><p className="text-slate-500 mt-2">Visits and active learning time, collected in Firebase Realtime Database.</p></div><button onClick={load} disabled={loading} className="rounded-xl bg-slate-900 text-white px-5 py-3 font-bold disabled:opacity-50">{loading ? 'Loading…' : 'Refresh data'}</button></header>
-    <div className="flex flex-wrap gap-2">{dates.map(d => <button key={d.days} onClick={() => setPeriod(d.days)} className={`rounded-full px-4 py-2 text-sm font-bold ${period === d.days ? 'bg-indigo-600 text-white' : 'bg-white border border-slate-200'}`}>{d.label}</button>)}</div>
-    {error && <p role="alert" className="rounded-xl bg-red-50 p-4 text-red-700">{error}</p>}
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">{[['Unique visitors',data.visitors],['Visits / sessions',data.sessions],['Signed-in learners',data.signedIn],['Guest sessions',data.guests],['Logged-in sessions',data.loggedIn],['Page views',data.pageviews],['Total active time',fmt(data.total)],['Avg. active time / visit',fmt(data.avg)]].map(([label,value]) => <div key={label} className="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm"><p className="text-xs uppercase tracking-wide font-bold text-slate-500">{label}</p><p className="mt-3 text-2xl md:text-4xl font-black break-words">{value}</p></div>)}</div>
-    <div className="flex flex-wrap gap-2"><span className="rounded-full bg-white border border-slate-200 px-4 py-2 text-sm font-semibold">Guests: {data.guests}</span><span className="rounded-full bg-white border border-slate-200 px-4 py-2 text-sm font-semibold">Logged in: {data.loggedIn}</span></div><div className="grid lg:grid-cols-2 gap-5"><section className="bg-white rounded-2xl border border-slate-200 p-5"><h2 className="text-xl font-black mb-4">Most visited pages</h2>{data.paths.length ? data.paths.slice(0,15).map(([path,count])=><div key={path} className="flex justify-between gap-4 border-b border-slate-100 py-3 text-sm"><span className="break-all">{path}</span><strong>{count}</strong></div>) : <p className="text-slate-500">No visits recorded yet.</p>}</section><section className="bg-white rounded-2xl border border-slate-200 p-5"><h2 className="text-xl font-black mb-4">Daily visits</h2>{data.days.length ? data.days.map(([day,count])=><div key={day} className="flex items-center gap-3 py-2"><span className="text-xs text-slate-500 w-24 shrink-0">{day}</span><div className="h-3 rounded-full bg-indigo-500" style={{width:`${Math.max(3, count / Math.max(...data.days.map(d=>d[1])) * 100)}%`}}/><strong className="text-xs">{count}</strong></div>) : <p className="text-slate-500">No visits recorded yet.</p>}</section></div>
-    <p className="text-sm text-slate-500">Active time counts only when the tab is visible and focused, sampled periodically. Numbers are approximate and may be undercounted if visitors leave before a write completes. Unique visitors are based on browser identifiers, not verified individuals. No geographic location is collected.</p>
+  const max = Math.max(1, ...data.days.map(([,count]) => count));
+  const share = data.sessions ? Math.round(data.loggedIn / data.sessions * 100) : 0;
+  const number = n => n.toLocaleString('en-GB');
+  const cards = [['Unique visitors',number(data.visitors),'Distinct browser identifiers'],['Sessions',number(data.sessions),'Recorded visits'],['Page views',number(data.pageviews),'Across all tracked pages'],['Avg. active time',fmt(data.avg),'Per recorded session']];
+  return <main className="stats-dashboard"><div className="stats-shell">
+    <header className="stats-header"><div><Link to="/admin" className="stats-back">← Admin dashboard</Link><p className="stats-kicker">LEARN BY DOING / ANALYTICS</p><h1>Site statistics<span>.</span></h1><p>Understand how learners discover and use your platform.</p></div><button className="stats-refresh" onClick={load} disabled={loading}>{loading ? 'Refreshing…' : '↻ Refresh data'}</button></header>
+    <div className="stats-toolbar"><div><strong>Overview</strong><small>{dates.find(d=>d.days===period)?.label} · Recorded activity</small></div><div className="stats-filters" role="group" aria-label="Date range">{dates.map(d=><button key={d.days} aria-pressed={period===d.days} onClick={()=>setPeriod(d.days)}>{d.label}</button>)}</div></div>
+    {error && <div className="stats-error" role="alert">{error} <button onClick={load} disabled={loading}>Try again</button></div>}
+    {loading && <p role="status" className="stats-status">Loading statistics…</p>}
+    {!loading && !error && !data.sessions && <p className="stats-status">No recorded visits in this period. Try a wider date range.</p>}
+    {(!error || sessions.length>0) && <div aria-busy={loading}>
+    {error && <p className="stats-status">Showing previously loaded data.</p>}
+    <div className="stats-kpis">{cards.map(([label,value,detail])=><section className="stats-panel stats-kpi" key={label}><p>{label}</p><strong>{loading&&!sessions.length?'—':value}</strong><small>{detail}</small></section>)}</div>
+    <div className="stats-grid"><section className="stats-panel"><div className="stats-section-head"><div><p className="stats-kicker">TRAFFIC</p><h2>Daily visits</h2></div><strong>{number(data.sessions)} visits</strong></div><p className="stats-muted">Sessions by recorded day</p>{data.days.length ? <div className="stats-chart" tabIndex={0} aria-label="Daily visit counts"><div className="stats-bars" style={{minWidth:Math.max(0,data.days.length*38)}}>{data.days.map(([day,count])=><div className="stats-bar-col" key={day}><span>{count}</span><div className="stats-bar-track"><div style={{height:`${count/max*100}%`}}/></div><small title={day}>{day}</small></div>)}</div></div>:<p className="stats-empty">No traffic recorded.</p>}</section>
+    <section className="stats-panel"><p className="stats-kicker">AUDIENCE</p><h2>Visitor breakdown</h2><div className="stats-ring" style={{background:data.sessions?`conic-gradient(#dc2626 ${share}%, #e2e8f0 0)`:'#e2e8f0'}}><div><strong>{data.sessions?`${share}%`:'—'}</strong><small>Signed-in sessions</small></div></div><div className="stats-legend"><span><i/>Logged-in sessions</span><strong>{number(data.loggedIn)}</strong><span><i className="stats-guest"/>Guest sessions</span><strong>{number(data.guests)}</strong></div><div className="stats-foot">Distinct signed-in learners <strong>{number(data.signedIn)}</strong></div></section></div>
+    <div className="stats-grid"><section className="stats-panel"><p className="stats-kicker">CONTENT</p><h2>Most visited pages</h2><p className="stats-muted">Top 15 by recorded page views</p>{data.paths.length?data.paths.slice(0,15).map(([path,count],i)=><div className="stats-path" key={path}><div><span>{i+1}. {path}</span><strong>{number(count)}</strong></div><div className="stats-meter"><div style={{width:`${count/Math.max(1,data.paths[0][1])*100}%`}}/></div></div>):<p className="stats-empty">No page views recorded.</p>}</section><section className="stats-panel"><p className="stats-kicker">ENGAGEMENT</p><h2>Active learning time</h2><div className="stats-big">{fmt(data.total)}</div><p className="stats-muted">Total recorded active time</p><div className="stats-foot">Average per visit <strong>{fmt(data.avg)}</strong></div><div className="stats-foot">Page views per visit <strong>{data.sessions?(data.pageviews/data.sessions).toFixed(1):'—'}</strong></div><p className="stats-note">Active time measures visible, focused tabs, not verified learning outcomes.</p></section></div></div>}
+    <footer className="stats-note">Statistics are approximate. Unique visitors represent browser identifiers, not verified individuals. Active time may be undercounted if a visitor leaves before a write completes. No geographic location is collected.</footer>
   </div></main>;
 }

@@ -1,0 +1,53 @@
+.ls-page-intro .ls-page-intro-inner{padding-block:32px}.ls-page-intro h1{font-size:clamp(32px,4vw,52px)}.ls-page-intro .ls-alias-note{border:0;background:transparent;padding:0;margin-top:10px}.ls-start-writing{background:#dc2626;color:white;border-radius:12px;padding:14px 20px;font-weight:700;cursor:pointer;white-space:nowrap}.ls-community-refresh.ls-root{background:#f8fafc}.ls-community-refresh.ls-root::before{display:none}.ls-community-refresh .ls-main{padding-top:24px;gap:24px}.ls-community-refresh .ls-main>div>div:first-child{order:1}.ls-community-refresh #space-composer{order:0;scroll-margin-top:100px}.ls-community-refresh .ls-main>div>div:last-child{order:2}.ls-community-refresh .ls-card{border-radius:20px}.ls-community-refresh .ls-card-glow{background:#0f172a;box-shadow:0 12px 32px #0f172a14}.ls-composer-heading,.ls-feed-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:18px}.ls-composer-heading h2,.ls-feed-heading h2{font-size:24px;font-weight:800;letter-spacing:-.03em}.ls-composer-heading p{color:#cbd5e1;font-size:14px}.ls-composer-heading>span{color:#fecaca;font-size:13px}.ls-community-refresh .ls-mission-tab{color:#cbd5e1;background:#ffffff0d;box-shadow:none!important}.ls-community-refresh .ls-mission-tab.active{background:#ffffff15}.ls-starters{display:grid;gap:8px;color:#e2e8f0;font-size:13px}.ls-starters>div,.ls-feed-filters{display:flex;flex-wrap:wrap;gap:8px}.ls-starters button{border:1px solid #64748b;border-radius:9px;padding:8px 10px;color:#fff;cursor:pointer}.ls-starters button:hover{background:#334155}.ls-community-refresh .ls-textarea{background:#fff;color:#0f172a;caret-color:#dc2626;border:2px solid transparent}.ls-community-refresh .ls-textarea:focus{background:#fff;border-color:#f87171;box-shadow:none}.ls-community-refresh .ls-textarea::placeholder{color:#64748b}.ls-mini-goal{display:grid;grid-template-columns:1fr auto;gap:6px;font-size:13px;color:#e2e8f0}.ls-mini-goal progress{grid-column:1/-1;width:100%;height:8px;accent-color:#f87171}.ls-community-refresh .ls-submit-btn{background:#dc2626;color:#fff;box-shadow:none}.ls-published{background:#14532d;color:#dcfce7;padding:12px;border-radius:10px;margin-top:12px}.ls-feed-heading{color:#0f172a;margin-bottom:0}.ls-feed-heading p{color:#64748b;font-size:14px}.ls-feed-filters button,.ls-empty-feed button{border:1px solid #cbd5e1;border-radius:9px;padding:9px 12px;color:#334155;background:white;cursor:pointer}.ls-feed-filters button[aria-pressed=true]{background:#0f172a;color:white;border-color:#0f172a}.ls-community-refresh .ls-empty-feed{background:white;color:#475569;padding:24px;display:grid;gap:12px}.ls-community-refresh .ls-post-card{background:#0f172a;border:1px solid #334155}.ls-community-refresh .ls-action-btn{color:#cbd5e1}.ls-community-refresh .ls-main aside>div{top:96px!important}.ls-community-refresh button:focus-visible,.ls-start-writing:focus-visible{outline:2px solid #f87171;outline-offset:3px}@media(max-width:720px){.ls-start-writing{margin-top:16px;white-space:normal}.ls-community-refresh #space-composer>div:last-child{padding:18px!important}.ls-community-refresh .ls-main{padding-inline:14px}.ls-community-refresh .ls-vocab-input{min-width:0}.ls-community-refresh .ls-submit-btn{white-space:normal}}@media(prefers-reduced-motion:reduce){.ls-community-refresh *{animation:none!important;transition:none!important}}
+.ls-page-intro .ls-page-intro-inner{padding-block:32px!important}.ls-page-intro h1{font-size:clamp(32px,4vw,52px)!important}.ls-community-refresh .ls-submit-btn:disabled{opacity:.55;cursor:not-allowed}.ls-community-refresh .ls-main>div>div:first-child{order:1}.ls-community-refresh .ls-main>div>div:last-child{order:2}
+
+/* Community feed: opaque surfaces in every interaction state. */
+.ls-community-refresh .ls-post-card,.ls-community-refresh .ls-post-card:hover,.ls-community-refresh .ls-post-card:focus-within{background:#fff;color:#0f172a;border:1px solid #dbe3ed;box-shadow:0 2px 8px #0f172a06;transform:none;padding:24px}
+.ls-community-refresh .ls-post-card.new-post{border-color:#dc2626}
+.ls-community-refresh .ls-post-card .ls-post-content{color:#0f172a;background:transparent;border:0;padding:0;margin:18px 0;white-space:pre-wrap;font-size:17px;line-height:1.75}
+.ls-community-refresh .ls-post-avatar{border-radius:50%;background:#172b45!important;color:white}
+.ls-community-refresh .ls-post-card .ls-action-btn,.ls-community-refresh .ls-post-card .ls-btn-icon{color:#475569;min-height:44px;text-transform:none;letter-spacing:0;font-size:14px}
+.ls-community-refresh .ls-post-card .ls-action-btn:hover,.ls-community-refresh .ls-post-card .ls-btn-icon:hover{background:#f1f5f9;color:#0f172a;transform:none}
+.ls-community-refresh .ls-post-card .ls-action-btn.liked{color:#b91c1c;background:#fff1f2}
+.ls-community-refresh .ls-post-card .ls-action-btn .icon{transform:none}
+.ls-community-refresh .ls-post-card .ls-vocab-tag,.ls-community-refresh .ls-post-card .ls-edited-badge{color:#475569;background:#f1f5f9;border-color:#dbe3ed;text-transform:none}
+.ls-community-refresh .ls-post-card .ls-comment-zone{background:#f8fafc;border-color:#e2e8f0;padding:16px}
+.ls-community-refresh .ls-post-card .ls-comment-item{background:white;overflow-wrap:anywhere}
+.ls-community-refresh .ls-post-card .ls-comment-input,.ls-community-refresh .ls-post-card .ls-edit-textarea{background:white;color:#0f172a;border:1px solid #94a3b8;resize:vertical}
+.ls-community-refresh .ls-post-card .ls-comment-input::placeholder{color:#64748b}
+.ls-community-refresh .ls-post-card .ls-char-btn,.ls-community-refresh .ls-post-card .ls-btn-cancel,.ls-community-refresh .ls-post-card .ls-btn-cancel-text{background:#f1f5f9;color:#334155;border:1px solid #cbd5e1}
+.ls-community-refresh .ls-post-card .ls-btn-send,.ls-community-refresh .ls-post-card .ls-btn-save{background:#0f172a;color:white;box-shadow:none;min-height:44px}
+.ls-community-refresh .ls-post-card .ls-btn-correction{color:#b91c1c;min-height:44px}
+.ls-community-refresh .ls-post-card>div:first-child{flex-wrap:wrap;gap:10px}
+.ls-community-refresh .ls-post-card>div:first-child>div:first-child{min-width:0;overflow-wrap:anywhere}
+.ls-community-refresh .ls-post-card>div:has(>.ls-action-btn){border-top:1px solid #e2e8f0!important;flex-wrap:wrap}
+.ls-community-refresh .ls-main{grid-template-columns:minmax(0,1fr);max-width:1200px;align-items:start}
+.ls-community-refresh .ls-main aside{min-width:0}
+.ls-community-refresh .ls-main aside>div{position:static!important}
+.ls-community-refresh #space-composer{overflow:hidden!important}
+.ls-community-refresh #space-composer>div:first-child{display:none}
+.ls-community-refresh .ls-textarea::placeholder{color:#64748b!important}
+.ls-community-refresh .ls-mission-tabs{flex-wrap:wrap;overflow:visible}
+.ls-community-refresh .ls-mission-tab{min-height:44px;text-transform:none;letter-spacing:0}
+.ls-community-refresh .ls-community-xp{background:#172b45!important}
+.ls-community-refresh .ls-community-xp p,.ls-community-refresh .ls-community-xp span{color:#e2e8f0!important}
+.ls-community-refresh #space-feed{scroll-margin-top:110px}
+.ls-community-refresh .ls-community-side,.ls-community-refresh .ls-more-activities{background:#fff;border:1px solid #dbe3ed;border-radius:18px;padding:20px;color:#0f172a;overflow-wrap:anywhere}
+.ls-community-refresh .ls-community-side h2{font-size:18px;font-weight:800;margin:0 0 10px}
+.ls-community-refresh .ls-community-side p{font-size:14px;color:#475569;line-height:1.6;margin:0 0 12px}
+.ls-community-refresh .ls-side-counts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0}
+.ls-community-refresh .ls-side-counts>div{background:#f1f5f9;border-radius:10px;padding:12px;display:grid;gap:4px}
+.ls-community-refresh .ls-side-counts strong{font-size:24px;color:#0f172a}.ls-community-refresh .ls-side-counts span{font-size:12px;color:#475569}
+.ls-community-refresh .ls-community-side button{display:flex;justify-content:space-between;align-items:center;gap:8px;width:100%;text-align:left;min-height:44px;padding:10px 12px;border-radius:9px;background:#f8fafc;color:#334155;margin-top:6px;cursor:pointer;font-weight:600}
+.ls-community-refresh .ls-community-side button:first-of-type{background:#b91c1c;color:white}
+.ls-community-refresh .ls-community-side button:hover{box-shadow:inset 0 0 0 2px #94a3b8}
+.ls-community-refresh .ls-peer-tip p[lang=pl]{border-left:3px solid #dc2626;padding-left:12px;color:#0f172a;margin-bottom:0}
+.ls-community-refresh .ls-more-activities summary{cursor:pointer;font-weight:700;padding:8px 0;min-height:44px}
+.ls-community-refresh .ls-link-card,.ls-community-refresh .ls-library-card,.ls-community-refresh .ls-tip-card{background:white;border:1px solid #dbe3ed;border-radius:14px;transform:none;overflow-wrap:anywhere}
+.ls-community-refresh .ls-link-card{margin-top:8px;padding:12px}.ls-community-refresh .ls-link-card>div,.ls-community-refresh .ls-library-item>div,.ls-community-refresh .ls-tip-card>div{color:#334155!important;text-transform:none!important;letter-spacing:0!important;font-size:13px!important}
+.ls-community-refresh .ls-library-card .ls-section-label{color:#0f172a}.ls-community-refresh .ls-library-item{background:#f8fafc}.ls-community-refresh .ls-library-item:hover,.ls-community-refresh .ls-link-card:hover{background:#f1f5f9}
+.ls-community-refresh .ls-shadow-card,.ls-community-refresh .ls-vocab-card{background:#172b45;border:1px solid #334155;box-shadow:none;transform:none}
+.ls-community-refresh .ls-shadow-card span,.ls-community-refresh .ls-shadow-card div,.ls-community-refresh .ls-vocab-card div{color:#e2e8f0!important;-webkit-text-fill-color:currentColor}
+.ls-community-refresh .ls-shadow-card::before,.ls-community-refresh .ls-vocab-card::after,.ls-community-refresh .ls-live-dot{display:none}
+@media(min-width:1024px){.ls-community-refresh .ls-main{grid-template-columns:minmax(0,1fr) minmax(280px,320px)}}
+@media(max-width:720px){.ls-community-refresh .ls-post-card,.ls-community-refresh .ls-post-card:hover,.ls-community-refresh .ls-post-card:focus-within{padding:16px}.ls-community-refresh .ls-post-card .ls-post-content{font-size:16px}.ls-community-refresh #space-composer form div:has(>.ls-vocab-input){flex-direction:column;align-items:stretch!important}.ls-community-refresh .ls-vocab-input{width:100%}.ls-community-refresh .ls-submit-btn{width:100%;min-height:44px}.ls-community-refresh .ls-main{padding-bottom:110px}.ls-community-refresh .ls-post-card .ls-comment-zone{padding:10px}}

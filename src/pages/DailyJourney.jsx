@@ -1,3 +1,4 @@
+import ActiveGuide from '../components/ActiveGuide';
 import IconText from "../components/IconText";
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -125,7 +126,7 @@ export default function DailyJourney() {
     setRecall('');
     setClock(() => Date.now());
   }
-  return <main className="journey-root"><div className="journey-shell">
+  return <main className="journey-root"><div className="journey-shell">{!mission && tab === 'journey' && <ActiveGuide />}
   <header className="journey-header"><div><span className="journey-eyebrow">MAŁE KROKI. WIELKIE MOŻLIWOŚCI.</span><h1>Your Polish.<br /><em>A little more every day.</em></h1><p>Real-life words. Small wins. A clear path towards B1.</p></div><div className="journey-stats"><strong><IconText>{progress.xp}</IconText><small>journey XP</small></strong><strong><IconText>{Object.keys(progress.words).length}</IconText><small>review phrases</small></strong><strong><IconText>{progress.days.length}</IconText><small>active days</small></strong></div></header>
   {!saved && <p role="alert">Progress could not be saved in this browser. Copy any work you want to keep before leaving.</p>}
   {canImportGuest && <aside className="journey-note"><b>Have an earlier guest journey on this device?</b><p>Guest history is kept separate from your account. Import it only if it belongs to you.</p><button className="journey-primary" onClick={() => persist(mergeJourney(progress, guestProgress))}>Import my guest journey</button></aside>}
