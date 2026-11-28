@@ -1,3 +1,4 @@
+import {subscribeAudio,stopAudio} from '../lib/polishAudio';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import './BackgroundMusic.css';
@@ -55,6 +56,8 @@ export default function BackgroundMusic() {
     };
   }, [enabled, missing, tryPlay]);
 
+  useEffect(()=>subscribeAudio(active=>{if(audioRef.current)audioRef.current.volume=active ? .035 : .22;}),[enabled]);
+  useEffect(()=>{stopAudio();},[pathname]);
   const toggle = () => {
     const next = !enabled;
     setEnabled(next);

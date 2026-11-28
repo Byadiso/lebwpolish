@@ -1,0 +1,6 @@
+.reading-audio-minimal{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:12px 0 18px;color:#cbd5e1;font:500 13px/1.5 system-ui,sans-serif;max-width:100%}
+.reading-audio-minimal>button{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 12px;border:1px solid #64748b66;border-radius:10px;background:transparent;color:#e2e8f0;cursor:pointer;font:inherit}
+.reading-audio-minimal>button:hover{background:#ffffff0d;color:white}.reading-audio-minimal>button:focus-visible{outline:2px solid #a5b4fc;outline-offset:3px}
+.reading-audio-minimal>input{flex:1 1 100px;min-width:0;accent-color:#a5b4fc}.reading-audio-time{font-variant-numeric:tabular-nums;white-space:nowrap}.reading-audio-error{flex-basis:100%;color:#fca5a5}
+.reading-paragraph-inline .reading-paragraph-control{display:inline-block;vertical-align:middle;margin-inline-end:6px;line-height:1;font:500 13px/1.4 system-ui,sans-serif}.reading-paragraph-inline .reading-paragraph-control .pl-listen-buttons button{min-width:44px;min-height:44px}.reading-paragraph-inline .pl-listen-status{max-width:180px;white-space:normal}
+@media(max-width:480px){.reading-audio-minimal{gap:6px 10px}.reading-audio-minimal>input{flex-basis:90px}}

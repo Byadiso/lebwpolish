@@ -1,3 +1,4 @@
+import { playAudio, stopAudio } from '../lib/polishAudio';
 import "./MemeLab.css";
 import IconText from "../components/IconText";
 import { useEffect, useRef, useState, useCallback } from "react";
@@ -37,27 +38,14 @@ function useTTS() {
   const [speaking, setSpeaking] = useState(false);
   const [lang, setLang] = useState("pl");
   const speak = useCallback((plText, enText) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const text = lang === "pl" ? plText : enText || plText;
-    const langTag = lang === "pl" ? "pl-PL" : "en-US";
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = langTag;
-    u.rate = lang === "pl" ? 0.85 : 0.9;
-    const voices = window.speechSynthesis.getVoices();
-    const v = voices.find(x => x.lang.startsWith(lang === "pl" ? "pl" : "en"));
-    if (v) u.voice = v;
-    u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(u);
+    playAudio(lang === "pl" ? plText : enText || plText,{lang:lang === "pl" || !enText ? "pl-PL" : "en-US",rate:lang === "pl" || !enText ? 1 : .9,onStart:()=>setSpeaking(true),onEnd:()=>setSpeaking(false)});
   }, [lang]);
   const stop = useCallback(() => {
-    window.speechSynthesis?.cancel();
+    stopAudio();
     setSpeaking(false);
   }, []);
   const toggle = useCallback(() => setLang(l => l === "pl" ? "en" : "pl"), []);
-  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+  useEffect(() => () => stopAudio(), []);
   return {
     speak,
     stop,

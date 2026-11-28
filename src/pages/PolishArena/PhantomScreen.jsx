@@ -1,3 +1,4 @@
+import PolishListen from '../../components/PolishListen';
 import IconText from "../../components/IconText";
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -580,7 +581,7 @@ export default function PhantomScreen({
                     lineHeight: 1.05,
                     letterSpacing: '-0.01em'
                   }}>
-                      <IconText>{card.word}</IconText>
+                      <IconText>{card.word}</IconText><PolishListen text={card.word} compact />
                     </h2>
                   </div>
 

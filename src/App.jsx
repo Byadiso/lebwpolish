@@ -1,5 +1,6 @@
+import { stopAudio } from './lib/polishAudio';
 import { MotionConfig } from 'framer-motion';
-import { lazy, Suspense, useEffect } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import { firebaseConfigured } from './firebase';
@@ -13,6 +14,7 @@ import LearningLoader from './components/LearningLoader';
 import { activities } from './data/activities';
 import { useLearningPersistence } from './hooks/useLearningStorage';
 import { AccountSyncBanner } from './context/LearningProgressContext';
+const SkillPractice = lazy(() => import('./pages/SkillPractice'));
 const ClozeLab = lazy(() => import('./pages/ClozeLab'));
 const Home = lazy(() => import('./pages/Home'));
 const Notes = lazy(() => import('./pages/Notes'));
@@ -56,6 +58,13 @@ function ProtectedRoute({
   if (admin && user.email !== 'byadiso@gmail.com') return <Navigate to="/learn" replace />;
   return children;
 }
+function AudioNotice(){
+ const [visible,setVisible]=useState(false);
+ const location=useLocation();
+ useEffect(()=>{setVisible(false);},[location.pathname]);
+ useEffect(()=>{const show=()=>setVisible(true);window.addEventListener('lebw:audio-error',show);return()=>window.removeEventListener('lebw:audio-error',show);},[]);
+ return visible?<div role="status" style={{position:'fixed',bottom:'calc(140px + env(safe-area-inset-bottom, 0px))',left:16,zIndex:1000,maxWidth:'min(340px, calc(100vw - 32px))',background:'#172b45',color:'white',padding:12,borderRadius:12,boxShadow:'0 4px 18px #0003'}}>Audio unavailable. Select the audio control to retry. <button type="button" onClick={()=>setVisible(false)} aria-label="Dismiss audio message" style={{marginLeft:8,color:'white',background:'transparent',border:0,cursor:'pointer'}}>×</button></div>:null;
+}
 function AppContent() {
   const {loadLocal, saveLocal} = useLearningPersistence();
   const location = useLocation();
@@ -70,10 +79,10 @@ function AppContent() {
       const recent = loadLocal('lebw.recent', []);
       saveLocal('lebw.recent', [activity.path, ...(Array.isArray(recent) ? recent : []).filter(p => p !== activity.path)].slice(0, 5));
     }
-    window.speechSynthesis?.cancel();
+    stopAudio();
   }, [location.pathname, loadLocal, saveLocal]);
-  return <div className="min-h-screen bg-[#fafafa]"><Navbar /><VisitTracker /><BackgroundMusic /><QuickNotes /><AccountSyncBanner />{!firebaseConfigured && <div className="app-guest-notice">Local practice is ready. Sign-in and community features need your Firebase settings in <code>.env</code>.</div>}<div id="app-content" tabIndex={-1}><AppBoundary key={location.pathname}><Suspense fallback={<LearningLoader title="Loading your next activity" detail="Your next Polish challenge is almost ready." />}><Routes>
- <Route path="/" element={<Home />} /><Route path="/privacy" element={<PrivacyPolicy />} /><Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} /><Route path="/notes" element={<Notes />} /><Route path="/cloze" element={<ClozeLab />} /><Route path="/learn" element={<DailyJourney />} /><Route path="/explore" element={<Explore />} /><Route path="/B1-writing" element={<WritingStudio />} />
+  return <div className="min-h-screen bg-[#fafafa]"><Navbar /><AudioNotice /><VisitTracker /><BackgroundMusic /><QuickNotes /><AccountSyncBanner />{!firebaseConfigured && <div className="app-guest-notice">Local practice is ready. Sign-in and community features need your Firebase settings in <code>.env</code>.</div>}<div id="app-content" tabIndex={-1}><AppBoundary key={location.pathname}><Suspense fallback={<LearningLoader title="Loading your next activity" detail="Your next Polish challenge is almost ready." />}><Routes>
+ <Route path="/" element={<Home />} /><Route path="/privacy" element={<PrivacyPolicy />} /><Route path="/privacy-policy" element={<Navigate to="/privacy" replace />} /><Route path="/notes" element={<Notes />} /><Route path="/cloze" element={<ClozeLab />} /><Route path="/skill-practice" element={<SkillPractice />} /><Route path="/learn" element={<DailyJourney />} /><Route path="/explore" element={<Explore />} /><Route path="/B1-writing" element={<WritingStudio />} />
  <Route path="/login" element={firebaseConfigured ? <Login /> : <Navigate to="/learn" replace />} /><Route path="/signup" element={firebaseConfigured ? <Signup /> : <Navigate to="/learn" replace />} /><Route path="/guest" element={<EnrollmentGuard />} />
  <Route path="/grammar" element={<GrammarGauntlet />} /><Route path="/shadow-protocol" element={<ScenarioEngine />} /><Route path="/vocabularyvault" element={<VocabularyVault />} /><Route path="/b1-vocabulary" element={<B1VocabularyBuilder />} /><Route path="/b1-readiness" element={<B1ReadinessCoach />} /><Route path="/polish-simplified" element={<PolishWarForge />} /><Route path="/practice-polish-case" element={<PolishCaseCodex />} /><Route path="/reading-practice" element={<PolishReadingEngine />} /><Route path="/Reading-comprehension" element={<ReadingComprehension />} /><Route path="/conjugation-practice" element={<KoniugacjaMaster />} /><Route path="/B1-ready" element={<B1ShadowBoxer />} /><Route path="/play" element={<PolishArena />} /><Route path="/polish-music" element={<LirycznaSymfonia />} /><Route path="/practice" element={<PracticeLab />} /><Route path="/PolishMeme" element={<PolishWithMeme />} /><Route path="/PolishRolePlay" element={<PolishRoleplay />} />
  <Route path="/space" element={<ProtectedRoute><LearningSpace /></ProtectedRoute>} /><Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} /><Route path="/word-bank" element={<WordBank />} /><Route path="/statistics" element={<ProtectedRoute><PersonalStatistics /></ProtectedRoute>} /><Route path="/admin/statistics" element={<ProtectedRoute admin><Statistics /></ProtectedRoute>} /><Route path="/admin" element={<ProtectedRoute admin><AdminDashboard /></ProtectedRoute>} /><Route path="*" element={<Navigate to="/explore" replace />} />

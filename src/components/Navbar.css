@@ -162,3 +162,7 @@
 
 .app-mobile-nav a[aria-current="page"] { background:#1e293b; }
 @media(min-width:1201px){.app-nav-inner{gap:14px}.app-nav-link{padding:10px 8px;gap:6px}.app-nav-desktop{gap:2px}}
+
+.app-audio-rate{font:inherit;font-size:12px;min-height:44px;max-width:70px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#172b45;padding:4px}.app-audio-rate:focus-visible{outline:2px solid #b91c1c;outline-offset:2px}@media(max-width:420px){.app-audio-rate{max-width:56px;padding:2px;font-size:11px}}
+
+.app-audio-setting{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 12px}.app-audio-desktop{display:inline-flex}@media(max-width:1200px){.app-audio-desktop{display:none}}

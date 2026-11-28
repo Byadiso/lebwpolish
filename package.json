@@ -10,7 +10,10 @@
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs",
     "test:render": "node tests/render-smoke.mjs",
-    "test:production": "npm run build && node tests/production-smoke.mjs"
+    "test:production": "npm run build && node tests/production-smoke.mjs",
+    "audio:collect": "node scripts/collect-gosia.mjs",
+    "audio:check": "node scripts/check-gosia.mjs",
+    "audio:sync": "npm run audio:collect && python scripts/generate-gosia.py && npm run audio:check"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.18",

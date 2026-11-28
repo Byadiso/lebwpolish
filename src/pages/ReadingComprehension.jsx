@@ -1,9 +1,15 @@
+import './LearningFlow.css';
+import {useAuth} from '../context/AuthContext';
+import ReadingAudio from '../components/ReadingAudio';
+import PolishListen from '../components/PolishListen';
 import IconText from "../components/IconText";
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { READING_VAULT } from "../data/readingVault";
 const OPTION_LABELS = ["A", "B", "C", "D"];
+const difficultyLabel=d=>({1:"Easy",2:"Medium",3:"Hard"}[d]||d);
 const getDifficultyColor = difficulty => {
+  difficulty=difficultyLabel(difficulty);
   if (!difficulty) return "text-slate-500 bg-slate-500/10";
   if (difficulty === "Easy") return "text-emerald-400 bg-emerald-500/10";
   if (difficulty === "Hard") return "text-rose-400 bg-rose-500/10";
@@ -13,7 +19,7 @@ const getScoreFeedback = (score, total) => {
   const pct = score / total;
   if (pct === 1) return {
     label: "Perfect",
-    msg: "Flawless execution. Your B1 comprehension is sharp.",
+    msg: "You understood all the questions in this passage.",
     color: "text-emerald-400"
   };
   if (pct >= 0.75) return {
@@ -32,16 +38,21 @@ const getScoreFeedback = (score, total) => {
     color: "text-rose-400"
   };
 };
-export default function PolishReadingEngine() {
+export default function PolishReadingEngine() {const {user}=useAuth();return <ReadingSession key={user?.uid||"guest"} account={user?.uid||"guest"}/>;}
+function ReadingSession({account}) {
+  const storageKey=`lebw.reading.flow.${account}`;
+  const [saved]=useState(()=>{try{return JSON.parse(localStorage.getItem(storageKey)||"{}")||{}}catch{return {}}});
+  const [filter,setFilter]=useState("All");
   const [selectedTextId, setSelectedTextId] = useState(null);
   const [answers, setAnswers] = useState({});
   const [showResults, setShowResults] = useState(false);
   const [isStarted, setIsStarted] = useState(false);
   const [activeTooltip, setActiveTooltip] = useState(null);
   const [showGrammarNote, setShowGrammarNote] = useState(false);
-  const [favorites, setFavorites] = useState([]);
+  const [favorites, setFavorites] = useState(Array.isArray(saved.favorites)?saved.favorites:[]);
   const [currentQ, setCurrentQ] = useState(0);
-  const [sessionScores, setSessionScores] = useState([]);
+  const [sessionScores, setSessionScores] = useState(Array.isArray(saved.scores)?saved.scores:[]);
+  useEffect(()=>{try{localStorage.setItem(storageKey,JSON.stringify({favorites,scores:sessionScores.slice(-100)}))}catch{}},[storageKey,favorites,sessionScores]);
   const [revealedExplanations, setRevealedExplanations] = useState({});
   const tooltipRef = useRef(null);
   const containerRef = useRef(null);
@@ -72,7 +83,7 @@ export default function PolishReadingEngine() {
   const handleSubmit = () => {
     setShowResults(true);
     const score = calculateScore();
-    setSessionScores(prev => [...prev, {
+    setSessionScores(prev => [...prev.slice(-99), {
       title: activeData.title,
       score,
       total: activeData.questions.length
@@ -90,7 +101,7 @@ export default function PolishReadingEngine() {
   const answeredCount = Object.keys(answers).length;
   const totalQ = activeData?.questions?.length ?? 0;
   const progressPct = totalQ > 0 ? answeredCount / totalQ * 100 : 0;
-  const renderInteractiveText = (text, glossary = {}) => {
+  const renderInteractiveText = (text, glossary = {}, paragraphId = 0) => {
     const words = text.split(/(\s+)/);
     return words.map((part, i) => {
       const cleanWord = part.toLowerCase().replace(/[.,„"()!?;:]/g, "").trim();
@@ -99,12 +110,12 @@ export default function PolishReadingEngine() {
       return <span key={i} className="relative inline">
           <button onClick={e => {
           e.stopPropagation();
-          setActiveTooltip(activeTooltip === i ? null : i);
+          setActiveTooltip(activeTooltip === `${paragraphId}:${i}` ? null : `${paragraphId}:${i}`);
         }} className={`transition-all rounded px-[1px] ${definition ? "text-indigo-300 border-b border-indigo-500/50 hover:bg-indigo-500/15" : "hover:text-white hover:bg-white/5"}`}>
             <IconText>{part}</IconText>
           </button>
           <AnimatePresence>
-            {activeTooltip === i && <motion.div initial={{
+            {activeTooltip === `${paragraphId}:${i}` && <motion.div initial={{
             opacity: 0,
             y: 6
           }} animate={{
@@ -115,14 +126,14 @@ export default function PolishReadingEngine() {
             y: 6
           }} transition={{
             duration: 0.15
-          }} className="absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-52 p-3.5 bg-[#1e293b] border border-indigo-500/30 rounded-2xl shadow-2xl z-[200]" style={{
-            pointerEvents: "none"
+          }} onClick={e=>e.stopPropagation()} className="lf-word-tip absolute bottom-[calc(100%+8px)] left-1/2 -translate-x-1/2 w-52 p-3.5 bg-[#1e293b] border border-indigo-500/30 rounded-2xl shadow-2xl z-[200]" style={{
+            pointerEvents: "auto"
           }}>
                 <p className="text-[9px] font-black uppercase tracking-widest text-indigo-400 mb-1">
                   <IconText>{definition ? "Definicja" : "Słowo"}</IconText>
                 </p>
                 <p className="text-[13px] text-slate-100 leading-snug">
-                  <IconText>{definition ?? "Tap any highlighted word for its meaning."}</IconText>
+                  <IconText>{definition ?? "Tap any highlighted word for its meaning."}</IconText><PolishListen text={part} compact />
                 </p>
                 <div className="absolute top-full left-1/2 -translate-x-1/2 w-0 h-0 border-l-[6px] border-l-transparent border-r-[6px] border-r-transparent border-t-[6px] border-t-[#1e293b]" />
               </motion.div>}
@@ -133,7 +144,7 @@ export default function PolishReadingEngine() {
 
   // ── MENU ──────────────────────────────────────────────────────────────────
   if (!selectedTextId) {
-    return <div className="w-full bg-[#020617] min-h-screen text-white font-sans overflow-x-hidden">
+    return <div className="lf-reading w-full bg-[#101827] min-h-screen text-white font-sans overflow-x-hidden">
         <div className="max-w-5xl mx-auto px-5 py-12 md:py-20">
 
           {/* Header */}
@@ -144,12 +155,12 @@ export default function PolishReadingEngine() {
           opacity: 1,
           y: 0
         }} className="mb-4 text-center">
-            <h1 className="text-4xl md:text-6xl font-black uppercase italic tracking-tighter mb-3">
-              B1 Reading<IconText>{" "}</IconText>
-              <span className="text-indigo-500 font-serif lowercase not-italic">codex</span>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3">
+              Reading<IconText>{" "}</IconText>
+              <span className="text-indigo-500 font-serif lowercase not-italic">studio</span>
             </h1>
             <p className="text-slate-500 text-sm tracking-widest uppercase font-semibold mb-6">
-              Polish comprehension simulator
+              Read real Polish, then check your understanding.
             </p>
             <div className="h-px w-16 bg-indigo-600 mx-auto rounded-full" />
           </motion.header>
@@ -171,9 +182,11 @@ export default function PolishReadingEngine() {
                 </div>)}
             </motion.div>}
 
+          <div className="lf-filters" aria-label="Filter readings">{["All","Easy","Medium","Hard","Saved"].map(f=><button key={f} aria-pressed={filter===f} onClick={()=>setFilter(f)}>{f}</button>)}</div>
+          {filter==="Saved"&&!favorites.length&&<p>No saved readings yet. Select a star to save a passage.</p>}
           {/* Cards grid */}
           <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {READING_VAULT.map((item, idx) => {
+            {READING_VAULT.filter(item=>filter==="All"||(filter==="Saved"?favorites.includes(item.id):difficultyLabel(item.difficulty)===filter)).map((item, idx) => {
             const pastScore = sessionScores.findLast(s => s.title === item.title);
             return <motion.div key={item.id} initial={{
               opacity: 0,
@@ -191,9 +204,9 @@ export default function PolishReadingEngine() {
                     <span className="text-5xl"><IconText>{item.icon}</IconText></span>
                     <div className="flex items-center gap-2">
                       {item.difficulty && <span className={`text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-lg ${getDifficultyColor(item.difficulty)}`}>
-                          <IconText>{item.difficulty}</IconText>
+                          <IconText>{difficultyLabel(item.difficulty)}</IconText>
                         </span>}
-                      <button onClick={e => toggleFavorite(e, item.id)} className={`w-8 h-8 flex items-center justify-center rounded-xl text-base transition-all ${favorites.includes(item.id) ? "bg-indigo-500/20 text-indigo-400" : "bg-white/5 text-slate-600 hover:text-slate-400"}`}>
+                      <button onClick={e => toggleFavorite(e, item.id)} aria-label={favorites.includes(item.id)?"Remove saved reading":"Save reading"} aria-pressed={favorites.includes(item.id)} className={`w-8 h-8 flex items-center justify-center rounded-xl text-base transition-all ${favorites.includes(item.id) ? "bg-indigo-500/20 text-indigo-400" : "bg-white/5 text-slate-600 hover:text-slate-400"}`}>
                         <IconText>{favorites.includes(item.id) ? "★" : "☆"}</IconText>
                       </button>
                     </div>
@@ -203,9 +216,7 @@ export default function PolishReadingEngine() {
                   <p className="text-[9px] font-black text-indigo-500 uppercase tracking-[0.3em] mb-1.5">
                     <IconText>{item.category}</IconText>
                   </p>
-                  <h2 className="text-lg font-bold leading-snug mb-3 group-hover:text-indigo-100 transition-colors">
-                    <IconText>{item.title}</IconText>
-                  </h2>
+                  <h2 className="text-lg font-bold leading-snug mb-3"><button className="lf-reading-open" onClick={e=>{e.stopPropagation();setSelectedTextId(item.id)}}><IconText>{item.title}</IconText></button></h2>
 
                   {/* Stats row */}
                   <div className="flex items-center gap-3 mt-auto pt-5 border-t border-white/5">
@@ -238,7 +249,7 @@ export default function PolishReadingEngine() {
   // ── SIMULATOR ─────────────────────────────────────────────────────────────
   const score = showResults ? calculateScore() : null;
   const feedback = showResults ? getScoreFeedback(score, totalQ) : null;
-  return <div ref={containerRef} className="w-full bg-[#020617] min-h-screen text-white font-sans" onClick={() => setActiveTooltip(null)}>
+  return <div ref={containerRef} className="lf-reading w-full bg-[#101827] min-h-screen text-white font-sans" onClick={() => setActiveTooltip(null)}>
       <div className="max-w-3xl mx-auto px-5 pb-24">
 
         {/* Sticky header */}
@@ -295,7 +306,7 @@ export default function PolishReadingEngine() {
                 {/* Meta chips */}
                 <div className="flex items-center justify-center gap-3 flex-wrap mb-10">
                   {activeData.difficulty && <span className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-xl ${getDifficultyColor(activeData.difficulty)}`}>
-                      <IconText>{activeData.difficulty}</IconText>
+                      <IconText>{difficultyLabel(activeData.difficulty)}</IconText>
                     </span>}
                   <span className="text-[10px] font-black uppercase tracking-widest px-3 py-1 rounded-xl text-slate-400 bg-white/5">
                     <IconText>{totalQ}</IconText> questions
@@ -327,9 +338,9 @@ export default function PolishReadingEngine() {
                   </span>
                 </div>
 
-                {/* Text */}
+                {/* Text */}<ReadingAudio text={activeData.text} />
                 <div className="text-slate-200 text-lg md:text-xl leading-[1.85] font-serif italic">
-                  <IconText>{renderInteractiveText(activeData.text, activeData.glossary)}</IconText>
+                  {activeData.text.split(/\n\s*\n/).map((paragraph,i)=><div key={i}><div className="pl-reading-paragraph"><PolishListen text={paragraph} label="Listen to paragraph" /></div><p><IconText>{renderInteractiveText(paragraph, activeData.glossary, i)}</IconText></p></div>)}
                 </div>
 
                 {/* Grammar note toggle */}

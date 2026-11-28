@@ -1,3 +1,5 @@
+import { playAudio } from '../lib/polishAudio';
+import PolishListen from '../components/PolishListen';
 import { useLearningStorage } from '../hooks/useLearningStorage';
 import { resetScenarioStorage } from '../lib/scenarioStorage';
 import IconText from "../components/IconText";
@@ -75,14 +77,7 @@ export default function ScenarioEngine() {
     setShowTerminateModal(false);
   };
   const speakTransmission = text => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.lang = "pl-PL";
-    utterance.rate = 0.9;
-    utterance.onstart = () => setIsSpeaking(true);
-    utterance.onend = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(utterance);
+    playAudio(text,{rate:1,onStart:()=>setIsSpeaking(true),onEnd:()=>setIsSpeaking(false)});
   };
   useEffect(() => {
     setShowHint(false);
@@ -355,7 +350,7 @@ export default function ScenarioEngine() {
             <div className="space-y-1">
               {missionLog.map((log, i) => <div key={i} className="flex justify-between items-center text-[10px] border-b border-emerald-900/10 py-1">
                   <span className="text-emerald-500/60 font-bold"><IconText>{log.label}</IconText></span>
-                  <span className="text-white font-black"><IconText>{log.correct}</IconText></span>
+                  <span className="text-white font-black"><IconText>{log.correct}</IconText><PolishListen text={log.correct} compact /></span>
                   <span className="text-emerald-400 font-bold">+<IconText>{log.xp}</IconText> XP</span>
                 </div>)}
             </div>

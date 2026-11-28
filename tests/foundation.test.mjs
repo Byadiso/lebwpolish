@@ -1,0 +1,18 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { matchesTranslation } from '../src/lib/translationAnswers.js';
+import { emptyProgress, completeMission, reviewWord, readProgress } from '../src/lib/journeyProgress.js';
+import { record, EMPTY, mergeActive } from '../src/lib/activePractice.js';
+import { mergeJourney, LearningStore } from '../src/lib/learningSync.js';
+import { DIAGNOSTIC, sanitizeReadiness, readinessSummary } from '../src/data/b1Readiness.js';
+const drills=JSON.parse(readFileSync(new URL('../src/data/drills.json',import.meta.url)));
+const now=1700000000000;
+test('all canonical and curated translations accepted',()=>{for(const d of drills){assert.ok(matchesTranslation(d.polish,d));for(const a of d.alternatives||[])assert.ok(matchesTranslation(a,d));}});
+test('translation normalization preserves diacritics and rejects wrong endings',()=>{assert.ok(matchesTranslation('  IDĘ   DO LEKARZA! ',{polish:'Idę do lekarza.'}));assert.ok(!matchesTranslation('Ide do lekarza',{polish:'Idę do lekarza.'}));assert.ok(!matchesTranslation('Idę do lekarz',{polish:'Idę do lekarza.'}));assert.ok(!matchesTranslation('',drills[0]));});
+test('mission completion awards XP once and retains review words',()=>{const m={id:'m',words:[{id:'w',pl:'dom',en:'house',example:'To dom.'}]};const a=completeMission(emptyProgress(),m,now);const b=completeMission(a,m,now+1);assert.equal(b.xp,30);assert.equal(b.words.w.due,now);assert.equal(reviewWord(b,'w',false,now).words.w.due,now+600000);});
+test('active recall respects due time and merges newest card',()=>{const a=record(EMPTY,'w',true,now);assert.equal(a.cards.w.due,now+86400000);assert.equal(record(a,'w',true,now+1),a);const b=record(a,'w',false,now+86400000);assert.equal(mergeActive(b,a).cards.w.box,0);});
+test('journey merge retains both completions',()=>{const a={...emptyProgress(),completed:['a'],xp:30};const b={...emptyProgress(),completed:['b'],xp:30};assert.deepEqual(mergeJourney(a,b).completed,['a','b']);assert.equal(mergeJourney(a,b).xp,60);});
+test('malformed stored progress recovers',()=>assert.deepEqual(readProgress({getItem:()=>'{'}),emptyProgress()));
+test('diagnostic IDs and answers valid; invalid saved answers discarded',()=>{assert.equal(new Set(DIAGNOSTIC.map(q=>q.id)).size,DIAGNOSTIC.length);for(const q of DIAGNOSTIC)assert.ok(q.answer>=0&&q.answer<q.options.length);const d=sanitizeReadiness({answers:{'case-i':0,'case-l':99,unknown:0},checks:{0:true}});assert.deepEqual(d.answers,{'case-i':0});assert.equal(readinessSummary(d.answers).Grammar.correct,1);});
+test('guest storage does not leak into authenticated account',()=>{const m=new Map();const storage={getItem:k=>m.get(k)??null,setItem:(k,v)=>m.set(k,v),removeItem:k=>m.delete(k)};const guest=new LearningStore({storage});guest.setItem('test','guest');const account=new LearningStore({uid:'a',storage});assert.equal(account.getItem('test'),null);assert.equal(guest.getItem('test'),'guest');});

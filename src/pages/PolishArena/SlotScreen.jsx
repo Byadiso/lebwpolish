@@ -1,3 +1,4 @@
+import PolishListen from '../../components/PolishListen';
 import IconText from "../../components/IconText";
 import React, { useState, useRef, useCallback } from 'react';
 import { SUBJECTS, VERBS, OBJECTS } from './data';
@@ -765,7 +766,7 @@ export default function SlotScreen({
           {/* ── Polish sentence ── */}
           {reelState !== 'idle' && reelState !== 'spinning' && current && <div className="slot-sentence">
               <div className="slot-pl">
-                <IconText>{current.s.pl}</IconText> <IconText>{current.v.pl}</IconText> <IconText>{current.o.pl}</IconText>.
+                <IconText>{current.s.pl}</IconText> <IconText>{current.v.pl}</IconText> <IconText>{current.o.pl}</IconText>. <PolishListen text={[current.s.pl,current.v.pl,current.o.pl].join(" ")} compact />
               </div>
               <div className="slot-hint-text">
                 <IconText>{reelState === 'answering' ? "Any correct alternative is accepted — ignore grammar notes in brackets" : 'Check the translations revealed on each card above'}</IconText>

@@ -1,3 +1,4 @@
+import PolishListen from '../components/PolishListen';
 import IconText from "../components/IconText";
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -208,7 +209,7 @@ export default function B1UltimateMastery() {
         }}>
             <span className="inline-block px-3 py-1 bg-indigo-500/10 border border-indigo-500/20 text-[10px] font-black text-indigo-400 uppercase tracking-widest mb-6 rounded">Scenario: <IconText>{current.context}</IconText></span>
             <h2 className="text-2xl sm:text-4xl lg:text-6xl font-black italic tracking-tighter leading-[1.05] mb-12 text-slate-100">
-              <IconText>{current.prompt}</IconText>
+              <IconText>{current.prompt}</IconText><PolishListen text={current.prompt} compact />
             </h2>
 
             <div className="max-w-3xl relative">
@@ -241,7 +242,7 @@ export default function B1UltimateMastery() {
               }} className="mt-10 overflow-hidden">
                     <div className="p-8 bg-indigo-500/10 border border-indigo-500/20 rounded-[2rem]">
                         <span className="text-[10px] font-black text-indigo-400 uppercase block mb-2">Target Solution</span>
-                        <p className="text-2xl font-bold italic tracking-tight text-indigo-200"><IconText>{current.target}</IconText></p>
+                        <p className="text-2xl font-bold italic tracking-tight text-indigo-200"><IconText>{current.target}</IconText><PolishListen text={current.target} compact /></p>
                     </div>
                   </motion.div>}
               </AnimatePresence>

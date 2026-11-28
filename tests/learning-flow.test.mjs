@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {CASES_VAULT} from '../src/data/casesVault.js';import {casePractice} from '../src/data/casePractice.js';import {READING_VAULT} from '../src/data/readingVault.js';
+test('all seven existing case IDs retained',()=>assert.deepEqual(Object.keys(casePractice),CASES_VAULT.map(c=>c.id)));
+for(const c of CASES_VAULT)test(c.id+' has three valid questions',()=>{const g=casePractice[c.id];assert.equal(g.questions.length+1,3);for(const q of [...g.questions,c.challenge]){assert.equal(q.options.filter(o=>o===q.correct).length,1);assert.ok(q.hint)}for(const q of g.questions)assert.ok(q.full.includes(q.correct));});
+test('reading difficulty data uses three numeric levels',()=>assert.deepEqual([...new Set(READING_VAULT.map(r=>r.difficulty))].sort(),[1,2,3]));

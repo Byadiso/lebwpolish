@@ -1,0 +1,15 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {playAudio,stopAudio} from '../src/lib/polishAudio.js';
+import {readFileSync} from 'node:fs';
+import {SUBJECTS,VERBS,OBJECTS} from '../src/pages/PolishArena/data.js';
+const flush=()=>new Promise(r=>setImmediate(r));
+const filename='a'.repeat(64)+'.mp3';
+let spoken=0, instances=[];
+globalThis.speechSynthesis={cancel(){},speak(u){spoken++;u.onstart?.()},getVoices(){return [{lang:'pl-PL'}]}};
+globalThis.SpeechSynthesisUtterance=class {};
+globalThis.Audio=class {constructor(url){this.url=url;instances.push(this)} play(){return Promise.resolve()} pause(){this.paused=true} removeAttribute(){} load(){}};
+test('missing clip uses Polish fallback; retry prefers Gosia',async()=>{let source;globalThis.fetch=async()=>({ok:true,json:async()=>({})});playAudio('Łódź',{onSource:s=>source=s});await flush();assert.equal(source,'browser');assert.equal(spoken,1);globalThis.fetch=async()=>({ok:true,json:async()=>({'Łódź':filename})});playAudio('Ło\u0301dź',{onSource:s=>source=s});await flush();assert.equal(source,'gosia');assert.equal(instances.at(-1).playbackRate,1);assert.ok(instances.at(-1).url.endsWith(filename));stopAudio();});
+test('media failure stops recording and uses fallback',async()=>{let source;playAudio('Łódź',{onSource:s=>source=s});await flush();const a=instances.at(-1);a.onerror();assert.equal(source,'browser');assert.equal(a.paused,true);stopAudio();});
+test('starting another clip cancels previous clip',async()=>{globalThis.fetch=async()=>({ok:true,json:async()=>({'Łódź':filename})});let ended=0;playAudio('Łódź',{onEnd:()=>ended++});await flush();const a=instances.at(-1);playAudio('Łódź');await flush();assert.equal(ended,1);assert.equal(a.paused,true);stopAudio();});
+test('collector covers actual Arena sentence combinations',()=>{const entries=new Set(JSON.parse(readFileSync(new URL('../scripts/gosia-coverage.json',import.meta.url)))['Polish Arena']);for(const s of SUBJECTS)for(const v of VERBS)for(const o of OBJECTS)assert.ok(entries.has([s.pl,v.pl,o.pl].join(' ')));assert.ok(entries.has('Mój sąsiad boi się codziennej rutyny'));});

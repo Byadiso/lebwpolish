@@ -1,3 +1,5 @@
+import { playAudio, stopAudio } from '../lib/polishAudio';
+import PolishListen from '../components/PolishListen';
 import { useLearningStorage } from '../hooks/useLearningStorage';
 import IconText from "../components/IconText";
 import { useEffect, useMemo, useState } from "react";
@@ -60,21 +62,13 @@ const SCENARIOS = [{
 function useSpeech() {
   const [speaking, setSpeaking] = useState(false);
   const speak = (text, lang = "pl-PL") => {
-    if (!window.speechSynthesis || !text) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = lang;
-    u.rate = lang.startsWith("pl") ? 0.85 : 0.95;
-    u.onstart = () => setSpeaking(true);
-    u.onend = () => setSpeaking(false);
-    u.onerror = () => setSpeaking(false);
-    window.speechSynthesis.speak(u);
+    playAudio(text,{lang,rate:lang.startsWith("pl")?1:.95,onStart:()=>setSpeaking(true),onEnd:()=>setSpeaking(false)});
   };
   const stop = () => {
-    window.speechSynthesis?.cancel();
+    stopAudio();
     setSpeaking(false);
   };
-  useEffect(() => () => window.speechSynthesis?.cancel(), []);
+  useEffect(() => () => stopAudio(), []);
   return {
     speak,
     stop,
@@ -316,7 +310,7 @@ export default function PolishRoleplay({
                 fontWeight: 700,
                 fontSize: 12
               }}>
-                    <IconText>{word}</IconText>
+                    <IconText>{word}</IconText><PolishListen text={word} compact />
                   </span>)}
               </div>
             </div>
@@ -333,7 +327,7 @@ export default function PolishRoleplay({
                 background: "rgba(255,255,255,0.03)",
                 border: "1px solid rgba(255,255,255,0.06)"
               }}>
-                    <IconText>{phrase}</IconText>
+                    <IconText>{phrase}</IconText><PolishListen text={phrase} compact />
                   </div>)}
               </div>
             </div>
@@ -360,7 +354,7 @@ export default function PolishRoleplay({
                 </IconText></button>
 
                 <button className="pcs-filter-btn" onClick={() => speaking ? stop() : speak(fullPolishText, "pl-PL")}>
-                  <IconText>{speaking ? "[icon:sparkles] Stop" : "[icon:volume] Listen"}</IconText>
+                  <IconText>{speaking ? "■ Stop" : "[icon:volume] Listen"}</IconText>
                 </button>
 
                 <TimerButton minutes={1} />

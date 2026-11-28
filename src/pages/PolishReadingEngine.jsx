@@ -1,3 +1,6 @@
+import ReadingAudio from '../components/ReadingAudio';
+import { playAudio } from '../lib/polishAudio';
+import PolishListen from '../components/PolishListen';
 import { useLearningStorage } from '../hooks/useLearningStorage';
 import IconText from "../components/IconText";
 import { useState, useEffect, useCallback, useRef } from "react";
@@ -3412,7 +3415,7 @@ function QuickBubble({
         fontStyle: "italic",
         fontWeight: 700
       }}>
-          <IconText>{cleanWord(word.pl)}</IconText>
+          <IconText>{cleanWord(word.pl)}</IconText><PolishListen text={cleanWord(word.pl)} compact />
         </span>
         <span style={{
         padding: "2px 8px",
@@ -3560,7 +3563,7 @@ function WordCard({
               lineHeight: 1,
               letterSpacing: "-0.03em"
             }}>
-                <IconText>{isLoading ? "..." : cleanWord(word.pl)}</IconText>
+                <IconText>{isLoading ? "..." : cleanWord(word.pl)}</IconText>{!isLoading&&<PolishListen text={cleanWord(word.pl)} compact />}
               </h2>
               <span style={{
               padding: "3px 10px",
@@ -4020,7 +4023,7 @@ function FlashcardReview({
             fontWeight: 900,
             margin: "0 0 1.5rem",
             textAlign: "center"
-          }}><IconText>{cleanWord(card.pl)}</IconText></h3>
+          }}><IconText>{cleanWord(card.pl)}</IconText></h3><PolishListen text={cleanWord(card.pl)} compact />
             <button onClick={e => {
             e.stopPropagation();
             onSpeak(card.pl);
@@ -4449,12 +4452,7 @@ export default function PolishReadingEngine() {
     }
   }, [wordsLookedUp.size]);
   const speak = useCallback(text => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = "pl-PL";
-    msg.rate = 0.82;
-    window.speechSynthesis.speak(msg);
+    playAudio(text,{rate:1});
   }, []);
   const showToast = useCallback((msg, type = "info", duration = 2200) => {
     setToast({
@@ -5119,7 +5117,7 @@ export default function PolishReadingEngine() {
         <div style={{
         marginBottom: "4rem"
       }}>
-          {pageData.paragraphs.map((para, pIdx) => <p key={pIdx} style={{
+          <ReadingAudio text={pageData.paragraphs.join(" ")} label="Listen to this page" compact />{pageData.paragraphs.map((para, pIdx) => <div key={pIdx} className="reading-paragraph-inline"><p style={{
           fontFamily: "'DM Serif Display', serif",
           fontSize: "clamp(1.35rem, 3.8vw, 1.8rem)",
           lineHeight: 1.95,
@@ -5127,7 +5125,7 @@ export default function PolishReadingEngine() {
           marginBottom: "2.5rem",
           letterSpacing: "0.01em"
         }}>
-              {para.split(" ").map((word, wIdx) => {
+              <span className="reading-paragraph-control"><PolishListen text={para} compact label={`Listen to paragraph ${pIdx + 1}`} /></span>{para.split(" ").map((word, wIdx) => {
             const clean = cleanWord(word);
             const isKnown = wordsLookedUp.has(clean);
             const isVocab = !!story.vocabulary[clean];
@@ -5139,7 +5137,7 @@ export default function PolishReadingEngine() {
                     <IconText>{word}</IconText>
                   </span>;
           })}
-            </p>)}
+            </p></div>)}
         </div>
 
         {/* Word legend */}

@@ -1,3 +1,4 @@
+import PolishListen from '../components/PolishListen';
 import IconText from "../components/IconText";
 import useLessonCompletion from '../hooks/useLessonCompletion';
 import { recordLessonCompletion } from '../lib/lessonCompletion';
@@ -126,7 +127,7 @@ export default function VocabLexicon() {
               {activeLesson.sections.map((s, idx) => <div key={idx} className="bg-black/40 p-5 md:p-6 rounded-2xl md:rounded-3xl border border-white/5">
                   <h4 className="text-emerald-400 font-black text-[9px] md:text-[10px] uppercase mb-2 tracking-widest"><IconText>{s.title}</IconText></h4>
                   <p className="text-slate-300 text-xs md:text-sm mb-3 leading-relaxed"><IconText>{s.content}</IconText></p>
-                  <p className="text-white font-bold italic text-sm md:text-base border-l-2 border-emerald-500/50 pl-3"><IconText>{s.ex}</IconText></p>
+                  <p className="text-white font-bold italic text-sm md:text-base border-l-2 border-emerald-500/50 pl-3"><IconText>{s.ex}</IconText><PolishListen text={s.ex.replace(/\([^)]*\)/g, "")} compact /></p>
                 </div>)}
             </div>
             

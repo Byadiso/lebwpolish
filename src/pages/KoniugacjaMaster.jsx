@@ -1,3 +1,6 @@
+import './LearningFlow.css';
+import {useAuth} from "../context/AuthContext";
+import PolishListen from '../components/PolishListen';
 import IconText from "../components/IconText";
 import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1080,7 +1083,10 @@ function XpBurst({
 /* ═══════════════════════════════════════════════════════════════
    MAIN COMPONENT
 ═══════════════════════════════════════════════════════════════ */
-export default function KoniugacjaMaster() {
+export default function KoniugacjaMaster(){const {user}=useAuth();return <VerbSession key={user?.uid||"guest"} account={user?.uid||"guest"}/>;}
+function VerbSession({account}) {
+  const key=`lebw.verbs.flow.${account}`;
+  const [saved]=useState(()=>{try{return JSON.parse(localStorage.getItem(key)||"{}")||{}}catch{return {}}});
   const [activeGroupId, setActiveGroupId] = useState("group-m");
   const [activeVerbIdx, setActiveVerbIdx] = useState(0);
   const [activeTense, setActiveTense] = useState("present");
@@ -1092,12 +1098,14 @@ export default function KoniugacjaMaster() {
   const [qIdx, setQIdx] = useState(0);
   const [chosen, setChosen] = useState(null);
   const [quizScore, setQuizScore] = useState(0);
+  const [correctCount,setCorrectCount]=useState(0);
   const [quizStreak, setQuizStreak] = useState(0);
   const [quizDone, setQuizDone] = useState(false);
   const [xpBursts, setXpBursts] = useState([]);
   const [totalXp, setTotalXp] = useState(0);
-  const [mastered, setMastered] = useState(new Set()); // verb+tense keys
-  const [bestStreaks, setBestStreaks] = useState({});
+  const [mastered, setMastered] = useState(()=>new Set(Array.isArray(saved.perfect)?saved.perfect:[])); // verb+tense keys
+  const [bestStreaks, setBestStreaks] = useState(saved.best||{});
+  useEffect(()=>{try{localStorage.setItem(key,JSON.stringify({perfect:[...mastered],best:bestStreaks}))}catch{}},[key,mastered,bestStreaks]);
   const btnRefs = useRef({});
   const group = CONJUGATION_DATA[activeGroupId];
   const verb = group.verbs[activeVerbIdx] || group.verbs[0];
@@ -1131,6 +1139,7 @@ export default function KoniugacjaMaster() {
     setQIdx(0);
     setChosen(null);
     setQuizScore(0);
+    setCorrectCount(0);
     setQuizStreak(0);
     setQuizDone(false);
   }, []);
@@ -1155,6 +1164,7 @@ export default function KoniugacjaMaster() {
     setChosen(opt);
     const correct = opt === questions[qIdx].correct;
     if (correct) {
+      setCorrectCount(n=>n+1);
       const pts = 10 + quizStreak * 5;
       setQuizScore(s => s + pts);
       setTotalXp(x => x + pts);
@@ -1169,23 +1179,16 @@ export default function KoniugacjaMaster() {
     } else {
       setQuizStreak(0);
     }
-    setTimeout(() => {
-      if (qIdx + 1 >= questions.length) {
-        setQuizDone(true);
-        // Mark mastered if all correct
-        if (quizScore + (correct ? 10 : 0) >= questions.length * 8) {
-          setMastered(m => new Set([...m, masteryKey]));
-        }
-      } else {
-        setQIdx(i => i + 1);
-        setChosen(null);
-      }
-    }, 900);
+  };
+  const continueQuiz=()=>{
+    if(chosen===null)return;
+    if(qIdx+1>=questions.length){setQuizDone(true);if(correctCount===questions.length)setMastered(m=>new Set([...m,masteryKey]));}
+    else {setQIdx(i=>i+1);setChosen(null);}
   };
   const q = questions[qIdx];
   const isMastered = mastered.has(masteryKey);
   return <div className="km-root" style={{
-    background: "#020617",
+    background: "#101827",
     color: "#f0f0ff",
     fontFamily: "'DM Sans', sans-serif",
     display: "flex",
@@ -1373,7 +1376,7 @@ export default function KoniugacjaMaster() {
               color: "#f0f0ff",
               lineHeight: 1,
               margin: 0
-            }}><IconText>{verb.infinitive}</IconText></h1>
+            }}><IconText>{verb.infinitive}</IconText></h1><PolishListen text={verb.infinitive} compact />
               {isMastered && <motion.span initial={{
               scale: 0
             }} animate={{
@@ -1388,7 +1391,7 @@ export default function KoniugacjaMaster() {
               background: "rgba(52,211,153,0.15)",
               color: "#34d399",
               border: "1px solid rgba(52,211,153,0.3)"
-            }}>✓ Mastered</motion.span>}
+            }}>✓ Perfect round</motion.span>}
             </div>
             <div style={{
             display: "flex",
@@ -1582,7 +1585,7 @@ export default function KoniugacjaMaster() {
               color: "rgba(245,158,11,0.55)",
               marginBottom: 5
             }}>
-                  Mastery Tip
+                  Learning tip
                 </div>
                 <p style={{
               fontSize: 13,
@@ -1646,7 +1649,7 @@ export default function KoniugacjaMaster() {
             fontSize: 52,
             marginBottom: 16
           }}>
-                  <IconText>{quizScore >= questions.length * 8 ? "[icon:trophy]" : quizScore >= questions.length * 5 ? "[icon:star]" : "[icon:book]"}</IconText>
+                  <IconText>{correctCount === questions.length ? "[icon:trophy]" : correctCount >= questions.length * .6 ? "[icon:star]" : "[icon:book]"}</IconText>
                 </div>
                 <h2 style={{
             fontFamily: "'Playfair Display', serif",
@@ -1656,7 +1659,7 @@ export default function KoniugacjaMaster() {
             color: "#f0f0ff",
             marginBottom: 8
           }}>
-                  <IconText>{quizScore >= questions.length * 8 ? "Perfect!" : quizScore >= questions.length * 5 ? "Well done!" : "Keep going!"}</IconText>
+                  <IconText>{correctCount === questions.length ? "Perfect!" : correctCount >= questions.length * .6 ? "Well done!" : "Keep going!"}</IconText>
                 </h2>
                 <div style={{
             fontFamily: "'Playfair Display', serif",
@@ -1666,7 +1669,7 @@ export default function KoniugacjaMaster() {
             fontWeight: 700,
             marginBottom: 6
           }}>
-                  <IconText>{quizScore}</IconText> pts
+                  <IconText>{quizScore}</IconText> pts · {correctCount}/{questions.length} correct
                 </div>
                 <div style={{
             fontSize: 12,
@@ -1688,7 +1691,7 @@ export default function KoniugacjaMaster() {
             fontWeight: 700,
             marginBottom: 24
           }}>
-                    ✓ <IconText>{verb.infinitive}</IconText> — <IconText>{activeTense}</IconText> MASTERED
+                    ✓ <IconText>{verb.infinitive}</IconText> — <IconText>{activeTense}</IconText> · perfect round
                   </div>}
                 <div style={{
             display: "flex",
@@ -1830,7 +1833,7 @@ export default function KoniugacjaMaster() {
               fontSize: "clamp(14px,2vw,16px)",
               color: "rgba(255,255,255,0.6)"
             }}>
-                    "<IconText>{q.example}</IconText>"
+                    "<IconText>{q.example}</IconText>{chosen!==null&&<PolishListen text={q.example} compact />}"
                   </div>
                 </motion.div>
 
@@ -1944,6 +1947,7 @@ export default function KoniugacjaMaster() {
                       </div>
                     </motion.div>}
                 </AnimatePresence>
+                {chosen!==null&&<button className="lf-primary" onClick={continueQuiz}>{qIdx+1===questions.length?"See results":"Continue"}</button>}
               </div>) : null}
           </div>}
       </main>
@@ -2096,7 +2100,7 @@ export default function KoniugacjaMaster() {
               margin: 0,
               lineHeight: 1.6
             }}>
-                    "<IconText>{selectedForm.example}</IconText>"
+                    "<IconText>{selectedForm.example}</IconText><PolishListen text={selectedForm.form} compact /><PolishListen text={selectedForm.example} compact />"
                   </p>
                 </div>}
 
