@@ -1,3 +1,4 @@
+import PolishListen from '../components/PolishListen';
 import IconText from "../components/IconText";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -1011,7 +1012,7 @@ export default function PolishWarForge() {
         </motion.div>
 
         {/* ── Grammar reveal ── */}
-        <GrammarReveal note={activeLesson.grammar_note} visible={showGrammar} />
+        {isForged&&<PolishListen text={activeLesson.correctSequence.join(' ')} compact />}<GrammarReveal note={activeLesson.grammar_note} visible={showGrammar} />
 
         {/* ── No stamina state ── */}
         {stamina === 0 && !isForged && <motion.div initial={{
@@ -1043,7 +1044,7 @@ export default function PolishWarForge() {
         }}>
               The correct answer was: <strong style={{
             color: T.rose
-          }}><IconText>{activeLesson.correctSequence.join(' ')}</IconText></strong>
+          }}><IconText>{activeLesson.correctSequence.join(' ')}</IconText><PolishListen text={activeLesson.correctSequence.join(' ')} compact /></strong>
             </p>
             <motion.button whileTap={{
           scale: 0.97

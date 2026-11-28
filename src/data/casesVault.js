@@ -4,7 +4,7 @@ export const CASES_VAULT = [
     icon: "[icon:user]",
     label: "Case 1",
     concept: "Mianownik (The 'Who is it?' Case)",
-    lesson: "The default form. No changes! Use it for the subject of the sentence.",
+    lesson: "The dictionary form is usually nominative singular. Use nominative for the subject; plural forms can change.",
     sections: [
       {
         title: "Think of it like...",
@@ -33,12 +33,12 @@ export const CASES_VAULT = [
     sections: [
       {
         title: "How to swap letters",
-        content: "[icon:user] Boy adjectives get -ego. [icon:user] Girl adjectives get -ej. [icon:user] Girl nouns: -a turns into -y/-i.",
+        content: "Masculine and neuter singular adjectives usually take -ego; feminine adjectives take -ej. Feminine nouns ending in -a often take -y or -i.",
         ex: "Nie mam zimnej wody. Szukam mojego brata."
       },
       {
         title: "Plural Forms",
-        content: "[icon:folder] Adjectives: -ych / -ich. [icon:user] Boys: often -ów. [icon:user] Girls/Neuter: usually the ending is removed.",
+        content: "Plural adjectives take -ych or -ich. Noun endings vary: butów, kobiet, okien.",
         ex: "Nie mam nowych butów. Dużo kobiet."
       }
     ],
@@ -83,7 +83,7 @@ export const CASES_VAULT = [
     sections: [
       {
         title: "Living vs. Inanimate",
-        content: "[icon:user] Boys (Living): add -a. [icon:folder] Objects: No change. [icon:user] Girls: -a turns to -ę (adjective -ą).",
+        content: "Masculine animate nouns usually match genitive; masculine inanimate nouns usually match nominative. Feminine nouns ending in -a usually take -ę; their adjectives take -ą.",
         ex: "Widzę psa (living). Widzę dom (object). Piję kawę."
       },
       {
@@ -129,7 +129,7 @@ export const CASES_VAULT = [
     icon: "[icon:pin]",
     label: "Case 6",
     concept: "Miejscownik (The 'Location' Case)",
-    lesson: "Only used after: W (in), NA (on), O (about), Przy (at).",
+    lesson: "Used after certain prepositions, including w, na, o, przy and po, depending on meaning.",
     sections: [
       {
         title: "The tricky swap",
@@ -138,7 +138,7 @@ export const CASES_VAULT = [
       },
       {
         title: "Plural Forms",
-        content: "[icon:folder] Adjectives: -ych / -ich. [icon:users] Nouns: ALWAYS end in -ach regardless of gender.",
+        content: "[icon:folder] Adjectives: -ych / -ich. [icon:users] Most nouns end in -ach; exceptions include w Niemczech and we Włoszech.",
         ex: "W tych dużych miastach."
       }
     ],
@@ -171,7 +171,7 @@ export const CASES_VAULT = [
       q: "Address your Dad: 'Kochany ______ (tata), słuchaj!'",
       options: ["tata", "tacie", "tato", "tatą"],
       correct: "tato",
-      hint: "Even though 'tata' is a man, it ends in -a, so it follows the 'Girl rule' in Wołacz: change -a to -o."
+      hint: "Tata has the traditional vocative form tato. Learn it as a useful expression."
     }
   }
 ];

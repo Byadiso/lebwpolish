@@ -1,3 +1,5 @@
+import { stopAudio } from '../lib/polishAudio';
+import PolishListen from '../components/PolishListen';
 import ActiveGuide from '../components/ActiveGuide';
 import IconText from "../components/IconText";
 import { useEffect, useRef, useState } from 'react';
@@ -32,7 +34,7 @@ export default function DailyJourney() {
   const [revealed, setRevealed] = useState(false);
   const [recall, setRecall] = useState('');
   const [saved, setSaved] = useState(true);
-  const [audioMessage, setAudioMessage] = useState('');
+
   const [clock, setClock] = useState(Date.now);
   const [savedGoal, setGoal] = useLearningValue('lebw.journey.goal', 3);
   const goal = [1, 3, 5].includes(savedGoal) ? savedGoal : 3;
@@ -44,7 +46,7 @@ export default function DailyJourney() {
     const timer = window.setInterval(() => setClock(() => Date.now()), 30000);
     return () => {
       window.clearInterval(timer);
-      window.speechSynthesis?.cancel();
+      stopAudio();
     };
   }, []);
   useEffect(() => {
@@ -64,8 +66,7 @@ export default function DailyJourney() {
     setAssisted(false);
   }
   function setTab(id) {
-    window.speechSynthesis?.cancel();
-    setAudioMessage('');
+    stopAudio();
     setParams(id === 'journey' ? {} : {
       tab: id
     });
@@ -75,25 +76,12 @@ export default function DailyJourney() {
     setClock(() => Date.now());
   }
   function openMission(item) {
-    window.speechSynthesis?.cancel();
-    setAudioMessage('');
+    stopAudio();
     setMission(item);
     setStep(-1);
     resetAnswer();
   }
-  function listen(text) {
-    if (!window.speechSynthesis) {
-      setAudioMessage('Audio is unavailable in this browser. Try reading the example aloud.');
-      return;
-    }
-    window.speechSynthesis.cancel();
-    const speech = new SpeechSynthesisUtterance(text);
-    speech.lang = 'pl-PL';
-    speech.rate = .85;
-    speech.onerror = () => setAudioMessage('Audio could not play. Check your device’s Polish voice settings.');
-    setAudioMessage('Device-generated Polish audio. Voice quality varies.');
-    window.speechSynthesis.speak(speech);
-  }
+
   const due = Object.values(progress.words).filter(w => w.due <= clock).sort((a, b) => a.due - b.due);
   const word = due[0];
   const task = mission?.tasks[step];
@@ -149,7 +137,7 @@ export default function DailyJourney() {
    <aside className="journey-note"><b>A habit that fits your life.</b><p>Five focused minutes count. Review a few words, try a conversation, and stop at a good moment. Your progress will be here when you return.</p></aside>
   </>}
   {tab === 'journey' && mission && <section className="journey-lesson" aria-label={mission.title}><button className="journey-back" onClick={() => setMission(null)}><AppIcon name="back" /> Back to your journey</button><div className="journey-section-heading"><span><IconText>{mission.level}</IconText> · <IconText>{mission.title}</IconText></span><span><IconText>{finished ? 'Complete' : step < 0 ? 'Discover' : `Try ${step + 1} of ${mission.tasks.length}`}</IconText></span></div><progress aria-label="Mission progress" max={mission.tasks.length + 1} value={step + 1} />
-   {step < 0 ? <><span className="journey-big-icon"><IconText>{mission.icon}</IconText></span><h2 tabIndex={-1} ref={headingRef}><IconText>{mission.rule}</IconText></h2><p><IconText>{mission.explanation}</IconText></p><div className="journey-example"><strong lang="pl"><IconText>{mission.example}</IconText></strong><p><IconText>{mission.translation}</IconText></p><button onClick={() => listen(mission.example)}><AppIcon name="volume" /> Hear the phrase</button></div><button className="journey-primary" onClick={() => setStep(0)}>Try it yourself <AppIcon name="arrow" /></button></> : finished ? <><span className="journey-big-icon"><AppIcon name="trophy" /></span><h2 tabIndex={-1} ref={headingRef}>A small win you can use.</h2><p>You completed <IconText>{mission.title.toLowerCase()}</IconText>. Your phrases are now in your memory garden.</p><div className="journey-example"><b>Take it into real life</b><p><IconText>{mission.transfer}</IconText></p></div><button className="journey-primary" onClick={() => setTab('review')}>Practise your new phrases <AppIcon name="arrow" /></button><button className="journey-back" onClick={() => setMission(null)}>Done for now — save my place</button></> : <form onSubmit={e => {
+   {step < 0 ? <><span className="journey-big-icon"><IconText>{mission.icon}</IconText></span><h2 tabIndex={-1} ref={headingRef}><IconText>{mission.rule}</IconText></h2><p><IconText>{mission.explanation}</IconText></p><div className="journey-example"><strong lang="pl"><IconText>{mission.example}</IconText></strong><p><IconText>{mission.translation}</IconText></p><PolishListen text={mission.example} /></div><button className="journey-primary" onClick={() => setStep(0)}>Try it yourself <AppIcon name="arrow" /></button></> : finished ? <><span className="journey-big-icon"><AppIcon name="trophy" /></span><h2 tabIndex={-1} ref={headingRef}>A small win you can use.</h2><p>You completed <IconText>{mission.title.toLowerCase()}</IconText>. Your phrases are now in your memory garden.</p><div className="journey-example"><b>Take it into real life</b><p><IconText>{mission.transfer}</IconText></p></div><button className="journey-primary" onClick={() => setTab('review')}>Practise your new phrases <AppIcon name="arrow" /></button><button className="journey-back" onClick={() => setMission(null)}>Done for now — save my place</button></> : <form onSubmit={e => {
           e.preventDefault();
           setFeedback(task.answers.some(a => normalizeAnswer(a) === normalizeAnswer(answer)) ? 'correct' : 'retry');
         }}><h2 tabIndex={-1} ref={headingRef}><IconText>{task.prompt}</IconText></h2><label htmlFor="journey-answer">Your Polish answer</label><input id="journey-answer" ref={answerRef} lang="pl" autoComplete="off" value={answer} disabled={feedback === 'correct'} onChange={e => {
@@ -178,20 +166,20 @@ export default function DailyJourney() {
                 setAnswer(task.answers[0]);
                 setFeedback(null);
                 answerRef.current?.focus();
-              }}>Show an example to practise</button></div>}{feedback === 'correct' && <div className="journey-feedback success"><b><AppIcon name="check" /> <IconText>{assisted ? 'Good practice. Now read it aloud.' : 'Dobrze! You’ve got it.'}</IconText></b><p><IconText>{task.why}</IconText></p></div>}</div>
+              }}>Show an example to practise</button></div>}{feedback === 'correct' && <div className="journey-feedback success"><b><AppIcon name="check" /> <IconText>{assisted ? 'Good practice. Now read it aloud.' : 'Dobrze! You’ve got it.'}</IconText></b><p><IconText>{task.why}</IconText></p><PolishListen text={answer}/></div>}</div>
     {feedback === 'correct' ? <button type="button" className="journey-primary" onClick={() => {
             if (step === mission.tasks.length - 1) persist(completeMission(progress, mission));
             setStep(step + 1);
             resetAnswer();
           }}>Continue <AppIcon name="arrow" /></button> : <button className="journey-primary" disabled={!answer.trim()}>Check my answer <AppIcon name="arrow" /></button>}
-   </form>}<p className="journey-audio-note" role="status"><IconText>{audioMessage}</IconText></p></section>}
+   </form>}</section>}
   {tab === 'review' && <section className="journey-lesson"><span className="journey-eyebrow">MEMORY GARDEN</span><h2>Let your vocabulary take root.</h2><p>Recall before revealing. Remembered phrases return after 1, 3, 7, 14, then 30 days. Tricky ones return after 10 minutes.</p>{word ? <div className="journey-review"><span><IconText>{due.length}</IconText> phrases ready · How would you say…</span><h3><IconText>{word.en}</IconText></h3>{!revealed ? <form onSubmit={e => {
             e.preventDefault();
             setRevealed(true);
-          }}><label htmlFor="recall-answer">Try from memory (optional)</label><input id="recall-answer" value={recall} lang="pl" autoComplete="off" onChange={e => setRecall(e.target.value)} placeholder="Your Polish phrase…" /><button className="journey-primary">Reveal Polish <AppIcon name="arrow" /></button></form> : <><strong lang="pl"><IconText>{word.pl}</IconText></strong><p lang="pl"><IconText>{word.example}</IconText></p>{recall.trim() && <p><IconText>{normalizeAnswer(recall) === normalizeAnswer(word.pl) ? 'That matches. Nicely recalled.' : 'Compare your phrase with the example. Check endings and Polish letters.'}</IconText></p>}<button className="journey-back" onClick={() => listen(word.example)}><AppIcon name="volume" /> Listen</button><p>Did you recall it before revealing?</p><div className="journey-review-actions"><button className="refresh-secondary" onClick={() => rate(false)}>Still learning</button><button className="journey-primary" onClick={() => rate(true)}>Remembered <AppIcon name="check" /></button></div></>}</div> : <div className="journey-example"><AppIcon name="leaf" size={32} /><h3><IconText>{Object.keys(progress.words).length ? 'All caught up. Nicely done.' : 'Your garden starts with one phrase.'}</IconText></h3><p><IconText>{Object.keys(progress.words).length ? 'Your phrases will return when their next review is due.' : 'Complete a mission to plant your first useful phrases.'}</IconText></p>{Object.values(progress.words).length > 0 && <p>Next review: {new Date(Math.min(...Object.values(progress.words).map(w => w.due))).toLocaleString(undefined, {
+          }}><label htmlFor="recall-answer">Try from memory (optional)</label><input id="recall-answer" value={recall} lang="pl" autoComplete="off" onChange={e => setRecall(e.target.value)} placeholder="Your Polish phrase…" /><button className="journey-primary">Reveal Polish <AppIcon name="arrow" /></button></form> : <><strong lang="pl"><IconText>{word.pl}</IconText></strong><PolishListen text={word.pl}/><p lang="pl"><IconText>{word.example}</IconText></p>{recall.trim() && <p><IconText>{normalizeAnswer(recall) === normalizeAnswer(word.pl) ? 'That matches. Nicely recalled.' : 'Compare your phrase with the example. Check endings and Polish letters.'}</IconText></p>}<PolishListen text={word.example} /><p>Did you recall it before revealing?</p><div className="journey-review-actions"><button className="refresh-secondary" onClick={() => rate(false)}>Still learning</button><button className="journey-primary" onClick={() => rate(true)}>Remembered <AppIcon name="check" /></button></div></>}</div> : <div className="journey-example"><AppIcon name="leaf" size={32} /><h3><IconText>{Object.keys(progress.words).length ? 'All caught up. Nicely done.' : 'Your garden starts with one phrase.'}</IconText></h3><p><IconText>{Object.keys(progress.words).length ? 'Your phrases will return when their next review is due.' : 'Complete a mission to plant your first useful phrases.'}</IconText></p>{Object.values(progress.words).length > 0 && <p>Next review: {new Date(Math.min(...Object.values(progress.words).map(w => w.due))).toLocaleString(undefined, {
               dateStyle: 'medium',
               timeStyle: 'short'
-            })}</p>}<button className="journey-primary" onClick={() => setTab('journey')}>Explore a mission <AppIcon name="arrow" /></button></div>}<p className="journey-audio-note" role="status"><IconText>{audioMessage}</IconText></p></section>}
+            })}</p>}<button className="journey-primary" onClick={() => setTab('journey')}>Explore a mission <AppIcon name="arrow" /></button></div>}</section>}
   {tab === 'b1' && <><section className="journey-feature"><div><span className="journey-eyebrow">THE B1 COMPASS · ADULT EXAM</span><h2>Build every skill.<br />One step at a time.</h2><p>The adult B1 exam tests five skills. You need at least 50% in each part. Journey XP rewards practice; it is not an exam score.</p><a href="https://certyfikatpolski.pl/o-egzaminie/struktura-egzaminu/" target="_blank" rel="noreferrer"><IconText>Official exam structure [icon:sparkles]</IconText></a></div><div className="journey-illustration" aria-hidden="true"><span><AppIcon name="compass" /></span><b>Krok po kroku.</b><i>Step by step.</i></div></section><section className="journey-skill-grid">{examSkills.map((skill, i) => <Link className="journey-mission" key={skill.title} to={skill.path}><AppIcon name={['headphones', 'book', 'brain', 'pen', 'mic'][i]} size={28} /><span className="journey-eyebrow"> <IconText>{skill.time}</IconText></span><h3><IconText>{skill.title}</IconText></h3><p><IconText>{skill.desc}</IconText></p><span className="journey-mission-bottom">Open practice <AppIcon name="arrow" /></span></Link>)}</section><section className="journey-note"><b>Your can-do reflection</b><p>Tick what you feel confident doing. This is self-reflection, not a test result.</p><div className="refresh-checklist">{b1Checks.map((c, i) => <label key={c}><input type="checkbox" checked={Array.isArray(checks) && checks.includes(i)} onChange={e => {
                 const current = Array.isArray(checks) ? checks : [];
                 const next = e.target.checked ? [...current, i] : current.filter(n => n !== i);

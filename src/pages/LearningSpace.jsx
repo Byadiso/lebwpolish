@@ -65,6 +65,10 @@ export default function LearningSpace() {
     loading: authLoading
   } = useAuth();
   const [feedFilter, setFeedFilter] = useState("all");
+  const [feedSearch, setFeedSearch] = useState("");
+  const [feedStatus, setFeedStatus] = useState("loading");
+  const [actionError, setActionError] = useState("");
+  const [commentBusy, setCommentBusy] = useState(false);
   const [published, setPublished] = useState(false);
   const [posts, setPosts] = useState([]);
   const [resources, setResources] = useState([]);
@@ -129,7 +133,7 @@ export default function LearningSpace() {
   };
   const milestone = getMilestone(wordCount);
   const starters = {1: ["Gdybym…", "Najpierw…", "Ponieważ…"], 2: ["W dzieciństwie…", "Pamiętam, że…", "Moje ulubione miejsce to…"], 3: ["Moim zdaniem…", "Z jednej strony…", "Jednak…"], 4: ["W przyszłym roku…", "Pojadę do…", "Chcę odwiedzić…"]};
-  const visiblePosts = feedFilter === "mine" ? posts.filter(p => p.uid === user?.uid) : posts;
+  const visiblePosts = posts.filter(p => (feedFilter !== "mine" || p.uid === user?.uid) && [p.content, p.missionType, spaceAlias(p.uid), ...(Array.isArray(p.vocabulary) ? p.vocabulary : [])].join(' ').toLocaleLowerCase('pl').includes(feedSearch.trim().toLocaleLowerCase('pl')));
   const focusWriter = () => mainTextareaRef.current?.focus();
   const insertChar = (char, ref, currentText, setter) => {
     const input = ref.current;
@@ -149,6 +153,7 @@ export default function LearningSpace() {
         id: d.id,
         ...d.data()
       }));
+      setFeedStatus("ready");
       setPosts(prev => {
         const prevIds = new Set(prev.map(p => p.id));
         const fresh = newPosts.filter(p => !prevIds.has(p.id)).map(p => p.id);
@@ -162,7 +167,7 @@ export default function LearningSpace() {
         }
         return newPosts;
       });
-    });
+    }, () => setFeedStatus("error"));
   }, []);
   useEffect(() => {
     const q = query(collection(db, "resources"), limit(50));
@@ -186,7 +191,8 @@ export default function LearningSpace() {
   };
   const handleSubmit = async e => {
     e.preventDefault();
-    if (!text.trim() || isSubmitting) return;
+    if (!text.trim() || isSubmitting || !user) return;
+    setActionError("");
     setIsSubmitting(true);
     setSlotSpin(true);
     try {
@@ -208,6 +214,7 @@ export default function LearningSpace() {
         likes: [],
         timestamp: serverTimestamp()
       });
+      setPublished(true); setText(""); setVocab("");
       if (vocabList.length > 0) {
         await setDoc(doc(db, "users", user.uid), {
           vocabulary: arrayUnion(...vocabList),
@@ -231,6 +238,7 @@ export default function LearningSpace() {
       }
       const particleCount = Math.min(wordCount * 5, 200);
       confetti({
+        disableForReducedMotion: true,
         particleCount,
         spread: 90,
         origin: {
@@ -240,6 +248,7 @@ export default function LearningSpace() {
       });
       if (wordCount >= 40) {
         setTimeout(() => confetti({
+          disableForReducedMotion: true,
           particleCount: 80,
           angle: 60,
           spread: 55,
@@ -249,6 +258,7 @@ export default function LearningSpace() {
           colors: ['#f59e0b']
         }), 300);
         setTimeout(() => confetti({
+          disableForReducedMotion: true,
           particleCount: 80,
           angle: 120,
           spread: 55,
@@ -265,6 +275,7 @@ export default function LearningSpace() {
       setTimeout(() => setPulseEditor(false), 1000);
     } catch (err) {
       console.error(err);
+      setActionError("Could not complete all publishing steps. Check the feed before retrying.");
     } finally {
       setIsSubmitting(false);
       setTimeout(() => setSlotSpin(false), 800);
@@ -291,17 +302,17 @@ export default function LearningSpace() {
     if (activeCommentBox === postId) return setActiveCommentBox(null);
     setActiveCommentBox(postId);
     setCommentText("");
-    const q = query(collection(db, "global_posts", postId, "comments"), orderBy('timestamp', 'asc'));
-    onSnapshot(q, snap => setComments(prev => ({
-      ...prev,
-      [postId]: snap.docs.map(d => ({
-        id: d.id,
-        ...d.data()
-      }))
-    })));
   };
+  useEffect(() => {
+    if (!activeCommentBox) return;
+    const postId = activeCommentBox;
+    const q = query(collection(db, "global_posts", postId, "comments"), orderBy('timestamp', 'asc'));
+    return onSnapshot(q, snap => setComments(prev => ({...prev, [postId]: snap.docs.map(d => ({id:d.id,...d.data()}))})), () => setActionError("Could not load comments. Close and reopen the discussion to retry."));
+  }, [activeCommentBox]);
   const handlePostComment = async (postId, isCorrection = false) => {
-    if (!commentText.trim()) return;
+    if (!commentText.trim() || !user || commentBusy) return;
+    setCommentBusy(true); setActionError("");
+    try {
     await addDoc(collection(db, "global_posts", postId, "comments"), {
       content: commentText,
       author: mySpaceAlias,
@@ -310,6 +321,7 @@ export default function LearningSpace() {
       timestamp: serverTimestamp()
     });
     setCommentText("");
+    } catch { setActionError("Could not send your comment. Please try again."); } finally { setCommentBusy(false); }
   };
   const handleLike = async p => {
     const isLiked = p.likes?.includes(user.uid);
@@ -1138,13 +1150,14 @@ export default function LearningSpace() {
             <div>
               <h1 id="ls-page-title">Your Polish <em>community.</em></h1>
               <p>Write a few sentences, share them with the community and learn from feedback. One sentence is enough to begin.</p>
-              {user && <p className="ls-alias-note">You post as: <strong>{mySpaceAlias}</strong> <span>· Your name and email are not displayed in the feed.</span></p>}
+              {user && <p className="ls-alias-note">You post as: <strong>{mySpaceAlias}</strong> <span>· Your public feed displays this alias instead of your name or email.</span></p>}
             </div>
-            <button type="button" className="ls-start-writing" onClick={focusWriter}>Write a post →</button>
+            
           </div>
         </div>
       </section>
       <div className="ls-root ls-community-refresh">
+      {actionError && <div className="ls-action-error" role="alert">{actionError} <button type="button" onClick={()=>setActionError("")}>Dismiss</button></div>}
       <main className="ls-main">
 
         {/* ════ LEFT COLUMN ════ */}
@@ -1479,7 +1492,8 @@ export default function LearningSpace() {
           gap: '16px'
         }}>
             <div id="space-feed" className="ls-feed-heading"><div><h2>Community feed</h2><p>Read, encourage and help each other improve.</p></div><div className="ls-feed-filters">{[["all","Everyone"],["mine","My writing"]].map(([id,label]) => <button key={id} type="button" aria-pressed={feedFilter===id} onClick={()=>setFeedFilter(id)}>{label}</button>)}</div></div>
-            {visiblePosts.length === 0 && <div className="ls-card ls-empty-feed">{feedFilter === "mine" ? "Your writing will appear here after you share it." : "No posts to display yet."}<button type="button" onClick={focusWriter}>Write a sentence →</button></div>}
+            <label className="ls-feed-search">Search recent posts<input type="search" value={feedSearch} onChange={e=>setFeedSearch(e.target.value)} placeholder="Words, topics or learner aliases" /></label>
+            {feedStatus === "loading" ? <p role="status">Loading community posts…</p> : feedStatus === "error" ? <p role="alert">Could not load the feed. Refresh to retry.</p> : visiblePosts.length === 0 && <div className="ls-card ls-empty-feed">{feedSearch.trim() ? "No matching recent posts." : feedFilter === "mine" ? "Your writing will appear here after you share it." : "No posts to display yet."}</div>}
             {visiblePosts.map(p => <article key={p.id} className={`ls-card ls-post-card ${newPostIds.has(p.id) ? 'new-post' : ''}`}>
                 {/* Post header */}
                 <div style={{
@@ -1614,13 +1628,13 @@ export default function LearningSpace() {
               paddingTop: '14px',
               borderTop: '1px solid rgba(255,255,255,0.05)'
             }}>
-                  <button onClick={() => handleLike(p)} aria-label="Like post" aria-pressed={Boolean(p.likes?.includes(user.uid))} className={`ls-action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
+                  <button onClick={() => handleLike(p)} aria-label={p.likes?.includes(user.uid) ? "Unlike post" : "Like post"} aria-pressed={Boolean(p.likes?.includes(user.uid))} className={`ls-action-btn ${p.likes?.includes(user.uid) ? 'liked' : ''}`}>
                     <span className="icon"><IconText>{p.likes?.includes(user.uid) ? "[icon:heart]" : "[icon:heart]"}</IconText></span>
                     <span><IconText>{p.likes?.length || 0}</IconText></span>
                   </button>
                   <button onClick={() => toggleComments(p.id)} aria-expanded={activeCommentBox === p.id} className="ls-action-btn">
                     <span className="icon"><IconText>[icon:chat]</IconText></span>
-                    <span>Komentarze</span>
+                    <span>{comments[p.id] ? `${comments[p.id].length} ${comments[p.id].length === 1 ? "comment" : "comments"}` : "Comments"}</span>
                   </button>
                 </div>
 
@@ -1674,15 +1688,15 @@ export default function LearningSpace() {
                     insertChar(char, ref, commentText, setCommentText);
                   }}><IconText>{char}</IconText></button>)}
                       </div>
-                      <textarea id={`comment-${p.id}`} value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Write feedback" placeholder="Napisz feedback..." className="ls-comment-input" rows={3} />
+                      <textarea id={`comment-${p.id}`} value={commentText} onChange={e => setCommentText(e.target.value)} aria-label="Write feedback" placeholder="Leave a kind comment or explain a correction…" className="ls-comment-input" rows={3} />
                       <div style={{
                   display: 'flex',
                   justifyContent: 'flex-end',
                   gap: '8px',
                   marginTop: '10px'
                 }}>
-                        <button onClick={() => handlePostComment(p.id, true)} className="ls-btn-correction"><IconText>[icon:pen] Poprawka</IconText></button>
-                        <button onClick={() => handlePostComment(p.id, false)} className="ls-btn-send">Wyślij</button>
+                        <button disabled={commentBusy || !commentText.trim()} onClick={() => handlePostComment(p.id, true)} className="ls-btn-correction"><IconText>[icon:pen] Send correction</IconText></button>
+                        <button disabled={commentBusy || !commentText.trim()} onClick={() => handlePostComment(p.id, false)} className="ls-btn-send">Send comment</button>
                       </div>
                     </div>
                   </div>}
@@ -1708,9 +1722,9 @@ export default function LearningSpace() {
               <h2>Your writing space</h2>
               <p>Posting as <strong>{mySpaceAlias}</strong></p>
               <div className="ls-side-counts"><div><strong>{posts.filter(p => p.uid === user?.uid).length}</strong><span>Your posts in feed</span></div><div><strong>{totalXp}</strong><span>XP earned</span></div></div>
-              <button type="button" onClick={focusWriter}>Write something <span aria-hidden="true">→</span></button>
-              <button type="button" onClick={() => {setFeedFilter("mine"); document.getElementById("space-feed")?.scrollIntoView({block:"start"});}}>My writing <span aria-hidden="true">→</span></button>
-              <button type="button" onClick={() => {setFeedFilter("all"); document.getElementById("space-feed")?.scrollIntoView({block:"start"});}}>Read community posts <span aria-hidden="true">→</span></button>
+              
+              
+              
             </section>
             <section className="ls-community-side ls-peer-tip"><h2>Learn together</h2><p>Read a post, leave an encouraging comment or offer a kind correction in Polish.</p><p lang="pl">Świetnie napisane! A co o tym myślisz?</p></section>
             {/* Shadow Protocol */}

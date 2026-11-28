@@ -29,12 +29,12 @@ export const GRAMMAR_VAULT = [
       { title: "Imperfective (Robić)", content: "Focus on the duration or repetition.", ex: "Robiłem obiad (I was making dinner)" },
       { title: "Perfective (Zrobić)", content: "Focus on the finished result.", ex: "Zrobiłem obiad (Dinner is done)" }
     ],
-    mistake: { wrong: "Pisałem raport (when the report is done)", explanation: "Pisałem focuses on the process of writing — it implies the writing was ongoing, not complete. To say it's finished and ready, use the perfective Napisałem." },
+    mistake: { wrong: "Pisałem raport (when the report is done)", explanation: "Pisałem focuses on the activity without asserting whether it was completed. To say it's finished and ready, use the perfective Napisałem." },
     challenge: {
         q: "You finished writing a report and it's ready to send. Which verb do you use?",
         options: ["Pisałem raport", "Napisałem raport"],
         correct: "Napisałem raport",
-        why: "Napisałem is perfective — it conveys a completed result. Pisałem (imperfective) only describes the activity in progress, not a finished report."
+        why: "Napisałem is perfective — it conveys a completed result. Pisałem describes the activity without asserting its completion."
     },
     tip: "If you can say 'I finished it', you almost always need the Perfective (usually with a prefix like za-, z-, na-)."
   },
@@ -72,9 +72,9 @@ export const GRAMMAR_VAULT = [
         q: "How do you say 'I don't have a car' (Car = Auto)?",
         options: ["Nie mam auto", "Nie mam auta", "Nie mam autu"],
         correct: "Nie mam auta",
-        why: "NIE triggers Genitive. Auto is neuter; the genitive of neuter nouns ending in -o replaces it with -a: auta."
+        why: "Negating mam changes its accusative object to genitive. Auto is neuter; the genitive of neuter nouns ending in -o replaces it with -a: auta."
     },
-    tip: "Whenever you see 'NIE', expect the following noun's ending to change. This is the most tested rule in B1 exams."
+    tip: "Negation normally changes an accusative direct object to genitive, not every noun."
   },
   {
     id: 'Genitive', label: 'Possession', icon: "[icon:lock]",
@@ -103,11 +103,11 @@ export const GRAMMAR_VAULT = [
     lesson: "Dative marks the indirect object — the recipient of an action. It is also the case behind the 'podoba mi się' construction, the #1 B1 exam trap.",
     memory: "Celownik = 'Celować' (to aim at someone). You are 'directing' something towards a recipient. In English: 'to/for someone'. The personal pronouns (mi, ci, mu, jej) are its shorthand forms.",
     sections: [
-      { title: "Recipient", content: "Marks who receives something. Masc/Neut → -owi, Fem → -ie/-y.", ex: "Dałem książkę bratu (I gave a book to my brother)" },
+      { title: "Recipient", content: "Marks who receives something. Many masculine nouns take -owi, neuter nouns usually -u; feminine endings vary.", ex: "Dałem książkę bratu (I gave a book to my brother)" },
       { title: "Podoba mi się", content: "Literally 'It pleases to me.' The thing you like is the subject, not you.", ex: "Podoba mi się ten film (I like this film)" },
       { title: "Pronouns", content: "Mnie/Mi (me), Tobie/Ci (you), Jemu/Mu (him), Jej (her).", ex: "To mi nie odpowiada (That doesn't suit me)" }
     ],
-    mistake: { wrong: "Lubię ten film (as translation of 'This film appeals to me')", explanation: "While Lubię works for general liking, 'podoba mi się' signals aesthetic appreciation. The film is the grammatical subject — Ci podoba się ta muzyka means 'You like this music' literally as 'This music pleases to you'." },
+    mistake: { wrong: "Podobam mi się ten film", explanation: "Use Podoba mi się ten film. The film is the subject, so the verb is podoba, not podobam. Lubię ten film is also correct." },
     challenge: {
         q: "How do you say 'Do you like this song?' using the podoba construction? (Song = Piosenka)",
         options: ["Lubisz tę piosenkę?", "Podoba ci się ta piosenka?", "Podobasz ci tę piosenkę?"],
@@ -123,7 +123,7 @@ export const GRAMMAR_VAULT = [
     lesson: "The marker '-by' is the 'magic particle' of Polish. It allows you to exit reality and enter the realm of possibility, politeness, and dreams.",
     memory: "The -by particle is like a 'dream mode' switch. Past tense form + by + person ending = 'would do'. Chciałbym = I would want. Gdybym = If I were. Learn these two structures cold.",
     sections: [
-      { title: "The Formula", content: "Verb (Past Tense) + Person Marker + 'by'.", ex: "Zrobiłbym (I would do)" },
+      { title: "The Formula", content: "Past-tense base + by + person ending.", ex: "Zrobiłbym (I would do)" },
       { title: "Polite Requests", content: "Softens a command into a suggestion.", ex: "Chciałabym kawę (I would like a coffee)" },
       { title: "If... Then...", content: "Essential for hypothetical logic.", ex: "Gdybym był bogaty... (If I were rich...)" }
     ],
@@ -151,7 +151,7 @@ export const GRAMMAR_VAULT = [
         q: "How do you say 'I am a Pole' (masculine)? (Pole = Polak)",
         options: ["Jestem Polak", "Jestem Polakiem", "Jestem Polaka"],
         correct: "Jestem Polakiem",
-        why: "Jestem + profession/nationality always triggers Instrumental. Polak → Polakiem (masculine -em ending)."
+        why: "A noun describing a profession or nationality after jestem normally takes instrumental. Polak → Polakiem (masculine -em ending)."
     },
     tip: "Whenever you describe a 'permanent role' or 'transport mode', Narzędnik is your go-to tool."
   },
@@ -204,12 +204,12 @@ export const GRAMMAR_VAULT = [
       { title: "2–4 → Nominative Plural", content: "The noun uses a regular plural.", ex: "Dwa / Trzy / Cztery psy" },
       { title: "5+ → Genitive Plural", content: "The noun shifts to genitive plural — a unique form.", ex: "Pięć psów / Dziesięć minut" }
     ],
-    mistake: { wrong: "Pięć psy", explanation: "Psy is nominative plural — only correct for 2–4. After 5+, Polish requires genitive plural. Pies → psy (nom. pl.) → psów (gen. pl.). So: pięć psów." },
+    mistake: { wrong: "Pięć psy", explanation: "In this counting pattern, psy is used with 2–4; pięć requires genitive plural. Pies → psy (nom. pl.) → psów (gen. pl.). So: pięć psów." },
     challenge: {
         q: "How do you say 'seven minutes' (Minute = Minuta)?",
         options: ["Siedem minuta", "Siedem minuty", "Siedem minut"],
         correct: "Siedem minut",
-        why: "7 falls in the 5+ category, which requires genitive plural. Minuta → minuty (gen. sg.) → minut (gen. pl., with the -a dropped). Siedem minut."
+        why: "In this counting phrase, seven requires genitive plural. Minuta → minuty (gen. sg.) → minut (gen. pl., with the -a dropped). Siedem minut."
     },
     tip: "Memorize genitive plural forms separately — they're irregular and don't follow nominative plural rules."
   }

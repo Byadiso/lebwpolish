@@ -1,4 +1,5 @@
 export const activities = [
+ {path:'/skill-practice',title:'B1 Skills Practice',skill:'Mixed',level:'B1',minutes:5,icon:'target',description:'Practise six skills in everyday situations and revisit difficult tasks.'},
  {path:'/word-bank',title:'Word & Connector Bank',skill:'Vocabulary',level:'A1–B1',minutes:5,icon:'book',description:'Recall everyday words and connectors with spaced practice.'},
  {path:'/b1-readiness',title:'B1 Readiness Coach',skill:'Mixed',level:'B1',minutes:12,icon:'compass',description:'Try a short diagnostic and follow a personalized skills roadmap.'},
  {path:'/b1-vocabulary',title:'B1 Vocabulary Building Blocks',skill:'Vocabulary',level:'B1',minutes:8,icon:'book',description:'Recall thematic chunks, discover aspect and case patterns, and write with confidence.'},

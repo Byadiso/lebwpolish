@@ -1,3 +1,4 @@
+import PolishListen from '../../components/PolishListen';
 import IconText from "../../components/IconText";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { DUEL_QUESTIONS } from './data';
@@ -261,7 +262,7 @@ export default function DuelScreen({
             <div className="du-q-meta">
               Pytanie <IconText>{qIdx + 1}</IconText> / <IconText>{DUEL_QUESTIONS.length}</IconText>
             </div>
-            <div className="du-q-text"><IconText>{q.pl}</IconText></div>
+            <div className="du-q-text"><IconText>{q.pl}</IconText><PolishListen text={q.pl} compact /></div>
             <div className="du-q-hint">Wybierz poprawne tłumaczenie</div>
           </div>
 

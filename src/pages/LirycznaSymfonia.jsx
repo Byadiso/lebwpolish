@@ -1,3 +1,4 @@
+import PolishListen from '../components/PolishListen';
 import IconText from "../components/IconText";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -250,7 +251,7 @@ function VocabCard({
         fontSize: "clamp(2rem, 3vw, 2.6rem)",
         color: "#f1f5f9",
         wordBreak: "break-word"
-      }}><IconText>{word.pl}</IconText></h2>
+      }}><IconText>{word.pl}</IconText><PolishListen text={word.pl} compact /></h2>
 
         {/* Type badge */}
         <span style={{
@@ -1404,7 +1405,7 @@ export default function LirycznaSymfonia() {
                 color: "#f1f5f9",
                 lineHeight: 1
               }}>
-                    <IconText>{selectedWord.pl}</IconText>
+                    <IconText>{selectedWord.pl}</IconText><PolishListen text={selectedWord.pl} compact />
                   </h2>
                 </div>
                 <span style={{

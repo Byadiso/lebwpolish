@@ -5,7 +5,10 @@
     "english": "If I had known it would turn out this way, I wouldn't have agreed to it.",
     "level": "B1",
     "category": "Conditionals",
-    "tip": "Gdybym = If I (conditional). Notice the -bym ending for 'I would'."
+    "tip": "Gdybym = If I (conditional). Notice the -bym ending for 'I would'.",
+    "alternatives": [
+      "Gdybym wiedziała, że tak będzie, nie zgodziłabym się na to."
+    ]
   },
   {
     "id": "drill_002",
@@ -21,7 +24,10 @@
     "english": "It matters to me that you are happy.",
     "level": "B1",
     "category": "Emotions",
-    "tip": "Zależy mi na = it matters to me / I care about. Followed by dative."
+    "tip": "Zależy mi na + locative (miejscownik), e.g. na zdrowiu. Mi is the dative pronoun.",
+    "alternatives": [
+      "Zależy mi na tym, żebyś była szczęśliwa."
+    ]
   },
   {
     "id": "drill_004",
@@ -29,7 +35,10 @@
     "english": "I didn't expect it to turn out to be so difficult.",
     "level": "B1",
     "category": "Expectations",
-    "tip": "Okazać się = to turn out / to prove to be. Very useful verb in Polish."
+    "tip": "Okazać się = to turn out / to prove to be. Very useful verb in Polish.",
+    "alternatives": [
+      "Nie spodziewałam się, że to okaże się takie trudne."
+    ]
   },
   {
     "id": "drill_005",
@@ -45,7 +54,10 @@
     "english": "Throughout my whole life I tried to do what is right.",
     "level": "B1",
     "category": "Life & Values",
-    "tip": "Przez całe życie = throughout one's whole life. Słuszne = right / correct / just."
+    "tip": "Przez całe życie = throughout one's whole life. Słuszne = right / correct / just.",
+    "alternatives": [
+      "Przez całe życie starałam się robić to, co jest słuszne."
+    ]
   },
   {
     "id": "drill_007",
@@ -69,7 +81,10 @@
     "english": "It's a pity you couldn't come to that meeting.",
     "level": "B1",
     "category": "Regret",
-    "tip": "Szkoda, że = it's a pity that / what a shame that. Followed by past tense."
+    "tip": "Szkoda, że = it's a pity that / what a shame that. Followed by past tense.",
+    "alternatives": [
+      "Szkoda, że nie mogłaś przyjść na to spotkanie."
+    ]
   },
   {
     "id": "drill_010",
@@ -77,7 +92,10 @@
     "english": "Before you leave, make sure you've closed the windows.",
     "level": "B1",
     "category": "Instructions",
-    "tip": "Zanim = before (with future meaning). Upewnić się = to make sure."
+    "tip": "Zanim = before (with future meaning). Upewnić się = to make sure.",
+    "alternatives": [
+      "Zanim wyjdziesz, upewnij się, że zamknęłaś okna."
+    ]
   },
   {
     "id": "drill_011",
@@ -85,7 +103,10 @@
     "english": "Could you explain to me what this is all about?",
     "level": "B1",
     "category": "Requests",
-    "tip": "Mógłbyś = could you (polite conditional). O co chodzi = what it's about."
+    "tip": "Mógłbyś = could you (polite conditional). O co chodzi = what it's about.",
+    "alternatives": [
+      "Czy mogłabyś mi wyjaśnić, o co w tym chodzi?"
+    ]
   },
   {
     "id": "drill_012",
@@ -93,7 +114,10 @@
     "english": "I always dreamed of travelling all over the world.",
     "level": "B1",
     "category": "Dreams",
-    "tip": "Marzyć o + locative = to dream of something. Po całym świecie = all over the world."
+    "tip": "Marzyć o + locative = to dream of something. Po całym świecie = all over the world.",
+    "alternatives": [
+      "Zawsze marzyłam o podróżowaniu po całym świecie."
+    ]
   },
   {
     "id": "drill_013",
@@ -109,7 +133,10 @@
     "english": "Only after some time did I understand what she meant.",
     "level": "B1",
     "category": "Reflection",
-    "tip": "Dopiero = only / not until. Mieć na myśli = to mean / to have in mind."
+    "tip": "Dopiero = only / not until. Mieć na myśli = to mean / to have in mind.",
+    "alternatives": [
+      "Dopiero po jakimś czasie zrozumiałam, co miała na myśli."
+    ]
   },
   {
     "id": "drill_015",
@@ -117,7 +144,12 @@
     "english": "I would like you to share your opinion more often.",
     "level": "B1",
     "category": "Communication",
-    "tip": "Chciałbym, żebyś = I would like you to... Dzielić się = to share."
+    "tip": "Chciałbym, żebyś = I would like you to... Dzielić się = to share.",
+    "alternatives": [
+      "Chciałabym, żebyś częściej dzielił się swoją opinią.",
+      "Chciałbym, żebyś częściej dzieliła się swoją opinią.",
+      "Chciałabym, żebyś częściej dzieliła się swoją opinią."
+    ]
   },
   {
     "id": "drill_016",
@@ -125,7 +157,10 @@
     "english": "I got used to living in a big city.",
     "level": "B1",
     "category": "Lifestyle",
-    "tip": "Przyzwyczaić się do = to get used to. Followed by genitive or verbal noun."
+    "tip": "Przyzwyczaić się do = to get used to. Followed by genitive or verbal noun.",
+    "alternatives": [
+      "Przyzwyczaiłam się do życia w dużym mieście."
+    ]
   },
   {
     "id": "drill_017",
@@ -133,7 +168,7 @@
     "english": "I don't think that would be the best idea in this situation.",
     "level": "B1",
     "category": "Opinions",
-    "tip": "Nie sądzę, żeby = I don't think that (used with subjunctive / conditional)."
+    "tip": "Nie sądzę, żeby… introduces a clause with żeby and a past-form verb, expressing doubt."
   },
   {
     "id": "drill_018",
@@ -149,7 +184,10 @@
     "english": "When I was young, I didn't appreciate what I had.",
     "level": "B1",
     "category": "Reflection",
-    "tip": "Doceniać = to appreciate / to value. A key verb for expressing gratitude in Polish."
+    "tip": "Doceniać = to appreciate / to value. A key verb for expressing gratitude in Polish.",
+    "alternatives": [
+      "Gdy byłam młoda, nie doceniałam tego, co miałam."
+    ]
   },
   {
     "id": "drill_020",
@@ -157,6 +195,9 @@
     "english": "Please let me know if you need any help.",
     "level": "B1",
     "category": "Communication",
-    "tip": "Dać znać = to let someone know. Jeśli = if (for real conditions, not hypothetical)."
+    "tip": "Dać znać = to let someone know. Jeśli = if (for real conditions, not hypothetical).",
+    "alternatives": [
+      "Proszę, daj mi znać, jeśli będziesz potrzebowała pomocy."
+    ]
   }
 ]

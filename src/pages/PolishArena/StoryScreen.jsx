@@ -1,3 +1,4 @@
+import PolishListen from '../../components/PolishListen';
 import IconText from "../../components/IconText";
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -696,7 +697,7 @@ export default function StoryScreen({
                   color: '#e2e8f0',
                   lineHeight: 1.55
                 }}>
-                      "<IconText>{s.prompt}</IconText>"
+                      "<IconText>{s.prompt}</IconText><PolishListen text={(s.prompt.match(/"([^"]+)"/)||[])[1]} compact />"
                     </p>
                   </div>
 

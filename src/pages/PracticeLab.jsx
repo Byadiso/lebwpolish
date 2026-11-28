@@ -1,3 +1,5 @@
+import PolishListen from '../components/PolishListen';
+import { playAudio } from '../lib/polishAudio';
 import "./PracticeLab.css";
 import IconText from "../components/IconText";
 import { useState, useEffect, useRef, useCallback } from "react";
@@ -6,6 +8,7 @@ import { db } from "../firebase";
 import { doc, setDoc, increment } from "firebase/firestore";
 import { motion, AnimatePresence } from "framer-motion";
 import drillData from "../data/drills.json";
+import { matchesTranslation } from "../lib/translationAnswers";
 
 /* ─── Constants ─────────────────────────────────────────────────────────── */
 const POLISH_CHARS = ["ą", "ć", "ę", "ł", "ń", "ó", "ś", "ź", "ż"];
@@ -136,7 +139,7 @@ export default function PracticeLab() {
   const [userInput, setUserInput] = useState("");
   const [status, setStatus] = useState("idle"); // idle | checking | success | error
   const [isListening, setIsListening] = useState(false);
-  const [isSpeaking, setIsSpeaking] = useState(false);
+
   const [showHint, setShowHint] = useState(false);
   const [showTip, setShowTip] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
@@ -146,7 +149,7 @@ export default function PracticeLab() {
   const [sessionStreak, setSessionStreak] = useState(0);
   const [streakMsg, setStreakMsg] = useState(null);
   const [autoPlay, setAutoPlay] = useState(false); // ← OFF by default; plays only on button click
-  const [speed, setSpeed] = useState(0.8);
+  const [speed, setSpeed] = useState(1);
   const inputRef = useRef(null);
   const recognitionRef = useRef(null);
   const drills = drillData;
@@ -162,21 +165,13 @@ export default function PracticeLab() {
 
   /* ── Speech ── */
   const speak = useCallback((text, rate = speed) => {
-    if (!window.speechSynthesis) return;
-    window.speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = "pl-PL";
-    u.rate = rate;
-    u.onstart = () => setIsSpeaking(true);
-    u.onend = () => setIsSpeaking(false);
-    u.onerror = () => setIsSpeaking(false);
-    window.speechSynthesis.speak(u);
+    playAudio(text,{rate});
   }, [speed]);
 
   // Auto-play only fires when the toggle is ON — never on first mount
   useEffect(() => {
     if (!autoPlay) return;
-    const t = setTimeout(() => speak(currentDrill.polish, 0.7), 350);
+    const t = setTimeout(() => speak(currentDrill.polish, 1), 350);
     return () => clearTimeout(t);
   }, [currentIndex, autoPlay]); // intentionally excludes speak to avoid double-trigger
 
@@ -241,8 +236,7 @@ export default function PracticeLab() {
   const handleVerify = async e => {
     if (status === "checking" || status === "success" || !userInput.trim()) return;
     setStatus("checking");
-    const norm = s => s.toLowerCase().replace(/[.,?!;:]/g, "").trim();
-    const correct = norm(userInput) === norm(currentDrill.polish);
+    const correct = matchesTranslation(userInput, currentDrill);
     setTimeout(async () => {
       if (correct) {
         const earnedXp = showHint ? 5 : 20;
@@ -257,7 +251,7 @@ export default function PracticeLab() {
           setTimeout(() => setStreakMsg(null), 2200);
         }
         triggerChip(totalEarned, isBonus, e);
-        speak("Świetnie!", 1.1);
+        speak("Świetnie!", 1);
         if (user && db) {
           try { await setDoc(doc(db, "users", user.uid), { xp: increment(totalEarned) }, { merge: true }); }
           catch (error) { console.warn('Practice progress could not sync:', error.code); }
@@ -265,7 +259,7 @@ export default function PracticeLab() {
       } else {
         setStatus("error");
         setSessionStreak(0);
-        speak("Spróbuj ponownie.", 0.75);
+        speak("Spróbuj ponownie.", 1);
       }
     }, 480);
   };
@@ -322,14 +316,14 @@ export default function PracticeLab() {
           <input id="pl-answer" ref={inputRef} type="text" value={userInput} placeholder="Wpisz po polsku…" lang="pl" autoComplete="off" className={`pl-input pl-${status}`} onKeyDown={e => e.key === "Enter" && !e.nativeEvent.isComposing && (status === "success" ? nextDrill() : handleVerify(e))} onChange={e => { setUserInput(e.target.value); if (status !== "idle") setStatus("idle"); }} />
           <div className="pl-letters" aria-label="Polish characters">{POLISH_CHARS.map(char => <button type="button" key={char} onClick={() => injectChar(char)}>{char}</button>)}</div>
           <div className="pl-feedback" role="status" aria-live="polite" data-status={status}>
-            {status === "success" ? <><strong>Świetnie! Correct answer.</strong><span>{streakMsg || "You earned XP. Ready for the next sentence?"}</span></> : status === "error" ? <><strong>Spróbuj ponownie — try again.</strong><span>Check your word order and endings, or use a hint.</span></> : status === "checking" ? "Checking your answer…" : "Try recalling the sentence before using a hint."}
+            {status === "success" ? <><strong>Świetnie! Correct answer.</strong><span>{streakMsg || "You earned XP. Ready for the next sentence?"}</span></> : status === "error" ? <><strong>Spróbuj ponownie — try again.</strong><span>Check your endings or use a hint. Other valid translations may not yet be recognised.</span></> : status === "checking" ? "Checking your answer…" : "Try recalling the sentence before using a hint."}
           </div>
           <button className={`pl-primary ${status === "success" ? "pl-correct" : ""}`} onClick={e => status === "success" ? nextDrill() : handleVerify(e)} disabled={status === "checking" || (!userInput.trim() && status !== "success")}>{status === "checking" ? "Checking…" : status === "success" ? "Next challenge →" : "Check answer →"}</button>
           <div className="pl-hint">{showHint ? <p lang="pl">{currentDrill.polish}</p> : <button type="button" onClick={() => setShowHint(true)}>Need a hint? <small>−15 XP</small></button>}</div>
         </section>
         <aside className="pl-side" aria-label="Practice tools">
           <section className="pl-card pl-tools"><h2>Listen & speak</h2><p>Hear the sentence or dictate your answer in Polish.</p>
-            <div className="pl-audio"><button onClick={() => speak(currentDrill.polish)} aria-label="Listen to Polish sentence"><IconText>[icon:volume]</IconText> {isSpeaking ? "Playing…" : "Listen"}</button><button onClick={() => speak(currentDrill.polish, 0.45)}>Slow · 0.45×</button><button onClick={startListening} disabled={!(window.SpeechRecognition || window.webkitSpeechRecognition)}><IconText>[icon:mic]</IconText> {isListening ? "Listening…" : "Speak"}</button></div>
+            <div className="pl-audio"><PolishListen text={currentDrill.polish} normalRate={speed} slowRate={0.45} /><button onClick={startListening} disabled={!(window.SpeechRecognition || window.webkitSpeechRecognition)}><IconText>[icon:mic]</IconText> {isListening ? "Listening…" : "Speak"}</button></div>
             <div className="pl-settings"><button role="switch" aria-checked={autoPlay} onClick={() => setAutoPlay(a => !a)}>Auto-play <strong>{autoPlay ? "On" : "Off"}</strong></button><div><span>Playback speed</span><div className="pl-speeds">{[0.6, 0.8, 1.0].map(s => <button key={s} aria-pressed={speed === s} onClick={() => setSpeed(s)}>{s}×</button>)}</div></div></div>
           </section>
           {currentDrill.tip && <section className="pl-card pl-tools"><h2><IconText>[icon:lightbulb]</IconText> Grammar insight</h2><p>Understand the pattern behind this sentence.</p><button className="pl-secondary" aria-expanded={showTip} onClick={() => setShowTip(t => !t)}>{showTip ? "Hide grammar tip" : "Show grammar tip"}</button>{showTip && <p className="pl-tip">{currentDrill.tip}</p>}</section>}
