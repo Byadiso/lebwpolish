@@ -1,6 +1,6 @@
 <div align="center">
 
-# LEBWPOLISH 🇵🇱
+# LEBWPOLISH 
 
 ### Learn Polish by doing. One useful sentence at a time.
 
@@ -184,13 +184,15 @@ Netlify deployment settings:
 | Environment variables | Configure Firebase web settings in Netlify |
 | Routing | Single-page application fallback to `index.html` |
 
+Develop changes on dedicated branches, review them through pull requests, run tests and verify a deployment preview before merging into the production branch. Publish a GitHub release after validating the deployed version.
 
+The V2 upgrade uses the branch `feature/v2-premium-active-learning`. The planned release tag is `v2.0.0`; the release badge above reflects published releases rather than planned versions.
 
 ## Privacy and security
 
 LEBWPOLISH includes administrator-only visitor statistics intended to understand platform usage, including guest and authenticated sessions, page visits and engagement duration.
 
-Read the [Privacy Policy](https://lebwpolish.netlify.app/privacy). 
+Read the [Privacy Policy](https://lebwpolish.netlify.app/privacy). Review analytics configuration, applicable privacy requirements, database permissions and community document visibility before production deployment. Shared community reads must not grant unauthorized editing or deletion. Frontend controls do not replace server-enforced access rules.
 
 ## Learning scope
 
